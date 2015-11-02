@@ -1,5 +1,0 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
-<sql type="CoreSQL">
-  <statement code="TestCoreConnection" clientObject="dummy">select * from dual</statement>
-</sql>
