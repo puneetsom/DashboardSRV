@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomDataGrid xmlns="http://amdocs.com/flex/dashboard/customDataGrid/CustomDataGrid" 
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                xsi:schemaLocation="http://amdocs.com/flex/dashboard/customDataGrid/CustomDataGrid ../xsd/CustomDataGrid.xsd"
+                lockedColumnCount="2"
+                title="Customers"
+                version="3">
+                
+  <!-- <Column id="prdYear" dataField="prd_year" textAlign="center" visible="false" /> -->
+  <Column id="customerId" dataField="customer_id" headerLabel="Customer Id" visible="true" />
+  <Column id="customerName" dataField="customer_name" headerLabel="Customer Name" visible="true" />
+  
+  <Column id="regionName" dataField="region_name" headerLabel="Region" visible="true" />
+  <Column id="productCode" dataField="product_code" headerLabel="Product Code" visible="true" />
+  <Column id="prdYear" dataField="prd_year" headerLabel="Product Year" visible="true" />
+  <Column id="productType" dataField="product_type" headerLabel="Product Type" textAlign="center" visible="true" />
+  <Column id="canvassYear" dataField="cvs_year" headerLabel="Campaign Year" visible="true" />
+  
+  <Column id="channelCode" dataField="channel_code" headerLabel="Channel" textAlign="center" visible="true" />
+  <Column id="prospectCode" dataField="prospect_code" headerLabel="Prospect" textAlign="center" visible="true" />
+  <Column id="poolInd" dataField="pool_ind" headerLabel="Pool" textAlign="center" visible="true" />
+  <Column id="handledInd" dataField="handled_ind" headerLabel="Handled?" textAlign="center" visible="true" />
+  
+  <Column id="asgnAmt" dataField="asgn_amt" headerLabel="Assigned Amt" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="hndlAmt" dataField="hndl_amt" headerLabel="Handled Amt" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="soldAmt" dataField="sold_amt" headerLabel="Sold Amt" visible="true" type="currency" fractionalDigits="0" />
+
+  <Column id="renewalAmt" dataField="renewal_amt" headerLabel="Renewal Amt" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="increaseAmt" dataField="increase_amt" headerLabel="Increase Amt" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="decreaseAmt" dataField="decrease_amt" headerLabel="Decrease Amt" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="cancelAmt" dataField="cancel_amt" headerLabel="Cancel Amt" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="oblAmt" dataField="obl_amt" headerLabel="OBL Amt" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="newAmt" dataField="new_amt" headerLabel="New Amt" visible="true" type="currency" fractionalDigits="0" />
+
+  <Column id="boostHdlAmt" dataField="bst_hndl_amt" headerLabel="Boost Handled Amt" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="boostSoldAmt" dataField="bst_sold_amt" headerLabel="Boost Sold Amt" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="disconnectAmt" dataField="discon_amt" headerLabel="Disconnect Amt" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="delinquentAmt" dataField="delinq_amt" headerLabel="Delinquent Amt" visible="true" type="currency" fractionalDigits="0" />
+
+  <Column id="canvassCode" dataField="canvass_code" headerLabel="Campaign Code" visible="false" />
+  <Column id="repName" dataField="rep_name" headerLabel="Rep" visible="false" />
+  <Column id="salesMgrName" dataField="sales_mgr_name" headerLabel="Sales Mgr" visible="false" />
+  <Column id="gmName" dataField="gm_name" headerLabel="GM" visible="false" />
+
+  
+</CustomDataGrid>

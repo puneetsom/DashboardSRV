@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomDataGrid xmlns="http://amdocs.com/flex/dashboard/customDataGrid/CustomDataGrid" 
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                xsi:schemaLocation="http://amdocs.com/flex/dashboard/customDataGrid/CustomDataGrid ../xsd/CustomDataGrid.xsd"
+                lockedColumnCount="1"
+                showFilters="true"
+                version="1">
+	   		
+	<Column id="defectId" headerLabel="Defect ID" dataField="defect_id" visible="true" type="number" useGrouping="false" fractionalDigits="0" width="75" />
+    <Column id="sts" headerLabel="Status"  dataField="status" visible="true" width="80"   />        
+    <Column id="authType" headerLabel="Auth Type" dataField="auth_type" visible="false" />
+    <Column id="authDt" headerLabel="Auth Date" type="datestring" textAlign="center" dataField="auth_date" visible="false" />
+    <Column id="authBy" headerLabel="Auth By" dataField="auth_by" visible="false" />
+    <Column id="authArea" headerLabel="Auth Area" dataField="auth_area" visible="false" />
+    <Column id="itBaOwner" headerLabel="IT BA Owner" dataField="it_ba_owner" visible="true" />
+    <Column id="amdocsBaOwner" headerLabel="Amdocs BA Owner" dataField="amdocs_ba_owner" visible="true" />
+    <Column id="defectSrc" headerLabel="Defect Source" dataField="defect_source" visible="true" width="95" />
+    <Column id="severity" headerLabel="Severity"   dataField="severity" visible="true"  />
+    <Column id="plannedClosingVersion" headerLabel="Planned Closing Version"  textAlign="center" dataField="planned_closing_version" visible="true" width="85" />
+    <Column id="remedyTicket" headerLabel="Remedy Ticket" dataField="remedy_ticket"  visible="true" width="85" />
+	<Column id="changeCallNumber" headerLabel="Change Call Number" dataField="change_call_number" visible="true" width="70" />
+	<Column id="detOnDate" headerLabel="Detected on Date" dataField="det_on_date" type="datestring" textAlign="center" visible="true" width="90" />
+	<Column id="detInVersion" headerLabel="Detect In Version" textAlign="center" dataField="det_in_version"  visible="true" width="100" />
+	<Column id="businessArea" headerLabel="Business Area" dataField="business_area"  visible="true" width="170" /> 
+	<Column id="summary" headerLabel="Summary" headerWordWrap="false" dataField="summary" visible="true" width="400" /> 
+	<Column id="responsibleApplication" headerLabel="Responsible Application" dataField="responsible_application"  visible="true" width="120" /> 
+    <Column id="desc" headerLabel="Description" dataField="description" visible="true" width="400" />
+    <Column id="bus_validated" headerLabel="Bus. Validated?" textAlign="center" dataField="bus_validated" visible="true" /> 
+    <Column id="validationType" headerLabel="Validation Type" dataField="validation_type"  visible="true" /> 
+    <Column id="busImpacts" headerLabel="Business Impacts" dataField="bus_impacts"  visible="true" width="150" /> 
+    <Column id="affectedUsers" headerLabel="Affected Users" dataField="affected_users"  visible="true" width="150" /> 
+    <Column id="workMode" headerLabel="Work Mode" dataField="work_mode" visible="true" width="190" /> 
+    <Column id="includeInAdvisor" headerLabel="Include In Advisor?" textAlign="center" dataField="include_in_advisor"  visible="true" /> 
+    <Column id="advisorResolution" headerLabel="Advisor Resolution" dataField="advisor_resolution"  visible="true" width="400" /> 
+    <Column id="defectType" headerLabel="Defect Type" dataField="defect_type"  visible="true" /> 
+    <Column id="region" headerLabel="Region" dataField="region"  visible="true" />           
+    <Column id="stUatqcDefect" headerLabel="ST/UATQC Defect #" dataField="st_uat_qc_defect"  visible="true" />          
+    <Column id="priority" headerLabel="Priority" dataField="priority"  visible="true" />  
+    <Column id="assignedTo" headerLabel="Assigned To" dataField="amdocs_assign_to" />
+    <Column id="responsibleSubAppl" headerLabel="Responsible Sub Application" dataField="responsible_sub_app" visible="true" />
+    <Column id="closingDt" headerLabel="Closing Date" dataField="closing_date" type="datestring" textAlign="center" visible="true" />
+    <Column id="plannedDeployedDt" headerLabel="Planned Deployed Date" dataField="planned_deployed_date" type="datestring" textAlign="center" visible="true" />
+    <Column id="closingVersion" headerLabel="Closing Version" dataField="closing_version" textAlign="center" visible="true" />  
+   
+</CustomDataGrid>

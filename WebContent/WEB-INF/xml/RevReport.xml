@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<KpiReport xmlns="http://www.amdocs.com/dashboard/mobile/report" 
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.amdocs.com/dashboard/mobile/report ../xsd/KpiReport.xsd "
+           locale="en_US"
+           title="Revenue Report">
+           
+    <Grid name="CategoryDetailGridColumns" configurationId="RevReportCategoryColumns" xmlCode="RevReportCategoryColumns" cacheLife="21600" />
+
+	<!--  Start Services -->
+	<Service name="selectReportProperties" serviceCode="RevReport_selectReportProperties" cacheLife="21600" />
+	
+	<Service name="selectInitialReportLevel" serviceCode="RevReport_selectInitialReportLevel" cacheLife="21600">
+		<Param name="employee_id" type="number" />
+	</Service>
+	
+	<Service name="selectInitialHistoryTrail" serviceCode="RevReport_selectInitialHistoryTrail" cacheLife="21600">
+		<Param name="prd_year" required="false" />
+		<Param name="cat_type" /> <!-- region_code, channel_code, gm_id, etc -->
+		<Param name="cat_id" />
+	</Service>
+	
+	<Service name="searchCategories" serviceCode="RevReport_searchCategories" cacheLife="21600">
+		<Param name="prd_year" required="false" />
+		<Param name="search" /> <!-- search string -->
+	</Service>
+	
+	<Service name="selectReportData" serviceCode="RevReport_selectReportData" cacheLife="21600">
+		<Param name="cat_type" /> <!-- region_code, channel_code, gm_id, etc -->
+		<Param name="prd_year" required="false" />
+		<Param name="rep_id" required="false" />
+		<Param name="sales_mgr_id" required="false" />
+		<!-- <Param name="gm_id" type="number" required="false" /> -->
+		<!-- <Param name="region_code" type="number" required="false" /> -->
+		<Param name="campaign_code" required="false" />
+		<Param name="channel_code" required="false" />
+		<Param name="office_code" required="false" />
+	</Service>
+	
+	<Service name="selectDetailData" serviceCode="RevReport_selectCustomerDetailData" cacheLife="21600" maxRows="100">
+		<Param name="data_field" /> <!-- hndl_cnt, asgn_cnt, sold_amt, etc -->
+		<Param name="prd_year" required="false" />
+		<Param name="rep_id" required="false" />
+		<Param name="sales_mgr_id" required="false" />
+		<!-- <Param name="gm_id" type="number" required="false" /> -->
+		<!-- <Param name="region_code" type="number" required="false" /> -->
+		<Param name="campaign_code" required="false" />
+		<Param name="channel_code" required="false" />
+		<Param name="office_code" required="false" />
+	</Service>
+	 
+	<Service name="selectYOYChartData" serviceCode="RevReport_selectYOYChartData" cacheLife="21600">
+		<Param name="report_type" /> <!-- M (monthly), W (weekly), or D (daily) -->
+		<Param name="data_field" />  <!-- hndl_cnt, asgn_cnt, sold_amt, etc -->
+		<Param name="prd_year" required="false" />
+		<Param name="rep_id" type="number" required="false" />
+		<Param name="sales_mgr_id" type="number" required="false" />
+		<!-- <Param name="gm_id" type="number" required="false" /> -->
+		<!-- <Param name="region_code" type="number" required="false" /> -->
+		<Param name="campaign_code" required="false" />
+		<Param name="channel_code" required="false" />
+		<Param name="office_code" required="false" />
+	</Service>
+	 
+	<Service name="selectTrendChartData" serviceCode="RevReport_selectTrendChartData" cacheLife="21600">
+		<Param name="report_type" /> <!-- M (monthly), W (weekly), or D (daily) -->
+		<Param name="data_field" />  <!-- hndl_cnt, asgn_cnt, sold_amt, etc -->
+		<Param name="prd_year" required="false" />
+		<Param name="rep_id" type="number" required="false" />
+		<Param name="sales_mgr_id" type="number" required="false" />
+		<!-- <Param name="gm_id" type="number" required="false" /> -->
+		<!-- <Param name="region_code" type="number" required="false" /> -->
+		<Param name="campaign_code" required="false" />
+		<Param name="channel_code" required="false" />
+		<Param name="office_code" required="false" />
+	</Service>
+	
+	<Service name="selectContactData" serviceCode="RevReport_selectContactData" cacheLife="21600">
+		<Param name="employee_id" type="number" /><!-- "cat_id" value for selected rep, sales mgr or gm -->
+	</Service>
+	<!--  End Services -->
+	
+	
+	<!--  Start Kpis -->
+	<Kpi name="Month Revenue" targetField="obj" actualField="amt" changeField="chg_amt" changePctField="chg_pct" type="currency" fractionalDigits="0" />
+	<!-- 
+	<Kpi name="Print Revenue" targetField="yp_obj" actualField="yp_amt" changeField="yp_chg_amt" changePctField="yp_chg_pct" type="currency" fractionalDigits="0" />
+	<Kpi name="Internet Revenue" targetField="iyp_obj" actualField="iyp_amt" changeField="iyp_chg_amt" changePctField="iyp_chg_pct" type="currency" fractionalDigits="0" />
+	 -->
+	<!-- <Kpi name="Assigned" actualField="asgn_cnt" type="number" /> -->
+	<Kpi name="YTD Revenue" actualField="ytd_amt" type="currency" fractionalDigits="0"  />
+	<Kpi name="Month Sold" actualField="sold_amt" percentField="sold_pct" type="currency" fractionalDigits="0"  />
+	<Kpi name="Month Handled" actualField="hndl_amt" percentField="hndl_pct" type="currency" fractionalDigits="0"  />
+	<Kpi name="Month Renewal" actualField="renewal_amt" percentField="renewal_pct" type="currency" fractionalDigits="0" />
+	<Kpi name="Month Increase" actualField="increase_amt" percentField="increase_pct" type="currency" fractionalDigits="0" />
+	<Kpi name="Month Decrease" actualField="decrease_amt" percentField="decrease_pct" type="currency" fractionalDigits="0" />
+	<Kpi name="Month Cancel" actualField="cancel_amt" percentField="cancel_pct" type="currency" fractionalDigits="0" />
+	<Kpi name="Month OBL" actualField="obl_amt" percentField="obl_pct" type="currency" fractionalDigits="0" />
+	<Kpi name="Month New" actualField="new_amt" percentField="new_pct" type="currency" fractionalDigits="0" />
+	<!--  End Kpis -->
+	
+	
+	<!--  Start Levels -->
+	<Level name="All" param="all">
+		<!-- <Category name="Regions" param="region_code" childParams="campaign_code" /> -->
+		<!-- <Category name="GMs" param="gm_id" /> -->
+		<Category name="Channels" param="channel_code" />
+		<Category name="Campaigns" param="campaign_code" />
+		<Category name="Sales Managers" param="sales_mgr_id" />
+	</Level>
+	<!-- 
+	<Level name="Region" param="region_code">
+		<Category name="Channels" param="channel_code" />
+		<Category name="Campaigns" param="campaign_code" />
+		<Category name="GMs" param="gm_id" />
+		<Category name="Sales Managers" param="sales_mgr_id" />
+	</Level>
+	 -->
+	<Level name="Campaign" param="campaign_code">
+		<!-- <Category name="GMs" param="gm_id" /> -->
+		<Category name="Office" param="office_code" />
+		<Category name="Sales Managers" param="sales_mgr_id" />
+		<Category name="Channels" param="channel_code" />
+	</Level>
+	<Level name="Channel" param="channel_code">
+		<!-- <Category name="Regions" param="region_code" childParams="campaign_code" /> -->
+		<Category name="Office" param="office_code" />
+		<!-- <Category name="GMs" param="gm_id" /> -->
+		<Category name="Sales Managers" param="sales_mgr_id" />
+		<Category name="Campaigns" param="campaign_code" />
+	</Level>
+	
+	<Level name="Office" param="office_code">
+		<Category name="Sales Managers" param="sales_mgr_id" />
+		<Category name="Reps" param="rep_id" />
+		<Category name="Channels" param="channel_code" />
+	</Level>
+	<!-- 
+	<Level name="GM" param="gm_id">
+		<Category name="Sales Managers" param="sales_mgr_id" />
+		<Category name="Campaigns" param="campaign_code" />
+		<Category name="Reps" param="rep_id" />
+		<Category name="Channels" param="channel_code" />
+		<Category name="Regions" param="region_code" childParams="campaign_code" />
+	</Level> -->
+	<Level name="Sales Manager" param="sales_mgr_id">
+		<Category name="Reps" param="rep_id" />
+		<!-- <Category name="GMs" param="gm_id" /> -->
+		<!-- <Category name="Regions" param="region_code" childParams="campaign_code"  /> -->
+	</Level>
+	<Level name="Sales Rep" param="rep_id">
+		<Category name="Sales Managers" param="sales_mgr_id" />
+		<!-- <Category name="GMs" param="gm_id" /> -->
+		<!-- <Category name="Regions" param="region_code" childParams="campaign_code" /> -->
+	</Level>
+	<!--  End Levels -->
+	
+	
+	<!--  Start DetailViews -->
+	<DetailView title="Overview" type="KpiDetailOverviewView" icon="kpi-icon_overview.png">
+		<Grid name="drillDownColumns" configurationId="DrillDownColumns" xmlCode="RevReportCustomerColumns" cacheLife="21600" />
+		<Service name="selectDetailData" serviceCode="RevReport_selectCustomerDetailData" cacheLife="21600" maxRows="100" />
+	</DetailView>
+	<DetailView title="Details" type="KpiDetailCategoryView" icon="kpi-icon_details.png">
+		<Grid name="gridColumns" configurationId="RevReportCategoryColumns" xmlCode="RevReportCategoryColumns" cacheLife="21600" />
+		<Grid name="drillDownColumns" configurationId="DrillDownColumns" xmlCode="RevReportCustomerColumns" cacheLife="21600" />
+		<Service name="selectReportData" serviceCode="RevReport_selectReportData" cacheLife="21600" />
+		<Service name="selectDetailData" serviceCode="RevReport_selectCustomerDetailData" cacheLife="21600" maxRows="100" />
+	</DetailView>
+	<DetailView title="Trend" type="KpiDetailChartView" icon="kpi-icon_line_chart.png">
+		<Metadata name="chartMetadata" xmlCode="RevReportTrendChartMetadata" cacheLife="21600" />
+		<Service name="selectChartData" serviceCode="RevReport_selectTrendChartData" cacheLife="21600" />
+	</DetailView>
+	<DetailView title="YOY" type="KpiDetailChartView" icon="kpi-icon_column_chart.png">
+		<Metadata name="chartMetadata" xmlCode="RevReportYOYChartMetadata" cacheLife="21600" />
+		<Service name="selectChartData" serviceCode="RevReport_selectYOYChartData" cacheLife="21600" />
+	</DetailView>
+	<!-- 
+	<DetailView title="Contact Info" type="KpiDetailContactView" icon="kpi-icon_phone.png" excludedLevels="all,channel_code,region_code,campaign_code,office_code">
+		<Service name="selectContactData" serviceCode="RevReport_selectContactData" cacheLife="21600" />
+	</DetailView>
+	-->
+	<!--  End DetailViews -->
+	
+</KpiReport>

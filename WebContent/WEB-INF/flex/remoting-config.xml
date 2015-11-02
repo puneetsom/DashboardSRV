@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<service id="remoting-service" class="flex.messaging.services.RemotingService">
+
+    <adapters>
+        <adapter-definition id="java-object" class="flex.messaging.services.remoting.adapters.JavaAdapter" default="true"/>
+    </adapters>
+
+    <default-channels>
+        <channel ref="amdocs-amf"/>
+    </default-channels>
+
+    <destination id="query-cache">
+        <properties>
+            <source>com.amdocs.infra.querycache.QueryCacheDAO</source>
+        </properties>
+    </destination>
+
+    <destination id="xml-loader">
+        <properties>
+            <source>com.amdocs.infra.xmlloader.XmlLoaderDAO</source>
+        </properties>
+    </destination>
+
+    <destination id="app-usage">
+        <properties>
+            <source>com.amdocs.infra.appusage.AppUsageDAO</source>
+        </properties>
+    </destination>
+    
+    <destination id="grid-service">
+        <properties>
+            <source>com.amdocs.dashboard.services.GridService</source>
+        </properties>
+    </destination>	
+
+    <destination id="excel">
+        <properties>
+            <source>com.amdocs.dashboard.excel.ExcelGenerator</source>
+        </properties>
+    </destination>
+    
+    <destination id="rejectcbpb_manually_handled_ind">
+        <properties>
+            <source>com.amdocs.dashboard.dao.RejectCBPBManHandledDAO</source>
+        </properties>
+    </destination>	
+   
+    <destination id="iyp-operations">
+        <properties>
+            <source>com.amdocs.dashboard.dao.IYPOperationsDAO</source>
+        </properties>
+    </destination>
+    <destination id="sla_runtime_jobs">
+        <properties>
+            <source>com.amdocs.dashboard.dao.SLARuntimeJobsDAO</source>
+        </properties>
+    </destination>
+    <destination id="wrf_proj_status">
+        <properties>
+            <source>com.amdocs.dashboard.dao.WRFProjStatusDAO</source>
+        </properties>
+    </destination>
+    <destination id="save-service">
+        <properties>
+            <source>com.amdocs.dashboard.services.SaveService</source>
+        </properties>
+    </destination>
+    <destination id="reqrep-service">
+        <properties>
+            <source>com.amdocs.dashboard.services.ReqRepositoryService</source>
+        </properties>
+    </destination>
+    <destination id="reqrep-inline-update">
+        <properties>
+            <source>com.amdocs.dashboard.dao.ReqRepositoryDAO</source>
+        </properties>
+    </destination>
+</service>

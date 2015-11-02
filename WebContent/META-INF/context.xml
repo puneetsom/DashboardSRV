@@ -1,0 +1,72 @@
+<Context reloadable="true" unpackWAR="true">
+
+	<!-- 
+		The database connection pools defined in this file are being used
+		by the QueryCache mechanism, although in the Dashboard, we are not
+		caching any results.
+		
+		TODO: These connections need to be combined with the connections defined
+			  in config.properties, perhaps using an ANT script, so we have all
+			  database connections defined in one place.
+	-->
+
+	<Resource auth="Container" description="CDW Db Connection"
+		driverClassName="oracle.jdbc.driver.OracleDriver" maxActive="4"
+		maxIdle="2" maxWait="5000" name="jdbc/CdwSQL"
+		password="lakers04" type="javax.sql.DataSource"
+		url="jdbc:oracle:thin:@fhp003e.ffdc.sbc.com:1521:xtccdw"
+		username="m67930" validationQuery="select * from dual" />
+		
+	<Resource auth="Container" description="CDW Db Connection"
+		driverClassName="oracle.jdbc.driver.OracleDriver" maxActive="4"
+		maxIdle="2" maxWait="5000" name="jdbc/CdwSQLSensisSLA"
+		password="dev1" type="javax.sql.DataSource"
+		url="jdbc:oracle:thin:@fldi010.ffdc.sbc.com:1521:tccdw"
+		username="dev1" validationQuery="select * from dual" />			
+
+
+	<!-- ************** REF Connection ************** -->
+
+	<Resource auth="Container" description="Ref Db Connection"
+		driverClassName="oracle.jdbc.driver.OracleDriver" maxActive="4"
+		maxIdle="2" maxWait="5000" name="jdbc/RefSQL"
+		password="gen_query" type="javax.sql.DataSource"
+		url="jdbc:oracle:thin:@flti008.ffdc.sbc.com:1521:ptcagdb"
+		username="gen_query" validationQuery="select * from dual" />
+
+
+	<!-- ************** OLSM Connection ************** -->
+
+	<Resource auth="Container" description="OLSM Db Connection"
+		driverClassName="oracle.jdbc.driver.OracleDriver" maxActive="4"
+		maxIdle="2" maxWait="5000" name="jdbc/OlsmSQL"
+		password="gen_query" type="javax.sql.DataSource"
+		url="jdbc:oracle:thin:@flti008.ffdc.sbc.com:1521:ptcanys"
+		username="gen_query" validationQuery="select * from dual" />
+<!--
+	<Resource auth="Container" description="OLSM Db Connection"
+		driverClassName="oracle.jdbc.driver.OracleDriver" maxActive="4"
+		maxIdle="2" maxWait="5000" name="jdbc/OlsmSQL"
+		password="st22" type="javax.sql.DataSource"
+		url="jdbc:oracle:thin:@flti005.ffdc.sbc.com:1521:tcng2"
+		username="st22" validationQuery="select * from dual" />
+
+	<Resource auth="Container" description="OLSM Db Connection"
+		driverClassName="oracle.jdbc.driver.OracleDriver" maxActive="4"
+		maxIdle="2" maxWait="5000" name="jdbc/OlsmSQL"
+		password="gen_query" type="javax.sql.DataSource"
+		url="jdbc:oracle:thin:@fhp003e.ffdc.sbc.com:1521:xtcanys"
+		username="gen_query" validationQuery="select * from dual" />
+-->
+
+
+	<!-- ************** Operational Monitoring Connection ************** -->
+
+	<Resource auth="Container" description="Operational Monitoring Connection"
+		driverClassName="oracle.jdbc.driver.OracleDriver" maxActive="4"
+		maxIdle="2" maxWait="5000" name="jdbc/OpMonSQL"
+		password="st3" type="javax.sql.DataSource"
+		url="jdbc:oracle:thin:@flti005.ffdc.sbc.com:1521:tcng4"
+		username="st3" validationQuery="select * from dual" />
+
+</Context>

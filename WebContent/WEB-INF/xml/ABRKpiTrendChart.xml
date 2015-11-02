@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XYChart xmlns="http://www.amdocs.com/dashboard/mobile/XYChart"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://www.amdocs.com/dashboard/mobile/XYChart ../xsd/XYChart.xsd"
+		 locale="en_US"
+         name="Monthly Trend"
+         sliderField="kpi_date_lbl">
+
+	<Service name="selectTrendChartData" serviceCode="ABRKPI_selectYOYChartData" cacheLife="21600">
+		<Param name="report_type" /> <!-- X (monthly), W (weekly) -->
+		<Param name="data_field" />  <!-- hndl_cnt, asgn_cnt, sold_amt, etc -->
+		<Param name="prd_year" required="false" />
+		<Param name="branch_code" required="false" />
+		<Param name="rvp_code" required="false" />
+		<Param name="channel" required="false" />
+		<Param name="region" required="false" />
+	</Service>
+
+	<seriesSet type="area">
+		<lineSeries id="totalAmt" displayName="Total Amount" yField="kpi_val" lineColor="1387c0" lineAlpha="1.0" lineWidth="1.5" fillColor="1387c0" fillAlpha="0.3" />
+	</seriesSet>
+
+	<axisSet>
+		<axis id="xAxis" position="bottom" categoryField="kpi_date_lbl" type="string" title="Month" showTitle="false" />
+		<axis id="yAxis" position="left" type="number" labelFormatter="currencyFormatter" title="Value" showTitle="false" />
+	</axisSet>
+	
+	<formatterSet>
+		<formatter id="currencyFormatter" type="currency" maxFractionalDigits="0" abbreviationThreshold="10000" abbreviationFractionalDigits="1" />
+		<formatter id="popoverFormatter" type="currency" maxFractionalDigits="0" />
+		<formatter id="currencyPopoverFormatter" type="currency" maxFractionalDigits="0" />
+		<formatter id="percentFormatter" type="percent" maxFractionalDigits="1" abbreviationThreshold="10000" abbreviationFractionalDigits="1" />
+		<formatter id="percentPopoverFormatter" type="percent" maxFractionalDigits="0" />
+	</formatterSet>  
+  
+</XYChart>

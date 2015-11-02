@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml-files SYSTEM "amdocs-xml-loader-config.dtd">
+<xml-files type="IypWeeklySummary-XML">
+   <xml-file code="IypWeeklySummary" location="http://cafrfd1y5wdev01.itsdo.sbc.com:8080/data/IypWeeklySummary/{type}-ads.xml" clientObject="IypWeeklySummmary" />
+</xml-files>

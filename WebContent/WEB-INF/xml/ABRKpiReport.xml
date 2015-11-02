@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<KpiReport xmlns="http://www.amdocs.com/dashboard/mobile/report" 
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.amdocs.com/dashboard/mobile/report ../xsd/KpiReport.xsd "
+           locale="en_US"
+           title="Sales Report">
+	
+	<Grid name="CategoryDetailGridColumns" configurationId="ABRKpiCategoryColumns" xmlCode="ABRKpiCategoryColumns" cacheLife="0" />
+
+	<!--  Start Services -->
+	<Service name="selectReportProperties" serviceCode="ABRKPI_selectReportProperties" cacheLife="21600" />
+		
+	<Service name="selectReportTypeFilters" serviceCode="ABRKPI_selectReportTypeFilters" cacheLife="21600" />
+	
+	<Service name="selectReportYearFilters" serviceCode="ABRKPI_selectReportYearFilters" cacheLife="21600" />
+	
+	<Service name="selectReportPeriodFilters" serviceCode="ABRKPI_selectReportPeriodFilters" cacheLife="21600">
+		<Param name="report_type" required="true" />
+		<Param name="prd_year" required="true" />
+	</Service>
+	
+	<Service name="selectInitialReportLevel" serviceCode="ABRKPI_selectInitialReportLevel" cacheLife="21600">
+		<Param name="employee_id" type="number" />
+	</Service>
+	
+	<Service name="selectInitialHistoryTrail" serviceCode="ABRKPI_selectInitialHistoryTrail" cacheLife="21600">
+		<Param name="report_type" value="X" /> <!-- X (monthly) or W (weekly) -->
+		<Param name="prd_year" value="2013" />
+		<Param name="report_period" value="06/01/2013" />
+		<Param name="cat_type" /> <!-- region_code, channel_code, gm_id, etc -->
+		<Param name="cat_id" />
+	</Service>
+	
+	<Service name="searchCategories" serviceCode="ABRKPI_searchCategories" cacheLife="21600">
+		<Param name="report_type" value="X" /> <!-- X (monthly) or W (weekly) -->
+		<Param name="prd_year" value="2013" />
+		<Param name="report_period" value="06/01/2013" />
+		<Param name="search" /> <!-- search string -->
+	</Service>
+	
+	<Service name="selectReportData" serviceCode="ABRKPI_selectReportData" cacheLife="21600">
+		<Param name="cat_type" /> <!-- region_code, channel_code, gm_id, etc -->
+		<Param name="report_type" value="X" /> <!-- X (monthly) or W (weekly) -->
+		<Param name="prd_year" value="2013" />
+		<Param name="report_period" value="06/01/2013" />
+		<Param name="branch_code" required="false" />
+		<Param name="rvp_code" required="false" />
+		<Param name="channel" required="false" />
+		<Param name="region" required="false" />
+	</Service>
+	
+	<Service name="selectDetailData" serviceCode="ABRKPI_selectDetailData" cacheLife="21600" maxRows="100">
+		<Param name="report_type" value="X" /> <!-- X (monthly) or W (weekly) -->
+		<Param name="prd_year" value="2013" />
+		<Param name="report_period" value="06/01/2013" />
+		<Param name="data_field" /> <!-- hndl_cnt, asgn_cnt, sold_amt, etc -->
+		<Param name="branch_code" required="false" />
+		<Param name="rvp_code" required="false" />
+		<Param name="channel" required="false" />
+		<Param name="region" required="false" />
+	</Service>
+	 
+	<Service name="selectYOYChartData" serviceCode="ABRKPI_selectYOYChartData" cacheLife="21600">
+		<Param name="report_type" value="X" /> <!-- X (monthly) or W (weekly) -->
+		<Param name="prd_year" value="2013" />
+		<Param name="report_period" value="06/01/2013" />
+		<Param name="data_field" />  <!-- hndl_cnt, asgn_cnt, sold_amt, etc -->
+		<Param name="prd_year" required="false" />
+		<Param name="branch_code" required="false" />
+		<Param name="rvp_code" required="false" />
+		<Param name="channel" required="false" />
+		<Param name="region" required="false" />
+	</Service>
+	 
+	<Service name="selectTrendChartData" serviceCode="ABRKPI_selectTrendChartData" cacheLife="21600">
+		<Param name="report_type" value="X" /> <!-- X (monthly) or W (weekly) -->
+		<Param name="prd_year" value="2013" />
+		<Param name="report_period" value="06/01/2013" />
+		<Param name="data_field" />  <!-- hndl_cnt, asgn_cnt, sold_amt, etc -->
+		<Param name="prd_year" required="false" />
+		<Param name="branch_code" required="false" />
+		<Param name="rvp_code" required="false" />
+		<Param name="channel" required="false" />
+		<Param name="region" required="false" />
+	</Service>
+	<!--  End Services -->
+	
+	
+	<!--  Start Kpis -->
+	<Kpi name="SVC" targetField="iyp_hndl_obj" actualField="iyp_hndl_amt" changeField="iyp_hndl_chg_amt" changePctField="iyp_hndl_chg_pct" type="currency" fractionalDigits="0" />
+	<Kpi name="Sold" targetField="iyp_sold_obj" actualField="iyp_sold_amt" changeField="iyp_sold_chg_amt" changePctField="iyp_sold_chg_pct" type="currency" fractionalDigits="0" />
+	<Kpi name="Net" targetField="iyp_net_obj" actualField="iyp_net_amt" changeField="iyp_net_chg_amt" changePctField="iyp_net_chg_pct" type="currency" fractionalDigits="0" />
+	<Kpi name="Net % to SVC Rev" actualField="iyp_net_srv_pct" type="percent" fractionalDigits="1" />
+	<Kpi name="YOY Net Dollars" actualField="iyp_sold_chg_amt" type="currency" fractionalDigits="0" />
+	<Kpi name="YOY Net % Growth" actualField="iyp_net_pct_growth" type="percent" fractionalDigits="0" />
+	<Kpi name="Net %" actualField="iyp_net_srv_pct_diff" type="percent" fractionalDigits="0" />
+	<Kpi name="New" targetField="iyp_new_obj" actualField="iyp_new_amt" changeField="iyp_new_chg_amt" changePctField="iyp_new_chg_pct" type="currency" fractionalDigits="0" includeInStatus="false" />
+	<Kpi name="ITA" targetField="iyp_increase_obj" actualField="iyp_increase_amt" changeField="iyp_increase_chg_amt" changePctField="iyp_increase_chg_pct" type="currency" fractionalDigits="0" includeInStatus="false" />
+	<Kpi name="OBL" targetField="iyp_obl_obj" actualField="iyp_obl_amt" changeField="iyp_obl_chg_amt" changePctField="iyp_obl_chg_pct" type="currency" fractionalDigits="0" preference="low" includeInStatus="false" />
+	<!--  End Kpis -->
+	
+	<KpiFilter id="prdYearFilter" dataField="prd_year" title="Year" serviceName="selectReportYearFilters" />	
+	<KpiFilter id="reportTypeFilter" dataField="report_type" title="Type" serviceName="selectReportTypeFilters" />	
+	<KpiFilter id="reportPeriodFilter" dataField="report_period" title="Period" serviceName="selectReportPeriodFilters" />
+	
+	<!--  Start Levels -->
+	<Level name="All" param="all">
+		<Category name="Regions" param="region" childParams="branch_code" />
+		<Category name="RVPs" param="rvp_code" childParams="branch_code" />
+		<Category name="Channels" param="channel" childParams="branch_code" />
+		<Category name="Branches" param="branch_code" />
+	</Level>
+	<Level name="Region" param="region">
+		<Category name="RVPs" param="rvp_code" childParams="branch_code" />
+		<Category name="Channels" param="channel" childParams="branch_code" />
+		<Category name="Branches" param="branch_code" />
+	</Level>
+	<Level name="Channel" param="channel">
+		<Category name="Regions" param="region" childParams="branch_code" />
+		<Category name="RVPs" param="rvp_code" childParams="branch_code" />
+		<Category name="Branches" param="branch_code" />
+	</Level>
+	<Level name="RVP" param="rvp_code">
+		<Category name="Regions" param="region" childParams="branch_code" />
+		<Category name="Branches" param="branch_code" />
+		<Category name="Channels" param="channel" childParams="branch_code" />
+	</Level>
+	<Level name="Branch" param="branch_code">
+		<Category name="Channels" param="channel" childParams="branch_code" />
+	</Level>
+	<!--  End Levels -->
+	
+	
+	<!--  Start DetailViews -->
+	<DetailView title="Overview" type="KpiDetailOverviewView" icon="kpi-icon_overview.png">
+	<!-- 
+		<Grid name="drillDownColumns" configurationId="DrillDownColumns" xmlCode="ABRKpiDetailColumns" cacheLife="21600" />
+		<Service name="selectDetailData" serviceCode="ABRKPI_selectDetailData" cacheLife="21600" maxRows="100" />
+	-->
+	</DetailView>
+	<DetailView title="Details" type="KpiDetailCategoryView" icon="kpi-icon_details.png">
+		<Grid name="gridColumns" configurationId="ABRKpiCategoryColumns" xmlCode="ABRKpiCategoryColumns" cacheLife="21600" />
+		<Service name="selectReportData" serviceCode="ABRKPI_selectReportData" cacheLife="21600" />
+	</DetailView>
+	<DetailView title="Trend" type="KpiDetailChartView" icon="kpi-icon_line_chart.png">
+		<Metadata name="chartMetadata" xmlCode="ABRKpiTrendChartMetadata" cacheLife="21600" />
+		<Service name="selectChartData" serviceCode="ABRKPI_selectTrendChartData" cacheLife="21600" />
+	</DetailView>
+	<DetailView title="YOY" type="KpiDetailChartView" icon="kpi-icon_column_chart.png">
+		<Metadata name="chartMetadata" xmlCode="ABRKpiYOYChartMetadata" cacheLife="21600" />
+		<Service name="selectChartData" serviceCode="ABRKPI_selectYOYChartData" cacheLife="21600" />
+	</DetailView>
+	<!--  End DetailViews -->
+	
+</KpiReport>

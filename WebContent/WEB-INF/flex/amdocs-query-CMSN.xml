@@ -1,0 +1,1063 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+
+<sql type="CdwSQL">
+	
+	<statement code="CMSN_SummaryData"><![CDATA[
+select   period_year
+       , period_num
+       , start_date
+       , end_date
+       , payment_date
+       , period_seq
+       , period_ind
+       , channel_code
+       , channel_name
+       , region_code
+       , region_name
+       , rep_status
+       , cmsn_dist1
+       , cmsn_dist2
+       , cmsn_dist3
+       , cmsn_dist4
+       , cmsn_dist5
+       , cmsn_dist6
+       --, debit_dist1
+       --, debit_dist2
+       --, debit_dist3
+       --, debit_dist4
+       --, debit_dist5
+       --, debit_dist6
+       --, debit_to_cmsn_dist1
+       --, debit_to_cmsn_dist2
+       --, debit_to_cmsn_dist3
+       --, debit_to_cmsn_dist4
+       --, debit_to_cmsn_dist5
+       --, debit_to_cmsn_dist6
+       , rep_cnt
+       , cmsn_this_pp
+       , debit_carry_prev_pp
+       , debit_recovered
+       , debit_this_pp
+       , debit_carry_over
+       , cmsn_to_pay
+       , cmsn_to_pay_avg
+       , cmsn_to_pay_prev_pp
+       , cmsn_to_pay_prev_yr_pp
+       , cmsn_to_pay_avg_prev_pp
+       , cmsn_to_pay_prev_yr_pp_avg
+       , manual_cmsn
+       , total_debit
+       , error_cbpb_amt_avg
+       , error_cbpb_amt
+       , round(avg(error_cbpb_amt_avg )
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 1 following), 2) as cbpb_2_amt_avg
+       , round(avg(error_cbpb_amt_avg)
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 5 following), 2) as cbpb_6_amt_avg
+        , round(avg(error_cbpb_amt_avg )
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 11 following), 2) as cbpb_12_amt_avg
+       , round(avg(error_cbpb_amt_avg )
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 23 following), 2) as cbpb_24_amt_avg
+        , round(avg(error_cbpb_amt)
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 1 following), 2) as cbpb_2_amt
+       , round(avg(error_cbpb_amt)
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 5 following), 2) as cbpb_6_amt
+        , round(avg(error_cbpb_amt)
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 11 following), 2) as cbpb_12_amt
+       , round(avg(error_cbpb_amt)
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 23 following), 2) as cbpb_24_amt
+       , round(avg(cmsn_to_pay) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 1 following), 2) as cmsn_to_pay_2_mv_avg
+       , round(avg(cmsn_to_pay_avg) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 1 following), 2) as cmsn_to_pay_avg_2_mv_avg
+       , round(avg(cmsn_to_pay) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 5 following), 2) as cmsn_to_pay_6_mv_avg
+       , round(avg(cmsn_to_pay_avg) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 5 following), 2) as cmsn_to_pay_avg_6_mv_avg
+       , round(avg(cmsn_to_pay) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 11 following), 2) as cmsn_to_pay_12_mv_avg
+       , round(avg(cmsn_to_pay_avg) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 11 following), 2) as cmsn_to_pay_avg_12_mv_avg
+       , round(avg(cmsn_to_pay) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 23 following), 2) as cmsn_to_pay_24_mv_avg
+       , round(avg(cmsn_to_pay_avg) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 23 following), 2) as cmsn_to_pay_avg_24_mv_avg
+from     cmsn_reg_smy_mv
+where    rep_status = {repStatusGroup}
+and      monthly_pay_period_ind = 'N'
+	]]></statement>
+	
+	<statement code="CMSN_DetailData"><![CDATA[
+select   period_year
+       , period_num
+       , start_date
+       , end_date
+       , payment_date
+       , period_ind
+       , channel_code
+       , channel_name
+       , region_code
+       , region_name
+       , rep_id
+       , rep_name
+       , employee_status
+       , employee_status_display
+       , rep_status
+       --, archive_ind
+       , emp_inactive_date
+       , ncs_date
+       , office_code
+       , office_name
+       , branch_code
+       , branch_name
+       , cmsn_this_pp
+       , debit_carry_prev_pp
+       , debit_recovered
+       , debit_this_pp
+       , debit_carry_over
+       , cmsn_to_pay       
+       , manual_cmsn 
+       , cipp_debit_carried_forward
+       , cipp_previous_debit_balance
+       , total_debit 
+       , total_cmsn
+       , cmsn_to_pay_x_pp
+       , cmsn_to_pay_avg_x_pp
+       , cmsn_diff
+       , debit_diff
+       , error_cbpb_x_pp
+       , error_cbpb_avg_x_pp
+from     (select   t.*
+                 , (case {numPeriods}
+                       when 1 then cmsn_to_pay
+                       when 2 then cmsn_to_pay_2_pp
+                       when 6 then cmsn_to_pay_6_pp
+                       when 12 then cmsn_to_pay_12_pp
+                       when 24 then cmsn_to_pay_24_pp
+                       when 48 then cmsn_to_pay_48_pp
+                    end) cmsn_to_pay_x_pp
+                 , round(case {numPeriods}
+                       when 1 then cmsn_to_pay
+                       when 2 then cmsn_to_pay_2_pp/2
+                       when 6 then cmsn_to_pay_6_pp/6
+                       when 12 then cmsn_to_pay_12_pp/12
+                       when 24 then cmsn_to_pay_24_pp/24
+                       when 48 then cmsn_to_pay_48_pp/48
+                    end,2) cmsn_to_pay_avg_x_pp
+                 , (case {numPeriods}
+                   	   when 1 then (error_cbpb_amt)
+                       when 2 then (error_cbpb_2_pp)
+                       when 6 then (error_cbpb_6_pp)
+                       when 12 then (error_cbpb_12_pp)
+                       when 24 then (error_cbpb_24_pp)
+                       when 48 then (error_cbpb_48_pp)
+                    end) error_cbpb_x_pp
+                  , (case {numPeriods}
+                   	   when 1 then (error_cbpb_amt)
+                       when 2 then (error_cbpb_2_pp)/2
+                       when 6 then (error_cbpb_6_pp)/6
+                       when 12 then (error_cbpb_12_pp)/12
+                       when 24 then (error_cbpb_24_pp)/24
+                       when 48 then (error_cbpb_48_pp)/48
+                    end) error_cbpb_avg_x_pp
+          from     cmsn_rep_smy_mv t
+          where    period_ind = {periodInd}
+          and      rep_status_group = {repStatusGroup}
+          and      monthly_pay_period_ind = 'N'
+          and      last_period_seq <= (decode(period_ind,'P',1,0) + {numPeriods} - 1)
+         )
+order by cmsn_diff desc
+	]]></statement>
+	
+	<statement code="CMSN_RepSummary"><![CDATA[
+select   rep_id
+       , region_code
+       --, max(archive_ind) archive_ind
+       , period_year
+       , period_num
+       , start_date
+       , end_date
+       , payment_date
+       , period_seq
+       , 'ALL' channel_code
+       , 'All' channel_name
+       , sum(error_cbpb_amt) error_cbpb 
+       , sum(debit_this_pp) debit_this_pp
+       , sum(cmsn_this_pp) cmsn_this_pp
+       , sum(cmsn_to_pay) cmsn_to_pay    
+       , sum(debit_carry_over) debit_carry_over
+       , sum(debit_carry_prev_pp) debit_carry_prev_pp
+       , sum(debit_recovered) debit_recovered
+       , sum(manual_cmsn) manual_cmsn
+       , sum(cipp_debit_carried_forward) cipp_debit_carried_forward
+       , sum(cipp_previous_debit_balance) cipp_previous_debit_balance
+       , sum(total_debit) total_debit
+       , sum(total_cmsn) total_cmsn
+from     cmsn_rep_detail_mv t
+where    region_code = {regionCode}
+and      rep_id = {repId}
+and      period_seq <= 48
+and      monthly_pay_period_ind = 'N'
+group by rep_id
+       , region_code
+       , period_year
+       , period_num
+       , start_date
+       , end_date
+       , payment_date
+       , period_seq
+union all
+select   rep_id
+       , region_code
+       --, max(archive_ind) archive_ind
+       , period_year
+       , period_num
+       , start_date
+       , end_date
+       , payment_date
+       , period_seq
+       , channel_code
+       , channel_name
+       , sum(error_cbpb_amt) error_cbpb 
+       , sum(debit_this_pp) debit_this_pp
+       , sum(cmsn_this_pp) cmsn_this_pp
+       , sum(cmsn_to_pay) cmsn_to_pay    
+       , sum(debit_carry_over) debit_carry_over
+       , sum(debit_carry_prev_pp) debit_carry_prev_pp
+       , sum(debit_recovered) debit_recovered
+       , sum(manual_cmsn) manual_cmsn
+       , sum(cipp_debit_carried_forward) cipp_debit_carried_forward
+       , sum(cipp_previous_debit_balance) cipp_previous_debit_balance
+       , sum(total_debit) total_debit
+       , sum(total_cmsn) total_cmsn
+from     cmsn_rep_detail_mv t
+where    region_code = {regionCode}
+and      rep_id = {repId}
+and      period_seq <= 48
+and      monthly_pay_period_ind = 'N'
+group by rep_id
+       , region_code
+       , period_year
+       , period_num
+       , start_date
+       , end_date
+       , payment_date
+       , period_seq
+       , channel_code
+       , channel_name
+order by 7, 6
+	]]></statement>
+	
+	<statement code="CMSN_SummaryData_by_EmployeeId"><![CDATA[
+select   period_year
+       , period_num
+       , start_date
+       , end_date
+       , payment_date
+       , period_seq
+       , period_ind
+       , channel_code
+       , channel_name
+       , region_code
+       , region_name
+       , rep_status
+       , cmsn_dist1
+       , cmsn_dist2
+       , cmsn_dist3
+       , cmsn_dist4
+       , cmsn_dist5
+       , cmsn_dist6
+       --, debit_dist1
+       --, debit_dist2
+       --, debit_dist3
+       --, debit_dist4
+       --, debit_dist5
+       --, debit_dist6
+       --, debit_to_cmsn_dist1
+       --, debit_to_cmsn_dist2
+       --, debit_to_cmsn_dist3
+       --, debit_to_cmsn_dist4
+       --, debit_to_cmsn_dist5
+       --, debit_to_cmsn_dist6
+       , rep_cnt
+       , cmsn_this_pp
+       , debit_carry_prev_pp
+       , debit_recovered
+       , debit_this_pp
+       , debit_carry_over
+       , cmsn_to_pay
+       , cmsn_to_pay_avg
+       , cmsn_to_pay_prev_pp
+       , cmsn_to_pay_prev_yr_pp
+       , cmsn_to_pay_avg_prev_pp
+       , cmsn_to_pay_prev_yr_pp_avg
+       , manual_cmsn
+       , total_debit
+       , error_cbpb_amt_avg
+       , error_cbpb_amt
+       , round(avg(error_cbpb_amt_avg )
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 1 following), 2) as cbpb_2_amt_avg
+       , round(avg(error_cbpb_amt_avg)
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 5 following), 2) as cbpb_6_amt_avg
+        , round(avg(error_cbpb_amt_avg )
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 11 following), 2) as cbpb_12_amt_avg
+       , round(avg(error_cbpb_amt_avg )
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 23 following), 2) as cbpb_24_amt_avg
+        , round(avg(error_cbpb_amt)
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 1 following), 2) as cbpb_2_amt
+       , round(avg(error_cbpb_amt)
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 5 following), 2) as cbpb_6_amt
+        , round(avg(error_cbpb_amt)
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 11 following), 2) as cbpb_12_amt
+       , round(avg(error_cbpb_amt)
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 23 following), 2) as cbpb_24_amt
+       , round(avg(cmsn_to_pay) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 1 following), 2) as cmsn_to_pay_2_mv_avg
+       , round(avg(cmsn_to_pay_avg) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 1 following), 2) as cmsn_to_pay_avg_2_mv_avg
+       , round(avg(cmsn_to_pay) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 5 following), 2) as cmsn_to_pay_6_mv_avg
+       , round(avg(cmsn_to_pay_avg) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 5 following), 2) as cmsn_to_pay_avg_6_mv_avg
+       , round(avg(cmsn_to_pay) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 11 following), 2) as cmsn_to_pay_12_mv_avg
+       , round(avg(cmsn_to_pay_avg) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 11 following), 2) as cmsn_to_pay_avg_12_mv_avg
+       , round(avg(cmsn_to_pay) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 23 following), 2) as cmsn_to_pay_24_mv_avg
+       , round(avg(cmsn_to_pay_avg) 
+            over (partition by channel_name, region_name
+                  order by     period_seq
+                  range between current row and 23 following), 2) as cmsn_to_pay_avg_24_mv_avg
+from     (
+select   period_year
+       , period_num
+       , start_date
+       , end_date
+       , payment_date
+       , period_seq
+       , period_ind
+       , monthly_pay_period_ind
+       , channel_code
+       , channel_name
+       , region_code
+       , region_name
+       , rep_status
+       , rep_cnt
+       , cmsn_this_pp
+       , debit_carry_prev_pp
+       , debit_recovered
+       , debit_this_pp
+       , debit_carry_over
+       , cmsn_to_pay
+       , cmsn_to_pay_avg
+       --, chargeback_amt
+       --, payback_amt
+       , error_cbpb_amt
+       , error_cbpb_amt_avg
+       , lag(cmsn_to_pay) 
+            over (partition by channel_name, region_name, rep_status
+                  order by     period_year, period_num) cmsn_to_pay_prev_pp
+       , nvl(lag(cmsn_to_pay) 
+            over (partition by channel_name, region_name, period_num, rep_status
+                  order by     period_year),0) cmsn_to_pay_prev_yr_pp
+       , lag(cmsn_to_pay_avg) 
+            over (partition by channel_name, region_name, rep_status
+                  order by     period_year, period_num) cmsn_to_pay_avg_prev_pp
+       , nvl(lag(cmsn_to_pay_avg) 
+            over (partition by channel_name, region_name, period_num, rep_status
+                  order by     period_year),0) cmsn_to_pay_prev_yr_pp_avg
+       , nvl(bots_carry_over, 0) bots_carry_over
+       , nvl(bots_carry_forward, 0)bots_carry_forward
+       , manual_cmsn
+       , cipp_previous_debit_balance
+       , cipp_debit_carried_forward
+       , total_debit
+       , cmsn_dist1
+       , cmsn_dist2
+       , cmsn_dist3
+       , cmsn_dist4
+       , cmsn_dist5
+       , cmsn_dist6
+       --, debit_dist1
+       --, debit_dist2
+       --, debit_dist3
+       --, debit_dist4
+       --, debit_dist5
+       --, debit_dist6
+       --, debit_to_cmsn_dist1
+       --, debit_to_cmsn_dist2
+       --, debit_to_cmsn_dist3
+       --, debit_to_cmsn_dist4
+       --, debit_to_cmsn_dist5
+       --, debit_to_cmsn_dist6
+from     (select   period_year
+                 , period_num
+                 , start_date
+                 , end_date
+                 , payment_date
+                 , period_seq
+                 , period_ind
+                 , monthly_pay_period_ind
+                 , channel_code
+                 , channel_name
+                 , region_code
+                 , region_name
+                 , rep_status
+               --  , sum(chargeback_amt) chargeback_amt
+               --  , sum(payback_amt) payback_amt
+                 , sum(error_cbpb_amt) error_cbpb_amt
+                 , round(avg(error_cbpb_amt),2) error_cbpb_amt_avg
+                 , count(rep_id) rep_cnt
+                 , sum(cmsn_this_pp) cmsn_this_pp
+                 , sum(debit_carry_prev_pp) debit_carry_prev_pp
+                 , sum(debit_recovered) debit_recovered
+                 , sum(debit_this_pp) debit_this_pp
+                 , sum(debit_carry_over) debit_carry_over
+                 , sum(cmsn_to_pay) cmsn_to_pay
+                 , round(avg(cmsn_to_pay),2) cmsn_to_pay_avg
+                 , sum(bots_carry_over) bots_carry_over
+                 , sum(bots_carry_forward) bots_carry_forward
+                 , sum(manual_cmsn) manual_cmsn
+                 , sum(cipp_previous_debit_balance) cipp_previous_debit_balance
+                 , sum(cipp_debit_carried_forward) cipp_debit_carried_forward
+                 , sum(total_debit) total_debit
+                 , count(case when cmsn_to_pay_reg_avg != 0 and cmsn_to_pay / cmsn_to_pay_reg_avg <= .5 then 1 end) cmsn_dist1
+                 , count(case when cmsn_to_pay_reg_avg = cmsn_to_pay or (cmsn_to_pay_reg_avg != 0 and cmsn_to_pay / cmsn_to_pay_reg_avg > .5 and cmsn_to_pay / cmsn_to_pay_reg_avg <= 1) then 1 end) cmsn_dist2
+                 , count(case when cmsn_to_pay_reg_avg != 0 and cmsn_to_pay / cmsn_to_pay_reg_avg > 1 and cmsn_to_pay / cmsn_to_pay_reg_avg <= 1.25 then 1 end) cmsn_dist3
+                 , count(case when cmsn_to_pay_reg_avg != 0 and cmsn_to_pay / cmsn_to_pay_reg_avg > 1.25 and cmsn_to_pay / cmsn_to_pay_reg_avg <= 1.5 then 1 end) cmsn_dist4
+                 , count(case when cmsn_to_pay_reg_avg != 0 and cmsn_to_pay / cmsn_to_pay_reg_avg > 1.5 then 1 end) cmsn_dist5
+                 , count(case when cmsn_to_pay_reg_avg = 0 and cmsn_to_pay > 0 then 1 end) cmsn_dist6
+                 --, count(case when debit_carry_over_reg_avg != 0 and debit_carry_over / debit_carry_over_reg_avg <= .5 then 1 end) debit_dist1
+                 --, count(case when debit_carry_over_reg_avg = debit_carry_over or (debit_carry_over_reg_avg != 0 and debit_carry_over / debit_carry_over_reg_avg > .5 and debit_carry_over / debit_carry_over_reg_avg <= 1) then 1 end) debit_dist2
+                 --, count(case when debit_carry_over_reg_avg != 0 and debit_carry_over / debit_carry_over_reg_avg > 1 and debit_carry_over / debit_carry_over_reg_avg <= 1.25 then 1 end) debit_dist3
+                 --, count(case when debit_carry_over_reg_avg != 0 and debit_carry_over / debit_carry_over_reg_avg > 1.25 and debit_carry_over / debit_carry_over_reg_avg <= 1.5 then 1 end) debit_dist4
+                 --, count(case when debit_carry_over_reg_avg != 0 and debit_carry_over / debit_carry_over_reg_avg > 1.5 then 1 end) debit_dist5
+                 --, count(case when debit_carry_over_reg_avg = 0 and debit_carry_over > 0 then 1 end) debit_dist6
+                 --, count(case when cmsn_to_pay != 0 and debit_carry_over / cmsn_to_pay <= .5 then 1 end) debit_to_cmsn_dist1
+                 --, count(case when cmsn_to_pay = debit_carry_over or (cmsn_to_pay != 0 and debit_carry_over / cmsn_to_pay > .5 and debit_carry_over / cmsn_to_pay <= 1) then 1 end) debit_to_cmsn_dist2
+                 --, count(case when cmsn_to_pay != 0 and debit_carry_over / cmsn_to_pay > 1 and debit_carry_over / cmsn_to_pay <= 1.25 then 1 end) debit_to_cmsn_dist3
+                 --, count(case when cmsn_to_pay != 0 and debit_carry_over / cmsn_to_pay > 1.25 and debit_carry_over / cmsn_to_pay <= 1.5 then 1 end) debit_to_cmsn_dist4
+                 --, count(case when cmsn_to_pay != 0 and debit_carry_over / cmsn_to_pay > 1.5 then 1 end) debit_to_cmsn_dist5
+                 --, count(case when cmsn_to_pay = 0 and debit_carry_over > 0 then 1 end) debit_to_cmsn_dist6
+          from     (select   period_year
+                           , period_num
+                           , start_date
+                           , end_date
+                           , payment_date
+                           , period_seq
+                           , period_ind
+                           , monthly_pay_period_ind
+                           , channel_code
+                           , channel_name
+                           , region_code
+                           , region_name
+                           , rep_id
+                           , rep_name
+                           , gen.rep_status
+                           , office_code
+                           , office_name
+                           , branch_code
+                           , branch_name
+                           , cmsn_this_pp
+                           , debit_carry_prev_pp
+                           , debit_recovered
+                           , debit_this_pp
+                           , debit_carry_over
+                           , cmsn_to_pay
+                           , nvl(bots_carry_over, 0) bots_carry_over
+       					   , nvl(bots_carry_forward, 0)bots_carry_forward
+                           , manual_cmsn
+                           --, chargeback_amt
+                           --, payback_amt
+                           , error_cbpb_amt
+                           , cipp_previous_debit_balance
+                           , cipp_debit_carried_forward
+                           , total_debit
+                           , count(distinct case when period_year >= '2010' then rep_id end) over(partition by region_code, channel_code, gen.rep_status) rep_cnt
+                           , avg(cmsn_to_pay) 
+                                over (partition by gen.rep_status
+                                                 , channel_code
+                                                 , region_code
+                                                 , period_seq) as cmsn_to_pay_reg_avg
+                           , avg(debit_carry_over) 
+                                over (partition by gen.rep_status
+                                                 , channel_code
+                                                 , region_code
+                                                 , period_seq) as debit_carry_over_reg_avg
+                    from     (select *
+                              from   cmsn_rep_detail_mv
+                              where  rep_id in (select employee_id 
+                                                from   cmsn_sales_hierarchy 
+                                                where  manager_id = {employeeId})
+                              and    monthly_pay_period_ind = 'N') c
+                           , (select {repStatusGroup} rep_status from dual) gen
+                    where    c.rep_status = gen.rep_status
+                    or       gen.rep_status = 'ALL'
+                    union all
+                    select   period_year
+                           , period_num
+                           , start_date
+                           , end_date
+                           , payment_date
+                           , period_seq
+                           , period_ind
+                           , monthly_pay_period_ind
+                           , 'ALL' channel_code
+                           , 'All' channel_name
+                           , region_code
+                           , region_name
+                           , rep_id
+                           , rep_name
+                           , gen.rep_status
+                           , office_code
+                           , office_name
+                           , branch_code
+                           , branch_name
+                           , cmsn_this_pp
+                           , debit_carry_prev_pp
+                           , debit_recovered
+                           , debit_this_pp
+                           , debit_carry_over
+                           , cmsn_to_pay
+                           , nvl(bots_carry_over, 0) bots_carry_over
+       					   , nvl(bots_carry_forward, 0)bots_carry_forward
+                           , manual_cmsn
+                           --, chargeback_amt
+                           --, payback_amt
+                           , error_cbpb_amt
+                           , cipp_previous_debit_balance
+                           , cipp_debit_carried_forward
+                           , total_debit
+                           , count(distinct case when period_year >= '2010' then rep_id end) over(partition by region_code, channel_code, gen.rep_status) rep_cnt
+                           , avg(cmsn_to_pay) 
+                                over (partition by gen.rep_status
+                                                 , channel_code
+                                                 , region_code
+                                                 , period_seq) as cmsn_to_pay_reg_avg
+                           , avg(debit_carry_over) 
+                                over (partition by gen.rep_status
+                                                 , channel_code
+                                                 , region_code
+                                                 , period_seq) as debit_carry_over_reg_avg
+                    from     (select *
+                              from   cmsn_rep_detail_mv
+                              where  rep_id in (select employee_id 
+                                                from   cmsn_sales_hierarchy 
+                                                where  manager_id = {employeeId})
+                              and    monthly_pay_period_ind = 'N') c
+                           , (select {repStatusGroup} rep_status from dual) gen
+                    where    c.rep_status = gen.rep_status
+                    or       gen.rep_status = 'ALL'
+                   )
+          where    rep_cnt != 0
+          having   count(rep_id) > 0
+          group by period_year
+                 , period_num
+                 , start_date
+                 , end_date
+                 , payment_date
+                 , period_seq
+                 , period_ind
+                 , monthly_pay_period_ind
+                 , channel_code
+                 , channel_name
+                 , region_code
+                 , region_name
+                 , rep_status
+         ) t
+order by channel_code
+       , channel_name
+       , region_code
+       , region_name
+       , payment_date
+         )
+	]]></statement>
+	
+	<statement code="CMSN_DetailData_by_EmployeeId"><![CDATA[
+select   period_year
+       , period_num
+       , start_date
+       , end_date
+       , payment_date
+       , period_ind
+       , channel_code
+       , channel_name
+       , region_code
+       , region_name
+       , rep_id
+       , rep_name
+       , employee_status
+       , employee_status_display
+       , rep_status
+       , emp_inactive_date
+       , ncs_date
+       , office_code
+       , office_name
+       , branch_code
+       , branch_name
+       , cmsn_this_pp
+       , debit_carry_prev_pp
+       , debit_recovered
+       , debit_this_pp
+       , debit_carry_over
+       , cmsn_to_pay       
+       , manual_cmsn   
+       , cipp_debit_carried_forward
+       , cipp_previous_debit_balance
+       , total_debit 
+       , total_cmsn
+       , cmsn_to_pay_x_pp
+       , cmsn_to_pay_avg_x_pp
+       , cmsn_diff
+       , debit_diff
+       , error_cbpb_x_pp
+       , error_cbpb_avg_x_pp
+from     (select   t.*
+                 , (case {numPeriods}
+                       when 1 then cmsn_to_pay
+                       when 2 then cmsn_to_pay_2_pp
+                       when 6 then cmsn_to_pay_6_pp
+                       when 12 then cmsn_to_pay_12_pp
+                       when 24 then cmsn_to_pay_24_pp
+                       when 48 then cmsn_to_pay_48_pp
+                    end) cmsn_to_pay_x_pp
+                 , round(case {numPeriods}
+                       when 1 then cmsn_to_pay
+                       when 2 then cmsn_to_pay_2_pp/2
+                       when 6 then cmsn_to_pay_6_pp/6
+                       when 12 then cmsn_to_pay_12_pp/12
+                       when 24 then cmsn_to_pay_24_pp/24
+                       when 48 then cmsn_to_pay_48_pp/48
+                    end,2) cmsn_to_pay_avg_x_pp
+                 , (case {numPeriods}
+                   	   when 1 then (error_cbpb_amt)
+                       when 2 then (error_cbpb_2_pp)
+                       when 6 then (error_cbpb_6_pp)
+                       when 12 then (error_cbpb_12_pp)
+                       when 24 then (error_cbpb_24_pp)
+                       when 48 then (error_cbpb_48_pp)
+                    end) error_cbpb_x_pp
+                  , (case {numPeriods}
+                   	   when 1 then (error_cbpb_amt)
+                       when 2 then (error_cbpb_2_pp)/2
+                       when 6 then (error_cbpb_6_pp)/6
+                       when 12 then (error_cbpb_12_pp)/12
+                       when 24 then (error_cbpb_24_pp)/24
+                       when 48 then (error_cbpb_48_pp)/48
+                    end) error_cbpb_avg_x_pp
+          from     (select *
+                    from   cmsn_rep_smy_mv
+                    where  {employeeId} = 0
+                    or     rep_id in (select employee_id 
+                                      from   cmsn_sales_hierarchy 
+                                      where  manager_id = {employeeId})) t
+          where    period_ind = {periodInd}
+          and      rep_status_group = {repStatusGroup}
+          and      last_period_seq <= (decode(period_ind,'P',1,0) + {numPeriods} - 1)
+          and      monthly_pay_period_ind = 'N'
+         )
+order by cmsn_diff desc
+	]]></statement>
+	
+<statement code="CBPB_DetailsData"><![CDATA[
+ SELECT rep_id,
+         rep_name,
+         t.customer_id,
+         employee_status,
+         PI.PRODUCT_CODE || ' ' || TO_CHAR (PI.ISSUE_DATE, 'mm/yy')
+            product_issue,
+        (CASE
+           WHEN t.CANVASS_CODE IS NOT NULL
+           THEN
+                 CA.CANVASS_CODE
+              || ' '
+              || DECODE (
+            (CA.CANVASS_ISSUE_MNTH || '/' || CA.CANVASS_ISSUE_YEAR),
+            '/', ' ',
+            (lpad(CA.CANVASS_ISSUE_MNTH,2,'0') || '/' || substr(CA.CANVASS_ISSUE_YEAR,-2)))
+        END)
+            canvass_issue,
+         TO_CHAR (pp.end_date, 'mm/dd/yyyy') pay_period,
+         t.region_code region_code,
+         office_code,
+         t.branch_code,
+         t.channel_code,
+         sales_mngr_id,
+         manager_name,
+         nvl(cb_pb_amt,0) cb_pb_amt,
+         cb_pb_ind,
+         /*
+         CASE WHEN cb_pb_amt > 0 THEN cb_pb_amt ELSE 0 END payback,
+         CASE WHEN cb_pb_amt <= 0 THEN cb_pb_amt ELSE 0 END chargeback,
+         */
+         ch.channel_name,
+         br.BRANCH_NAME,
+         dd.decode_display REGION,
+         DE.DECODE_DISPLAY empstatus,
+         dci.customer_name,
+         segment_code
+    FROM cmsn_cbpb_mv t,
+         channel ch,
+         branches br,
+         domain_decodes dd,
+         product_issue pi,
+         canvass ca,
+         domain_decodes de,
+         denorm_cust_info dci,
+         (SELECT start_date,
+                 end_date,
+                 period_year,
+                 period_num,
+                 region_code
+            FROM pay_period) pp,
+         (SELECT emp_first_name || '  ' || employee_surname rep_name,
+                 office_code,
+                 employee_status,
+                 employee_id
+            FROM employee) emp,
+         (SELECT emp_first_name || '  ' || employee_surname manager_name,
+                 employee_id
+            FROM employee) mgr
+   WHERE       T.PRODUCT_CODE = PI.PRODUCT_CODE(+)
+         AND T.PRODUCT_ISSUE_NUM = PI.PRODUCT_ISSUE_NUM(+)
+         AND T.CANVASS_CODE = CA.CANVASS_CODE(+)
+         AND T.CANVASS_ISSUE_NUM = CA.CANVASS_ISSUE_NUM(+)
+         AND emp.employee_status = DE.CODE_VALUE(+)
+         AND DE.DOMAIN_CODE = 'EMPSTATUS'
+         AND t.rep_id = emp.employee_id(+)
+         AND t.sales_mngr_id = mgr.employee_id(+)
+         AND T.REGION_CODE = pp.region_code(+)
+         AND t.period_num= PP.PERIOD_NUM(+)
+         AND  t.period_year = pp.period_year(+)
+         AND t.channel_code = ch.channel_code(+)
+         AND t.BRANCH_CODE = BR.BRANCH_CODE(+)
+         AND t.region_code = DD.code_value(+)
+         AND DD.domain_code = 'REGIONCODE'
+         AND t.customer_id = dci.customer_id(+)
+         and ({repId} = 0                  or t.rep_id = {repId}) 
+         and ({regionCode} = 0             or t.region_code = {regionCode}) 
+         and ({channelCode} = 'emptyParam' or t.channel_code = {channelCode}) 
+         and ({canvassCode} = 'emptyParam' or t.canvass_code = {canvassCode}) 
+         and ({canvassIssueNum} = 0        or t.canvass_issue_num = {canvassIssueNum}) 
+         and ({productCode} = 'emptyParam' or t.product_code = {productCode}) 
+         and ({productIssueNum} = 0        or t.product_issue_num = {productIssueNum}) 
+         and ({cycleYear} = 'emptyParam'   or t.period_year = {cycleYear}) 
+         and ({customerId} = 0             or t.customer_id = {customerId})
+ORDER BY rep_id, customer_id
+]]></statement>
+
+<statement code="CBPB_ChartData"><![CDATA[
+ SELECT (CASE WHEN a.pay_period_month IS NULL THEN 0 ELSE error_cbpb END)
+            error_cbpb,
+       (CASE WHEN a.pay_period_month IS NULL THEN 0 ELSE abs(error_cbpb) END)
+            error_cbpb_col,
+         b.month,
+         b.mnthyr pay_period
+    FROM (  SELECT EXTRACT (MONTH FROM end_date) pay_period_month,
+                   TO_CHAR (end_date, 'MM') end_date,
+                   SUM (cb_pb_amt) error_cbpb,
+                   pp.period_year
+              FROM cmsn_cbpb_mv t, pay_period pp
+             WHERE     t.region_code = pp.region_code
+                   AND t.period_num = pp.period_num
+                   AND t.period_year = pp.period_year
+                   AND TO_CHAR(end_date , 'YYYY' ) = pp.period_year
+                   and ({repId} = 0                  or t.rep_id = {repId}) 
+                   and ({regionCode} = 0             or t.region_code = {regionCode}) 
+                   and ({channelCode} = 'emptyParam' or t.channel_code = {channelCode}) 
+                   and ({canvassCode} = 'emptyParam' or t.canvass_code = {canvassCode}) 
+                   and ({canvassIssueNum} = 0        or t.canvass_issue_num = {canvassIssueNum}) 
+                   and ({productCode} = 'emptyParam' or t.product_code = {productCode}) 
+                   and ({productIssueNum} = 0        or t.product_issue_num = {productIssueNum}) 
+                   and ({cycleYear} = 'emptyParam'   or t.period_year = {cycleYear}) 
+                   and ({customerId} = 0             or t.customer_id = {customerId})
+          GROUP BY EXTRACT (MONTH FROM end_date),
+                   TO_CHAR (end_date, 'MM'),
+                   pp.period_year) a,
+          (select to_char(add_months(trunc(to_date({cycleYear}, 'YYYY'), 'YYYY'), month-1), 'Mon-YY') mnthyr
+               , month
+          from   dual
+               , (select     level month
+                  from       dual
+                  connect by level <= 12)
+          ) b
+   WHERE b.month = pay_period_month(+)
+   ORDER BY b.month
+]]></statement>
+
+<statement code="CBPB_Channel_list"><![CDATA[
+select distinct(channel_code) channel_code from cmsn_cbpb_mv
+]]></statement>
+
+
+<statement code="Reject_CBPB_Summary"><![CDATA[
+SELECT exca.manually_handled_ind,
+       EXCA.REGION_CODE,
+       exca.ctap_online_oper_id,
+       exca.ctap_online_prog_dt,
+       exca.form_id,
+       exca.customer_id,
+       exca.customer_name,
+       (CASE
+           WHEN EXCA.CANVASS_CODE IS NOT NULL
+           THEN
+              CA.CANVASS_CODE || ' '
+              || DECODE (
+                    (CA.CANVASS_ISSUE_MNTH || '/' || CA.CANVASS_ISSUE_YEAR),
+                    '/', ' ',
+                    (lpad(CA.CANVASS_ISSUE_MNTH,2,'0') || '/' || substr(CA.CANVASS_ISSUE_YEAR,-2)))
+        END)
+          CANVASS,
+       (CASE
+           WHEN exca.PRODUCT_CODE IS NOT NULL
+           THEN
+              PI.PRODUCT_CODE || ' ' || TO_CHAR (PI.ISSUE_DATE, 'mm/yy')
+        END)
+          PRODUCT,
+       exca.channel_code,
+       exca.segment_code,
+       exca.assignment_id,
+       exca.adjustment_amt,
+       exca.reject_date,
+       exca.reject_reason,
+       exca.rep_id,
+       exca.CSO_EXT_VERSION,
+       exca.cb_pb_ind,
+       (CASE
+           WHEN rep_id IS NOT NULL
+           THEN
+              EXCA.EMP_FIRST_NAME || ' ' || EXCA.EMP_SURNAME
+        END)
+          rep_name,
+       CH.CHANNEL_NAME,
+       (CASE
+           WHEN CTAP_ONLINE_OPER_ID IS NOT NULL
+           THEN
+              e.EMP_FIRST_NAME || ' ' || E.EMPLOYEE_SURNAME
+        END)
+          handled_by,
+       dd.decode_display REGION
+  FROM CSO_CMSN_EXTRACT_CA exca,
+       channel ch,
+       product_issue pi,
+       domain_decodes dd,
+       canvass ca,
+       employee e
+ WHERE     CMSN_HANDLE_STATUS IN ('F', 'R', 'S')
+ 	   and exca.last_version_ind = 'Y'
+       AND EXCA.CHANNEL_CODE = CH.CHANNEL_CODE(+)
+       AND EXCA.PRODUCT_CODE = PI.PRODUCT_CODE(+)
+       AND EXCA.PRODUCT_ISSUE_NUM = PI.PRODUCT_ISSUE_NUM(+)
+       AND EXCA.CANVASS_CODE = CA.CANVASS_CODE(+)
+       AND EXCA.CANVASS_ISSUE_NUM = CA.CANVASS_ISSUE_NUM(+)
+       AND EXCA.CTAP_ONLINE_OPER_ID = E.EMPLOYEE_ID(+)
+       AND EXCA.region_code = DD.code_value(+)
+       AND DD.domain_code = 'REGIONCODE'
+       AND manually_handled_ind = {manuallyHandledInd}
+       AND ({regionCode} = 0 or EXCA.region_code = {regionCode})
+	]]></statement>
+
+	<statement code="Pending_CBPB_Summary"><![CDATA[
+SELECT EXCA.REGION_CODE,
+       EXCA.FORM_ID,
+       EXCA.EMP_STATUS,
+       EXCA.REP_ID,
+       (CASE
+           WHEN EXCA.REP_ID IS NOT NULL
+           THEN
+              EXCA.EMP_FIRST_NAME || ' ' || EXCA.EMP_SURNAME
+        END)
+          REP_NAME,
+       EXCA.ADJUSTMENT_AMT,
+       EXCA.GRACE_PERIOD_END_DATE,
+       EXCA.GRACE_PERIOD,
+       EXCA.CUSTOMER_ID,
+       EXCA.CUSTOMER_NAME,
+       (CASE
+           WHEN EXCA.PRODUCT_CODE IS NOT NULL
+           THEN
+              PI.PRODUCT_CODE || ' ' || TO_CHAR (PI.ISSUE_DATE, 'mm/yy')
+        END)
+          PRODUCT,
+         (CASE
+           WHEN EXCA.CANVASS_CODE IS NOT NULL
+           THEN
+                 CA.CANVASS_CODE
+              || ' '
+              || DECODE (
+            (CA.CANVASS_ISSUE_MNTH || '/' || CA.CANVASS_ISSUE_YEAR),
+            '/', ' ',
+            (lpad(CA.CANVASS_ISSUE_MNTH,2,'0') || '/' || substr(CA.CANVASS_ISSUE_YEAR,-2)))
+        END)
+          CANVASS,
+       EXCA.CHANNEL_CODE,
+       EXCA.OFFICE_CODE,
+       EXCA.BRANCH_CODE,
+       EXCA.SEGMENT_CODE,
+       EXCA.MANGER_EMP_ID,
+       (CASE
+           WHEN EXCA.MANGER_EMP_ID IS NOT NULL
+           THEN
+              EXCA.MANGER_FIRST_NAME || ' ' || EXCA.MANGER_SURNAME
+        END)
+          MANAGER_NAME,
+       EXCA.OVERRIDDEN_REP_IND,
+       EXCA.RESPONSIBILITY,
+       EXCA.ASQ_CATEGORY,
+       EXCA.ERROR_TYPE,
+       EXCA.ERROR_SUB_TYPE,
+       EXCA.ERROR_REASON,
+       EXCA.DATE_ERROR_SOURCED,
+       EXCA.ADJUSTMENT_AMT,
+       EXCA.CB_PB_IND,
+       asq.ASQ_CATEGORY_DESC,
+       asq.ERROR_SUB_TYPE_DESC,
+       asq.ERROR_TYPE_DESC,
+       BRANCH_NAME,
+       dd.decode_display REGION,
+       de.decode_display EMPSTATUS,
+       ch.channel_name,
+       RG.RESP_DESC,
+       OFC.OFFICE_NAME
+  FROM CSO_CMSN_EXTRACT_CA exca,
+       ASQ_RESPONSIBILITY asq,
+       branches br,
+       domain_decodes dd,
+       domain_decodes de,
+       channel ch,
+       product_issue pi,
+       canvass ca,
+       RESPONSIBILITY_GROUPING rg,
+       office ofc,
+       employee e
+ WHERE     EXCA.CMSN_HANDLE_STATUS IN ('N')
+ 	   and exca.last_version_ind = 'Y'
+       AND EXCA.ASQ_CATEGORY = asq.ASQ_CATEGORY(+)
+       AND EXCA.ERROR_TYPE = asq.ERROR_TYPE(+)
+       AND EXCA.ERROR_SUB_TYPE = asq.ERROR_SUB_TYPE(+)
+       AND EXCA.BRANCH_CODE = BR.BRANCH_CODE(+)
+       AND EXCA.region_code = DD.code_value(+)
+       AND DD.domain_code = 'REGIONCODE'
+       AND EXCA.EMP_STATUS = De.CODE_VALUE(+)
+       AND DE.DOMAIN_CODE = 'EMPSTATUS'
+       AND EXCA.CHANNEL_CODE = CH.CHANNEL_CODE(+)
+       AND EXCA.PRODUCT_CODE = PI.PRODUCT_CODE(+)
+       AND EXCA.PRODUCT_ISSUE_NUM = PI.PRODUCT_ISSUE_NUM(+)
+       AND EXCA.CANVASS_CODE = CA.CANVASS_CODE(+)
+       AND EXCA.CANVASS_ISSUE_NUM = CA.CANVASS_ISSUE_NUM(+)
+       AND EXCA.RESPONSIBILITY = RG.RESPONSIBLITY(+)
+       AND exca.office_code = e.OFFICE_CODE(+)
+       and exca.rep_id = e.employee_id(+)
+       AND e.OFFICE_TYPE = ofc.OFFICE_TYPE(+)
+       and e.OFFICE_CODE = ofc.OFFICE_CODE(+)
+       and ({regionCode} = 0             or EXCA.region_code = {regionCode}) 
+       and ({channelCode} = 'emptyParam' or EXCA.channel_code = {channelCode}) 
+       and ({canvassCode} = 'emptyParam' or EXCA.canvass_code = {canvassCode}) 
+       and ({canvassIssueNum} = 0        or EXCA.canvass_issue_num = {canvassIssueNum}) 
+       and ({productCode} = 'emptyParam' or EXCA.product_code = {productCode}) 
+       and ({productIssueNum} = 0        or EXCA.product_issue_num = {productIssueNum}) 
+       and ({repId} = 0                  or EXCA.rep_id = {repId}) 
+       and ({customerId} = 0             or EXCA.customer_id = {customerId})
+	]]></statement>
+	
+	<statement code="Pending_Chart_Summary"><![CDATA[
+	SELECT EAX.grace_group,
+       max_dt,
+       min_dt,
+       EAX.DATA_POINT_RANGE_DISP grace,
+       nvl(SUM_ADJUSTMENT_AMT,0) ADJUSTMENT_AMT,
+       nvl(charge_back,0) charge_back,
+       nvl(pay_back,0) pay_back
+FROM(select
+       level grace_group, 
+       5*(level - 1)+1||decode (level, 6, '+','-'||5*level) DATA_POINT_RANGE_DISP
+     from dual connect by level <= 6) EAX,
+    (SELECT 
+       LEAST(6, GREATEST (1, CEIL(TRUNC(GRACE_PERIOD_END_DATE - TRUNC(logical_date))/5))) grace_group,
+       MAX (GRACE_PERIOD_END_DATE) max_dt,
+       MIN (GRACE_PERIOD_END_DATE) min_dt,
+       SUM (ADJUSTMENT_AMT) SUM_ADJUSTMENT_AMT,
+       SUM (CASE WHEN CB_PB_IND = 'CB' THEN ABS (ADJUSTMENT_AMT) ELSE 0 END) charge_back,
+       SUM (CASE WHEN CB_PB_IND = 'PB' THEN ABS (ADJUSTMENT_AMT) ELSE 0 END) pay_back
+     FROM CSO_CMSN_EXTRACT_CA, (select logical_date from op_logical_date where logical_date_name='Online')
+     WHERE 
+       		CMSN_HANDLE_STATUS = 'N'
+       	and last_version_ind = 'Y'
+        and ({regionCode} = 0             or region_code = {regionCode}) 
+        and ({repId} = 0                  or rep_id = {repId}) 
+        and ({channelCode} = 'emptyParam' or channel_code = {channelCode}) 
+        and ({canvassCode} = 'emptyParam' or canvass_code = {canvassCode}) 
+        and ({canvassIssueNum} = 0        or canvass_issue_num = {canvassIssueNum}) 
+        and ({productCode} = 'emptyParam' or product_code = {productCode}) 
+        and ({productIssueNum} = 0        or product_issue_num = {productIssueNum}) 
+        and ({customerId} = 0             or customer_id = {customerId})
+     GROUP BY LEAST(6, GREATEST (1, CEIL(TRUNC(GRACE_PERIOD_END_DATE - TRUNC(logical_date))/5)))
+    ) EXCA
+WHERE eax.grace_group = exca.grace_group(+)
+ORDER BY EAX.grace_group
+]]></statement>
+
+</sql>

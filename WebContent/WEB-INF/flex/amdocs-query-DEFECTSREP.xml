@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+<sql type="CdwSQL">
+<statement code="DEFECTS_DETAIL">
+<![CDATA[
+SELECT DEFECT_ID,
+       STATUS,
+       AUTH_TYPE,
+       AUTH_DATE,
+       AUTH_BY,
+       AUTH_AREA,
+       IT_BA_OWNER,
+       AMDOCS_BA_OWNER,
+       DEFECT_SOURCE,
+       SEVERITY,
+       PLANNED_CLOSING_VERSION,
+       REMEDY_TICKET,
+       CHANGE_CALL_NUMBER,
+       DET_ON_DATE,
+       DET_IN_VERSION,
+       BUSINESS_AREA,
+       SUMMARY,
+       DESCRIPTION,
+       RESPONSIBLE_APPLICATION,
+       RESPONSIBLE_SUB_APP,
+       BUS_VALIDATED,
+       VALIDATION_TYPE,
+       BUS_IMPACTS,
+       AFFECTED_USERS,
+       WORK_MODE,
+       INCLUDE_IN_ADVISOR,
+       ADVISOR_RESOLUTION,
+       DEFECT_TYPE,
+       REGION,
+       ST_UAT_QC_DEFECT,
+       CLOSING_DATE,
+       PRIORITY,
+       AMDOCS_ASSIGN_TO,
+       PLANNED_DEPLOYED_DATE,
+       CLOSING_VERSION
+    FROM prod_defects 
+ORDER BY DEFECT_ID DESC
+]]></statement>
+
+<statement code="DEFECTS_DETAIL2">
+<![CDATA[
+SELECT DEFECT_ID,
+       STATUS,
+       AUTH_TYPE,
+       to_char(AUTH_DATE,'MM/DD/YYYY') AUTH_DATE,
+       AUTH_BY,
+       AUTH_AREA,
+       IT_BA_OWNER,
+       AMDOCS_BA_OWNER,
+       DEFECT_SOURCE,
+       SEVERITY,
+       PLANNED_CLOSING_VERSION,
+       REMEDY_TICKET,
+       CHANGE_CALL_NUMBER,
+       to_char(DET_ON_DATE,'MM/DD/YYYY') DET_ON_DATE,
+       DET_IN_VERSION,
+       BUSINESS_AREA,
+       SUMMARY,
+       DESCRIPTION,
+       RESPONSIBLE_APPLICATION,
+       RESPONSIBLE_SUB_APP,
+       BUS_VALIDATED,
+       VALIDATION_TYPE,
+       BUS_IMPACTS,
+       AFFECTED_USERS,
+       WORK_MODE,
+       INCLUDE_IN_ADVISOR,
+       ADVISOR_RESOLUTION,
+       DEFECT_TYPE,
+       REGION,
+       ST_UAT_QC_DEFECT,
+       to_char(CLOSING_DATE,'MM/DD/YYYY') CLOSING_DATE,
+       PRIORITY,
+       AMDOCS_ASSIGN_TO,
+       to_char(PLANNED_DEPLOYED_DATE,'MM/DD/YYYY') PLANNED_DEPLOYED_DATE,
+       CLOSING_VERSION
+    FROM prod_defects 
+ORDER BY DEFECT_ID DESC
+]]></statement>
+</sql>
+

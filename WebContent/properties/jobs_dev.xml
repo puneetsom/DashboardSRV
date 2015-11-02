@@ -1,0 +1,482 @@
+<?xml version='1.0' encoding='utf-8'?>
+<quartz xmlns="http://www.opensymphony.com/quartz/JobSchedulingData"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.opensymphony.com/quartz/JobSchedulingData
+  http://www.opensymphony.com/quartz/xml/job_scheduling_data_1_5.xsd"
+  version="1.5">
+  <calendar class-name="org.quartz.impl.calendar.HolidayCalendar" replace="true">
+    <name>holidayCalendar</name>
+    <description>HolidayCalendar</description>
+    <base-calendar class-name="org.quartz.impl.calendar.WeeklyCalendar">
+      <name>weeklyCalendar</name>
+      <description>WeeklyCalendar</description>
+      <base-calendar class-name="org.quartz.impl.calendar.AnnualCalendar">
+        <name>annualCalendar</name>
+        <description>AnnualCalendar</description>
+      </base-calendar>
+    </base-calendar>
+  </calendar>
+
+  <!-- ******************** AMSS Registrations Job ********************
+  <job>
+    <job-detail>
+      <name>amssRegistrations</name>
+      <group>amssDashboardJobs</group>
+      <description>Self Service Dashboard Job - AMSS Registrations</description>
+      <job-class>com.amdocs.dashboard.kpi.amss.AmssRegistrations</job-class>
+      <volatility>false</volatility>
+      <durability>false</durability>
+      <recover>false</recover>
+      <job-data-map>
+        <entry>
+          <key>summaryOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Summary\amss-registrations.xml</value>
+        </entry>
+        <entry>
+          <key>detailOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Details\amss-registration-details.xml</value>
+        </entry>
+        <entry>
+          <key>regions</key>
+          <value>S,M,W,B,O</value>
+        </entry>
+        <entry><key>targets</key><value>true</value></entry>
+        <entry><key>targetAR</key><value>6791</value></entry>
+        <entry><key>targetAZ</key><value>489</value></entry>
+        <entry><key>targetCT</key><value>9368</value></entry>
+        <entry><key>targetKS</key><value>6595</value></entry>
+        <entry><key>targetMO</key><value>11480</value></entry>
+        <entry><key>targetOK</key><value>8122</value></entry>
+        <entry><key>targetTX</key><value>32155</value></entry>
+        <entry><key>targetIL</key><value>99</value></entry>
+        <entry><key>targetIN</key><value>7667</value></entry>
+        <entry><key>targetMI</key><value>18517</value></entry>
+        <entry><key>targetOH</key><value>15937</value></entry>
+        <entry><key>targetWI</key><value>11780</value></entry>
+        <entry><key>targetCA</key><value>58137</value></entry>
+        <entry><key>targetNV</key><value>1863</value></entry>
+        <entry><key>targetAL</key><value>8085</value></entry>
+        <entry><key>targetFL</key><value>30897</value></entry>
+        <entry><key>targetGA</key><value>18430</value></entry>
+        <entry><key>targetKY</key><value>6413</value></entry>
+        <entry><key>targetLA</key><value>9973</value></entry>
+        <entry><key>targetMS</key><value>5557</value></entry>
+        <entry><key>targetNC</key><value>12520</value></entry>
+        <entry><key>targetSC</key><value>6883</value></entry>
+        <entry><key>targetTN</key><value>12242</value></entry>
+        <entry><key>targetANON</key><value>18000</value></entry>
+      </job-data-map>
+    </job-detail>
+    <trigger>
+      <cron>
+        <name>amssTrigger1</name>
+        <group>amssDashboardTriggers</group>
+        <description>Self Service Dashboard Trigger - AMSS Registrations</description>
+        <job-name>amssRegistrations</job-name>
+        <job-group>amssDashboardJobs</job-group>
+        <cron-expression>0 30 23 * * ?</cron-expression>
+      </cron>
+    </trigger>
+  </job>
+  -->
+
+  
+  <!-- ******************** AMSS eProof Subscribers Job ********************
+  <job>
+    <job-detail>
+      <name>amssEProofSubscribers</name>
+      <group>amssDashboardJobs</group>
+      <description>Self Service Dashboard Job - eProof Subscribers</description>
+      <job-class>com.amdocs.dashboard.kpi.amss.AmssEProofSubscribers</job-class>
+      <volatility>false</volatility>
+      <durability>false</durability>
+      <recover>false</recover>
+      <job-data-map>
+        <entry>
+          <key>summaryOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Summary\amss-eproof-sub.xml</value>
+        </entry>
+        <entry>
+          <key>detailOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Details\amss-eproof-sub-details.xml</value>
+        </entry>
+        <entry>
+          <key>regions</key>
+          <value>S,M,W,B</value>
+        </entry>
+        <entry><key>targets</key><value>true</value></entry>
+        <entry><key>targetAR</key><value>4414</value></entry>
+        <entry><key>targetAZ</key><value>318</value></entry>
+        <entry><key>targetCT</key><value>6089</value></entry>
+        <entry><key>targetKS</key><value>4287</value></entry>
+        <entry><key>targetMO</key><value>7462</value></entry>
+        <entry><key>targetOK</key><value>5279</value></entry>
+        <entry><key>targetTX</key><value>20901</value></entry>
+        <entry><key>targetIL</key><value>65</value></entry>
+        <entry><key>targetIN</key><value>4989</value></entry>
+        <entry><key>targetMI</key><value>12050</value></entry>
+        <entry><key>targetOH</key><value>10370</value></entry>
+        <entry><key>targetWI</key><value>7665</value></entry>
+        <entry><key>targetCA</key><value>37827</value></entry>
+        <entry><key>targetNV</key><value>1212</value></entry>
+        <entry><key>targetAL</key><value>5250</value></entry>
+        <entry><key>targetFL</key><value>20062</value></entry>
+        <entry><key>targetGA</key><value>11966</value></entry>
+        <entry><key>targetKY</key><value>4164</value></entry>
+        <entry><key>targetLA</key><value>6475</value></entry>
+        <entry><key>targetMS</key><value>3608</value></entry>
+        <entry><key>targetNC</key><value>8129</value></entry>
+        <entry><key>targetSC</key><value>4469</value></entry>
+        <entry><key>targetTN</key><value>7949</value></entry>
+        <entry><key>targetANON</key><value>0</value></entry>
+      </job-data-map>
+    </job-detail>
+    <trigger>
+      <cron>
+        <name>amssTrigger2</name>
+        <group>amssDashboardTriggers</group>
+        <description>Self Service Dashboard Trigger - AMSS eProof Subscribers</description>
+        <job-name>amssEProofSubscribers</job-name>
+        <job-group>amssDashboardJobs</job-group>
+        <cron-expression>0 30 23 * * ?</cron-expression>
+      </cron>
+    </trigger>
+  </job>
+  -->
+
+
+  <!-- ******************** AMSS eBill Subscribers Job ********************
+  <job>
+    <job-detail>
+      <name>amssEBillSubscribers</name>
+      <group>amssDashboardJobs</group>
+      <description>Self Service Dashboard Job - eBill Subscribers</description>
+      <job-class>com.amdocs.dashboard.kpi.amss.AmssEBillSubscribers</job-class>
+      <volatility>false</volatility>
+      <durability>false</durability>
+      <recover>false</recover>
+      <job-data-map>
+        <entry>
+          <key>summaryOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Summary\amss-ebill-sub.xml</value>
+        </entry>
+        <entry>
+          <key>detailOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Details\amss-ebill-sub-details.xml</value>
+        </entry>
+        <entry>
+          <key>regions</key>
+          <value>S,M,W,B</value>
+        </entry>
+        <entry><key>targets</key><value>true</value></entry>
+        <entry><key>targetAR</key><value>4075</value></entry>
+        <entry><key>targetAZ</key><value>294</value></entry>
+        <entry><key>targetCT</key><value>5621</value></entry>
+        <entry><key>targetKS</key><value>3957</value></entry>
+        <entry><key>targetMO</key><value>6888</value></entry>
+        <entry><key>targetOK</key><value>4873</value></entry>
+        <entry><key>targetTX</key><value>19293</value></entry>
+        <entry><key>targetIL</key><value>60</value></entry>
+        <entry><key>targetIN</key><value>4605</value></entry>
+        <entry><key>targetMI</key><value>11123</value></entry>
+        <entry><key>targetOH</key><value>9573</value></entry>
+        <entry><key>targetWI</key><value>7075</value></entry>
+        <entry><key>targetCA</key><value>34917</value></entry>
+        <entry><key>targetNV</key><value>1119</value></entry>
+        <entry><key>targetAL</key><value>4846</value></entry>
+        <entry><key>targetFL</key><value>18518</value></entry>
+        <entry><key>targetGA</key><value>11046</value></entry>
+        <entry><key>targetKY</key><value>3844</value></entry>
+        <entry><key>targetLA</key><value>5977</value></entry>
+        <entry><key>targetMS</key><value>3330</value></entry>
+        <entry><key>targetNC</key><value>7504</value></entry>
+        <entry><key>targetSC</key><value>4125</value></entry>
+        <entry><key>targetTN</key><value>7337</value></entry>
+        <entry><key>targetANON</key><value>0</value></entry>
+      </job-data-map>
+    </job-detail>
+    <trigger>
+      <cron>
+        <name>amssTrigger3</name>
+        <group>amssDashboardTriggers</group>
+        <description>Self Service Dashboard Trigger - AMSS eBill Subscribers</description>
+        <job-name>amssEBillSubscribers</job-name>
+        <job-group>amssDashboardJobs</job-group>
+        <cron-expression>0 30 23 * * ?</cron-expression>
+      </cron>
+    </trigger>
+  </job>
+  -->
+
+  
+  <!-- ******************** AMSS Logins Job ********************
+  <job>
+    <job-detail>
+      <name>amssLogins</name>
+      <group>amssDashboardJobs</group>
+      <description>Self Service Dashboard Job - AMSS Logins</description>
+      <job-class>com.amdocs.dashboard.kpi.amss.AmssLogins</job-class>
+      <volatility>false</volatility>
+      <durability>false</durability>
+      <recover>false</recover>
+      <job-data-map>
+        <entry>
+          <key>summaryOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Summary\amss-logins.xml</value>
+        </entry>
+        <entry>
+          <key>detailOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Details\amss-login-details.xml</value>
+        </entry>
+        <entry>
+          <key>regions</key>
+          <value>S,M,W,B,O</value>
+        </entry>
+        <entry><key>targets</key><value>true</value></entry>
+        <entry><key>targetAR</key><value>128</value></entry>
+        <entry><key>targetAZ</key><value>9</value></entry>
+        <entry><key>targetCT</key><value>177</value></entry>
+        <entry><key>targetKS</key><value>124</value></entry>
+        <entry><key>targetMO</key><value>217</value></entry>
+        <entry><key>targetOK</key><value>153</value></entry>
+        <entry><key>targetTX</key><value>607</value></entry>
+        <entry><key>targetIL</key><value>2</value></entry>
+        <entry><key>targetIN</key><value>145</value></entry>
+        <entry><key>targetMI</key><value>349</value></entry>
+        <entry><key>targetOH</key><value>301</value></entry>
+        <entry><key>targetWI</key><value>222</value></entry>
+        <entry><key>targetCA</key><value>1097</value></entry>
+        <entry><key>targetNV</key><value>35</value></entry>
+        <entry><key>targetAL</key><value>153</value></entry>
+        <entry><key>targetFL</key><value>583</value></entry>
+        <entry><key>targetGA</key><value>348</value></entry>
+        <entry><key>targetKY</key><value>121</value></entry>
+        <entry><key>targetLA</key><value>188</value></entry>
+        <entry><key>targetMS</key><value>105</value></entry>
+        <entry><key>targetNC</key><value>236</value></entry>
+        <entry><key>targetSC</key><value>130</value></entry>
+        <entry><key>targetTN</key><value>230</value></entry>
+        <entry><key>targetANON</key><value>340</value></entry>
+      </job-data-map>
+    </job-detail>
+    <trigger>
+      <cron>
+        <name>amssTrigger4</name>
+        <group>amssDashboardTriggers</group>
+        <description>Self Service Dashboard Trigger - AMSS Logins</description>
+        <job-name>amssLogins</job-name>
+        <job-group>amssDashboardJobs</job-group>
+        <cron-expression>0 30 23 * * ?</cron-expression>
+      </cron>
+    </trigger>
+  </job>
+  -->
+
+
+  <!-- ******************** AMSS Payments Job ********************
+  <job>
+    <job-detail>
+      <name>amssPayments</name>
+      <group>amssDashboardJobs</group>
+      <description>Self Service Dashboard Job - AMSS Payments</description>
+      <job-class>com.amdocs.dashboard.kpi.amss.AmssPayments</job-class>
+      <volatility>false</volatility>
+      <durability>false</durability>
+      <recover>false</recover>
+      <job-data-map>
+        <entry>
+          <key>summaryOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Summary\amss-payments.xml</value>
+        </entry>
+        <entry>
+          <key>detailOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Details\amss-payment-details.xml</value>
+        </entry>
+        <entry>
+          <key>regions</key>
+          <value>S,M,W,B</value>
+        </entry>
+      </job-data-map>
+    </job-detail>
+    <trigger>
+      <cron>
+        <name>amssTrigger5</name>
+        <group>amssDashboardTriggers</group>
+        <description>Self Service Dashboard Trigger - AMSS Payments</description>
+        <job-name>amssPayments</job-name>
+        <job-group>amssDashboardJobs</job-group>
+        <cron-expression>0 0 18 * * ?</cron-expression>
+      </cron>
+    </trigger>
+  </job>
+  -->
+
+
+  <!-- ******************** AMSS Profile Updates Job ********************
+  <job>
+    <job-detail>
+      <name>amssProfileUpdates</name>
+      <group>amssDashboardJobs</group>
+      <description>Self Service Dashboard Job - AMSS Profile Updates</description>
+      <job-class>com.amdocs.dashboard.kpi.amss.AmssProfileUpdates</job-class>
+      <volatility>false</volatility>
+      <durability>false</durability>
+      <recover>false</recover>
+      <job-data-map>
+        <entry>
+          <key>summaryOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Summary\amss-profile-updates.xml</value>
+        </entry>
+        <entry>
+          <key>detailOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Details\amss-profile-update-details.xml</value>
+        </entry>
+        <entry>
+          <key>regions</key>
+          <value>S,M,W,B,O</value>
+        </entry>
+      </job-data-map>
+    </job-detail>
+    <trigger>
+      <cron>
+        <name>amssTrigger6</name>
+        <group>amssDashboardTriggers</group>
+        <description>Self Service Dashboard Trigger - AMSS Profile Updates</description>
+        <job-name>amssProfileUpdates</job-name>
+        <job-group>amssDashboardJobs</job-group>
+        <cron-expression>0 30 23 * * ?</cron-expression>
+      </cron>
+    </trigger>
+  </job>
+  -->
+
+
+  <!-- ******************** AMSS Impersonations Job ********************
+  <job>
+    <job-detail>
+      <name>amssImpersonations</name>
+      <group>amssDashboardJobs</group>
+      <description>Self Service Dashboard Job - AMSS Impersonations</description>
+      <job-class>com.amdocs.dashboard.kpi.amss.AmssImpersonations</job-class>
+      <volatility>false</volatility>
+      <durability>false</durability>
+      <recover>false</recover>
+      <job-data-map>
+        <entry>
+          <key>summaryOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Summary\amss-impersonations.xml</value>
+        </entry>
+        <entry>
+          <key>detailOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\SelfService\Details\amss-impersonation-details.xml</value>
+        </entry>
+      </job-data-map>
+    </job-detail>
+    <trigger>
+      <cron>
+        <name>amssTrigger7</name>
+        <group>amssDashboardTriggers</group>
+        <description>Self Service Dashboard Trigger - AMSS Impersonations</description>
+        <job-name>amssImpersonations</job-name>
+        <job-group>amssDashboardJobs</job-group>
+        <cron-expression>0 30 23 * * ?</cron-expression>
+      </cron>
+    </trigger>
+  </job>
+  -->
+
+
+  <!--  ********** Service Manager Jobs ********** -->
+<!--   
+       TODO: There's a problem with the Contracts job.
+       
+       The details file, Contracts-details.xml, has a problem with the UTF-8 encoding.
+       
+       For some reason, the file isn't encoded properly.
+       
+       I manually encoded the Contracts-details.xml file that's currently in the test environment.
+       
+       Matt - Apr 2, 2010  
+
+
+  <job>
+    <job-detail>
+      <name>the10bContracts</name>
+      <group>the10bDashboardJobs</group>
+      <description>Dashboard Job - Contracts Jobs</description>
+      <job-class>com.amdocs.dashboard.kpi.the10b.Contracts</job-class>
+      <volatility>false</volatility>
+      <durability>false</durability>
+      <recover>false</recover>
+      <job-data-map>
+        <entry>
+          <key>summaryOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Summary\Contracts.xml</value>
+        </entry>
+        <entry>
+          <key>summaryTotalOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Summary\ContractsTotal.xml</value>
+        </entry>
+        <entry>
+          <key>detailOutputFile</key>
+          <value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Details\Contracts-details.xml</value>
+        </entry>
+        <entry>
+          <key>regions</key>
+          <value>S,M,W,B</value>
+        </entry>
+      </job-data-map>
+    </job-detail>
+    <trigger>
+      <cron>
+        <name>the10bTrigger1</name>
+        <group>the10bDashboardTriggers</group>
+        <job-name>the10bContracts</job-name>
+        <job-group>the10bDashboardJobs</job-group>
+        <cron-expression>0 30 23 * * ?</cron-expression>
+      </cron>
+    </trigger>
+  </job>
+
+  <job>
+    <job-detail>
+      <name>the10bItems</name>
+      <group>the10bDashboardJobs</group>
+      <description>Dashboard Job - Load Item Info Job</description>
+      <job-class>com.amdocs.dashboard.kpi.the10b.Items</job-class>
+      <volatility>false</volatility>
+      <durability>false</durability>
+      <recover>false</recover>
+      <job-data-map>
+        <entry><key>summaryOutputFile</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Summary\CompletedItems.xml</value></entry>
+        <entry><key>summaryTotalOutputFile</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Summary\CompletedItemsTotal.xml</value></entry>
+        <entry><key>detailOutputFile</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Details\CompletedItems-details.xml</value></entry>
+
+        <entry><key>summaryOutputFilePendingItems</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Summary\PendingItems.xml</value></entry>
+        <entry><key>summaryTotalOutputFilePendingItems</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Summary\PendingItemsTotal.xml</value></entry>
+        <entry><key>detailOutputFilePendingItems</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Details\PendingItems-details.xml</value></entry>
+
+        <entry><key>summaryOutputFileInProgressItems</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Summary\InProgressItems.xml</value></entry>
+        <entry><key>summaryTotalOutputFileInProgressItems</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Summary\InProgressItemsTotal.xml</value></entry>
+        <entry><key>detailOutputFileInProgressItems</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Details\InProgressItems-details.xml</value></entry>
+
+        <entry><key>summaryOutputFileQueryItems</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Summary\QueryItems.xml</value></entry>
+        <entry><key>summaryTotalOutputFileQueryItems</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Summary\QueryItemsTotal.xml</value></entry>
+        <entry><key>detailOutputFileQueryItems</key><value>D:\Amdocs\Test-Server-8080\webapps\data\ServiceManager\Details\QueryItems-details.xml</value></entry>
+
+        <entry><key>regions</key><value>S</value></entry>
+      </job-data-map>
+    </job-detail>
+    <trigger>
+      <simple>
+        <name>the10bTrigger2</name>
+        <group>the10bDashboardTriggers</group>
+        <job-name>the10bItems</job-name>
+        <job-group>the10bDashboardJobs</job-group>
+      </simple>
+    </trigger>
+  </job>
+ -->
+
+
+</quartz>

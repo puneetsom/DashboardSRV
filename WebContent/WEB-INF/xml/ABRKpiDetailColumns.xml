@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomDataGrid xmlns="http://amdocs.com/flex/dashboard/customDataGrid/CustomDataGrid" 
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                xsi:schemaLocation="http://amdocs.com/flex/dashboard/customDataGrid/CustomDataGrid ../xsd/CustomDataGrid.xsd"
+                lockedColumnCount="1"
+                title="Details"
+                version="1">
+  
+  <Column id="dummy" dataField="dummy" headerLabel="N/A" visible="true" />
+  
+</CustomDataGrid>

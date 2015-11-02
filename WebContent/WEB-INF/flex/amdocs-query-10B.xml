@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+<sql type="CdwSQL">
+	<statement code="D10BMarketQuery" clientObject="10B">
+		select distinct market_id value , market_name label from market_name_ca order by 2
+	</statement>
+	
+	<statement code="D10BProductQuery" clientObject="10B">
+select ' ALL' label , ' ALL' value from dual union all
+select p.product_name label , m.product_code value    
+from market_ca m, all_prod_issue p                   
+where m.product_code = p.product_code
+and m.market_id = {market}              
+and p.bots_issue_ind = 'Y'                          
+	</statement>
+	
+	<statement code="D10BMediaMgrQuery" clientObject="10B">
+ select media_mgr_id value, max(media_mgr_surname|| ', ' || media_mgr_first_nm) label,
+max(media_mgr_surname) media_mgr_surname
+from d10b_acct_detail_smy_ca
+WHERE  MARKET_ID =  {market}                                                                      
+AND ( 'emptyParam' = {product}                                                                   
+or PRODUCT_CODE =  {product}  or {product} = ' ALL')   
+group by media_mgr_id
+order by 3                             
+	</statement>
+	
+	<statement code="D10BVerticalSegmentQuery" clientObject="10B">
+select vertical_name label, vertical_id value from vertical_name_ca union all select ' ALL',0 from dual 
+order by 1
+	</statement>
+	
+	<statement code="D10BAccntSmyGridQuery" clientObject="10B">
+SELECT                                                                                               
+A.MARKET_NAME MARKET,
+A.PRODUCT_NAME PRODUCT_NAME,                                                                                
+A.CHANNEL_CODE CHANNEL,                                                                              
+A.MEDIA_MGR_ID || ' - ' ||  TRIM(A.MEDIA_MGR_FIRST_NM )|| ' ' || TRIM(A.MEDIA_MGR_SURNAME) MEDIA_MGR,
+A.CUSTOMER_ID CUSTOMER_ID,                                                                           
+A.CUSTOMER_NAME CUSTOMER_NAME,                                                                       
+A.VERTICAL_NAME SEGMENT,                                                                             
+A.TOT_NISD_AMT TOT_NISD_AMT,                                                                         
+A.PRINT_REV_AMT PRINT_REV_AMT,                                                                       
+A.IYP_REV_AMT IYP_REV_AMT,                                                                           
+A.PREV_TOT_NISD_AMT PREV_TOT_NISD_AMT,                                                               
+A.PREV_PRINT_REV_AMT PREV_PRINT_REV_AMT,                                                             
+A.PREV_IYP_REV_AMT PREV_IYP_REV_AMT,                                                                 
+A.ALL_NISD_AMT ALL_NISD_AMT,                                                                         
+A.ALL_PRINT_NISD_AMT ALL_PRINT_NISD_AMT,                                                             
+A.ALL_IYP_NISD_AMT ALL_IYP_NISD_AMT,                                                                 
+A.ALL_PREV_NISD_AMT ALL_PREV_NISD_AMT,                                                               
+A.ALL_PREV_PRINT_AMT ALL_PREV_PRINT_AMT,                                                             
+A.ALL_PREV_IYP_AMT ALL_PREV_IYP_AMT                                                                  
+FROM                                                                                                 
+D10B_ACCT_DETAIL_SMY_CA A                                                                            
+WHERE ( 'emptyParam' = {market}                                                                    
+or A.MARKET_ID =  {market} )                                                                       
+AND ( 'emptyParam' = {product}                                                                   
+or A.PRODUCT_CODE =  {product}  or {product} = ' ALL')                                                                 
+AND ( 'emptyParam' = {mediaMgr}                                                                    
+or A.MEDIA_MGR_ID =  {mediaMgr} )                                                                  
+AND( 0  = {verticalSegment}                                                                     
+or A.VERTICAL_ID = {verticalSegment} )                                                                
+ORDER BY                                                                                             
+MARKET,                                                                                              
+CHANNEL,                                                                                             
+MEDIA_MGR,                                                                                           
+CUSTOMER_ID        
+</statement>
+
+<statement code="D10BTrckSmyGridQuery" clientObject="10B">
+SELECT
+A.CUSTOMER_ID CUSTOMER_ID,
+A.CUSTOMER_NAME CUSTOMER_NAME,
+mn.market_name market_name,
+A.VERTICAL_NAME VERTICAL_NAME,
+a.product_code product_code,
+a.product_name product_name,
+A.MEDIA_MGR_ID|| ' - ' || MEDIA_MGR_FIRST_NM || ' ' || MEDIA_MGR_SURNAME MEDIA_MGR,
+A.AIN_PROGRAM_ID || ' / ' || AIN_PROGRAM_AGE AIN_PROGRAM,
+A.AIN_PROGRAM_ID ain_program_id,
+AIN_PROGRAM_AGE ain_program_age,
+A.PROGRAM_TYPE PROGRAM_TYPE,
+A.GAP_IND GAP_IND,
+A.GUARANTEE_NUM_CALLS GUARANTEE_NUM_CALLS,
+A.NUM_CLICKS NUM_CLICKS,
+A.NUM_IMPRESSIONS NUM_IMPRESSIONS,
+A.ROI ROI,
+A.ROI_SOURCE ROI_SOURCE,
+A.NUM_YP_CALLS NUM_YP_CALLS,
+A.NUM_WP_CALLS NUM_WP_CALLS,
+A.NUM_IYP_CALLS NUM_IYP_CALLS,
+A.TOTAL_CALLS TOTAL_CALLS,
+A.PCT_CALLS_BUSINESS PCT_CALLS_BUSINESS,
+A.NUM_POTENTIAL_CALLS NUM_POTENTIAL_CALLS,
+A.POT_REV_PER_MO POT_REV_PER_MO,
+A.TOT_AD_COST_PER_MO TOT_AD_COST_PER_MO,
+A.NET_REV NET_REV,
+A.CONV_RATE CONV_RATE,
+A.NUM_CONV_CALLS NUM_CONV_CALLS,
+A.NUM_CLICK_YPCOM NUM_CLICK_YPCOM ,
+A.NUM_IMP_YPCOM NUM_IMP_YPCOM,
+A.NUM_CLICK_YPCON NUM_CLICK_YPCON,
+A.NUM_IMP_YPCON NUM_IMP_YPCON,
+A.NUM_CLICK_YODA NUM_CLICK_YODA,
+A.NUM_IMP_YODA NUM_IMP_YODA,
+A.NUM_411_TEXT NUM_411_TEXT,
+a.source_code source_code,
+a.AVG_VT_MO_CALLS,
+a.AVG_PPC_MO_CALLS,
+a.AVG_PPC_MO_CHARGE,
+a.AVG_CALLS_PER_SALE,
+a.AVG_PROFIT_PER_SALE,
+a.AVG_CUS_WORTH
+FROM D10B_TRACKING_SMY_CA  A
+, market_ca m ,
+(select distinct market_id , market_name from market_name_ca) mn
+WHERE A.product_code = m.product_code
+and m.market_id = mn.market_id
+AND  ( 'emptyParam' = {market}
+or m.market_id =  {market} ) 
+AND ( 'emptyParam' = {product}
+or A.PRODUCT_CODE =  {product} or {product} = ' ALL' ) 
+AND ( 'emptyParam' = {mediaMgr}
+or A.MEDIA_MGR_ID =  {mediaMgr} ) 
+AND( 0 = {verticalSegment}
+or A.VERTICAL_ID = {verticalSegment})
+order by
+a.CUSTOMER_ID, a.PRODUCT_CODE, a.VERTICAL_ID, a.AIN_PROGRAM_ID 
+</statement>
+
+<statement code="D10BTrckSmyDtlsGridQuery" clientObject="10B">
+SELECT 
+A.AIN_PROGRAM_ID	,
+(case WHEN A.SOURCE_CODE = 'CORB' THEN 'Southeast'
+ WHEN A.SOURCE_CODE = 'CORM' THEN 'Midwest'
+ WHEN A.SOURCE_CODE = 'CORS' THEN 'Southwest'
+ ELSE 'West' END) source_code ,
+A.AIN_PROGRAM_AGE       ,
+A.REGION_CODE           ,
+C.DECODE_DISPLAY REGION ,
+A.PROGRAM_TYPE          ,
+A.CUSTOMER_ID           ,
+A.LISTED_NAME           ,
+A.PRODUCT_CODE          ,
+A.PRODUCT_NAME          ,
+A.PRODUCT_ISSUE         ,
+A.STATE_ABBREVIATION    ,
+A.ISSUE_DATE            ,
+A.ITEM_BOTS_AMT         ,
+A.ITEM_NISD_AMT         ,
+A.GUARANTEE_NUM_CALLS   ,
+A.HEADING_CODE          ,
+A.HEADING_NAME          ,
+A.UDAC_CODE             ,
+A.COLOR_CODE            ,
+A.MULT_ITEM_IND         ,
+A.COMPETITIVE_IND       ,
+A.AVG_CALLS             ,
+A.ITEM_CPC              ,
+A.NUM_ACTIVE_MO         ,
+A.NUM_CTN               ,
+A.CALLS_MO_1            ,
+A.CALLS_MO_2            ,
+A.CALLS_MO_3            ,
+A.CALLS_MO_4            ,
+A.CALLS_MO_5            ,
+A.CALLS_MO_6            ,
+A.CALLS_MO_7            ,
+A.CALLS_MO_8            ,
+A.CALLS_MO_9            ,
+A.CALLS_MO_10           ,
+A.CALLS_MO_11           ,
+A.CALLS_MO_12           ,
+A.CTN1                  ,
+A.CTN2                  ,
+A.CTN3                  ,
+A.CTN4                  ,
+A.CTN5                  ,
+A.CTN6                  ,
+A.CTN7                  ,
+A.CTN8                  ,
+A.CTN9                  ,
+A.CTN10                 ,
+A.CTN11                 ,
+A.CTN12                 ,
+A.CTN13                 ,
+A.CTN14                 ,
+A.CTN15                 ,
+A.TERM1                 ,
+A.TERM2                 ,
+A.TERM3                 ,
+A.TERM4                 ,
+A.TERM5                 ,
+A.TERM6                 ,
+A.TERM7                 ,
+A.TERM8                 ,
+A.TERM9                 ,
+A.TERM10                ,
+A.TERM11                ,
+A.TERM12                ,
+A.TERM13                ,
+A.TERM14                ,
+A.TERM15
+FROM D10B_TRACKING_DTL_SMY_CA A, ALL_PROD_ISSUE B , DOMAIN_DECODES C
+WHERE ( 'emptyParam' = {ainProgramId}
+or A.AIN_PROGRAM_ID =  {ainProgramId} ) 
+AND ( 'emptyParam' = {ainProgramAge}
+or A.AIN_PROGRAM_AGE =  {ainProgramAge} ) 
+AND ( 'emptyParam' = {sourceCode}
+or A.SOURCE_CODE =  {sourceCode} ) 
+AND( 'emptyParam' = {customerId}
+or A.CUSTOMER_ID = {customerId} )
+AND ( 'emptyParam' = {product}
+or A.PRODUCT_CODE =  {product} or {product} = ' ALL' ) 
+AND A.PRODUCT_CODE          = B.PRODUCT_CODE 
+AND B.BOTS_ISSUE_IND         = 'Y'
+AND A.region_code=C.code_value(+)
+AND C.domain_code='REGIONCODE'
+order by 
+a.CUSTOMER_ID, a.PRODUCT_CODE, a.PRODUCT_ISSUE, a.HEADING_CODE, a.UDAC_CODE
+</statement>
+                                                                                  
+
+</sql>

@@ -1,0 +1,4 @@
+<jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" 
+               jaxb:version="2.0"> 
+	<jaxb:globalBindings generateIsSetMethod="true"/>		 
+</jaxb:bindings> 

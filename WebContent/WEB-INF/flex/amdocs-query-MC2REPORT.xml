@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+<sql type="CdwSQL">
+
+ 	<statement code="MC2REPORT_SUMMARY_DATA">
+		<![CDATA[	
+		SELECT 
+		       PROGRAM_ID
+		     , CUSTOMER_ID
+		     , CUSTOMER_NAME
+		     , TEMPLATE_ID
+		     , TEMPLATE_NAME
+		     , ISSUE_YEAR
+		     , BRANCH_CODE
+		     , BRANCH_NAME
+		     , PROGRAM_TYPE
+		     , PROGRAM_STATUS
+		     , START_MO
+		     , START_YEAR
+		     , END_MO
+		     , END_YEAR
+		     , VERTICAL_ID
+		     , VERTICAL_NAME
+		     , YPCONNECT_IND
+		     , LEVER_IND
+		     , MPD_CNT
+		     , REP_ID
+		     , REP_NAME
+		     , MGR_ID
+		     , MGR_NAME
+		     , MC2_MGR_ID
+		     , MC2_MGR_NAME
+		     , CHANNEL_CODE
+		     , CALL_LEAD_OBJ
+		     , NONCALL_LEAD_OBJ
+		     , PRD_CALL_LEAD_PCT
+		     , PRD_NONCALL_LEAD_PCT
+		     , UNMEAS_CALL_LEADS
+		     , UNMEAS_NONCALL_LEADS
+		     , TOT_CALL_LEAD
+		     , TOT_CALL_LEAD_PCT
+		     , TOT_CALL_LEAD_TRD
+		     , TOT_NONCALL_LEAD
+		     , TOT_NONCALL_LEAD_PCT
+		     , TOT_NONCALL_LEAD_TRD
+		     , TOT_CTN_EVERY_CALLS
+		     , TOT_YPCONNECT_CALLS
+		     , TOT_CALLS_DELIVERED
+		     , TOT_CLICKS_WEBSITE
+		     , TOT_PRINT_DIRECTIONS
+		     , TOT_PRINT_LANDING_PG
+		     , TOT_EMAILS_SUBMITTED
+		     , TOT_VIDEO_VIEWS
+		     , TOT_BOOK_MARKS
+		     , TOT_FORM_FILLS
+		     , PRV_CALL_LEAD
+		     , PRV_CALL_LEAD_PCT
+		     , PRV_CALL_LEAD_TRD
+		     ,PRV_NONCALL_LEAD
+		     ,PRV_NONCALL_LEAD_PCT
+		     ,PRV_NONCALL_LEAD_TRD
+		     ,PRV_CTN_EVERY_CALLS
+		     ,PRV_YPCONNECT_CALLS
+		     ,PRV_CALLS_DELIVERED
+		     ,PRV_CLICKS_WEBSITE
+		     ,PRV_PRINT_DIRECTIONS
+		     ,PRV_PRINT_LANDING_PG
+		     ,PRV_EMAILS_SUBMITTED
+		     ,PRV_VIDEO_VIEWS
+		     ,PRV_BOOK_MARKS
+		     ,PRV_FORM_FILLS
+		     ,CONTACT_NAME
+		     ,CONTACT_ADDRESS
+		     ,CONTACT_PHONE
+		     ,CONTACT_EMAIL
+		     ,PROGRAM_NISD
+		     ,CUSTOMER_NISD
+		     ,CONTRACT_QUERY_IND
+		     ,ITEM_QUERY_IND
+		     ,LOAD_DATE
+		     ,LOAD_NUMBER
+		          
+		FROM   TEST_MC2_PGM_SMY_CA A
+		WHERE  ( 'ALL' = {mc2Branch} or A.BRANCH_CODE = {mc2Branch} )		
+		    ]]>
+		    
+	</statement>
+    
+</sql>

@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+<sql type="CdwSQL">
+	<statement code="LMPubDashboardQueryInitGrid" clientObject="LMpub"><![CDATA[
+select 
+case when  HOME_DATA_BASE = 'W' then 'West'
+     when  HOME_DATA_BASE = 'M' then 'Midwest'
+     when  HOME_DATA_BASE = 'B' then 'Southeast'
+     when  HOME_DATA_BASE = 'S' then 'Southwest'
+end HOME_DATA_BASE
+,
+case when  REGION_CODE = '1' then 'ATT-MIDWEST'
+     when  REGION_CODE = '3' then 'ATT-WEST'
+     when  REGION_CODE = '4' then 'ATT-EAST'
+     when  REGION_CODE = '5' then 'ATT-SW'
+     when  REGION_CODE = '6' then 'NON-ATT'
+     when  REGION_CODE = '7' then 'ATT-SE-SEA'
+     when  REGION_CODE = '8' then 'ATT-SE-SCA'
+end REGION_CODE
+,STATE_ABBREVIATION
+,PRODUCT_CODE
+,PRODUCT_ISSUE_NUM
+,PRODUCT_NAME
+,ISSUE_DATE
+,WP_LAST_LIST_ACT_DATE
+,WP_PROD_EXT_DATE
+,WP_GALLEY_CLOSE_DATE
+,yp_last_list_act_date
+,yp_prod_ext_date
+,yp_galley_close_date
+,REJ_COUNT
+,MEMO_COUNT
+,DAYS_TO_EXTRACT
+,product_type 
+from lm_dashboard_vw
+where (DAYS_TO_EXTRACT >= {daysToExtractMin} or {daysToExtractMin} = 9999999) and
+      (DAYS_TO_EXTRACT <= {daysToExtractMax} or {daysToExtractMax} = 9999999) and
+      (HOME_DATA_BASe = {homeDataBase} or {homeDataBase} = 'emptyParam')        and
+      (STATE_ABBREVIATION = {stateCode} or {stateCode} = 'emptyParam') and
+      (Product_type = {productType} or {productType} = 'Both')
+	]]>
+	</statement>
+	<statement code="LMPubDashboardQueryChartGroupByRegion" clientObject="LMpub"><![CDATA[
+select HOME_DATA_BASE region_abbr,
+case when  HOME_DATA_BASE = 'W' then 'West'
+     when  HOME_DATA_BASE = 'M' then 'Midwest'
+     when  HOME_DATA_BASE = 'B' then 'Southeast'
+     when  HOME_DATA_BASE = 'S' then 'Southwest'
+end region , 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end value, count(product_code) products_count, sum(REJ_COUNT) rej_sum, sum(MEMO_COUNT) memo_sum 
+from lm_dashboard_vw 
+where (DAYS_TO_EXTRACT >= {daysToExtractMin} or {daysToExtractMin} = 9999999) and
+      (DAYS_TO_EXTRACT <= {daysToExtractMax} or {daysToExtractMax} = 9999999) and
+      (HOME_DATA_BASe = {homeDataBase} or {homeDataBase} = 'emptyParam')      and
+      (STATE_ABBREVIATION = {stateCode} or {stateCode} = 'emptyParam')  and
+      (Product_type = {productType} or {productType} = 'Both')
+group by HOME_DATA_BASE
+having 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end
+> 0
+order by  value desc
+	]]>
+	</statement>
+	<statement code="LMPubDashboardQueryChartGroupByState" clientObject="LMpub"><![CDATA[
+select STATE_ABBREVIATION state, 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end value, count(product_code) products_count, sum(REJ_COUNT) rej_sum, sum(MEMO_COUNT) memo_sum
+from lm_dashboard_vw 
+where (DAYS_TO_EXTRACT >= {daysToExtractMin} or {daysToExtractMin} = 9999999) and
+      (DAYS_TO_EXTRACT <= {daysToExtractMax} or {daysToExtractMax} = 9999999) and
+      (HOME_DATA_BASe = {homeDataBase} or {homeDataBase} = 'emptyParam')      and
+      (STATE_ABBREVIATION = {stateCode} or {stateCode} = 'emptyParam')  and
+      (Product_type = {productType} or {productType} = 'Both')
+group by STATE_ABBREVIATION
+having 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end
+> 0
+order by  value desc
+	]]>
+	</statement>
+	<statement code="LMPubDashboardQueryChartGroupByProduct" clientObject="LMpub"><![CDATA[
+select * from (select product_code product, 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end value, count(product_code) products_count, sum(REJ_COUNT) rej_sum, sum(MEMO_COUNT) memo_sum 
+from lm_dashboard_vw 
+where (DAYS_TO_EXTRACT >= {daysToExtractMin} or {daysToExtractMin} = 9999999) and
+      (DAYS_TO_EXTRACT <= {daysToExtractMax} or {daysToExtractMax} = 9999999) and
+      (HOME_DATA_BASe = {homeDataBase} or {homeDataBase} = 'emptyParam')      and
+      (STATE_ABBREVIATION = {stateCode} or {stateCode} = 'emptyParam')  and
+      (Product_type = {productType} or {productType} = 'Both')
+group by product_code
+having 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end
+> 0
+order by  value desc) where rownum < 20
+union all
+select 'Other', vs value, pc products_count, rs rej_sum, ms memo_sum 
+from (select sum(value) vs, sum(products_count) pc, sum(rej_sum) rs, sum(memo_sum) ms, count(*) cn 
+      from ( select * from (select product_code product, 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end value, count(product_code) products_count, sum(REJ_COUNT) rej_sum, sum(MEMO_COUNT) memo_sum 
+from lm_dashboard_vw 
+where (DAYS_TO_EXTRACT >= {daysToExtractMin} or {daysToExtractMin} = 9999999) and
+      (DAYS_TO_EXTRACT <= {daysToExtractMax} or {daysToExtractMax} = 9999999) and
+      (HOME_DATA_BASe = {homeDataBase} or {homeDataBase} = 'emptyParam')      and
+      (STATE_ABBREVIATION = {stateCode} or {stateCode} = 'emptyParam')  and
+      (Product_type = {productType} or {productType} = 'Both')
+group by product_code) minus select * from (select product_code product, 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end value, count(product_code) products_count, sum(REJ_COUNT) rej_sum, sum(MEMO_COUNT) memo_sum 
+from lm_dashboard_vw 
+where (DAYS_TO_EXTRACT >= {daysToExtractMin} or {daysToExtractMin} = 9999999) and
+      (DAYS_TO_EXTRACT <= {daysToExtractMax} or {daysToExtractMax} = 9999999) and
+      (HOME_DATA_BASe = {homeDataBase} or {homeDataBase} = 'emptyParam')      and
+      (STATE_ABBREVIATION = {stateCode} or {stateCode} = 'emptyParam')  and
+      (Product_type = {productType} or {productType} = 'Both')
+group by product_code
+having 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end
+> 0
+order by  value desc) where rownum < 20)
+      )
+where vs is not null and vs > 0 and cn > 1
+union all
+select * from ( select * from (select product_code product, 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end value, count(product_code) products_count, sum(REJ_COUNT) rej_sum, sum(MEMO_COUNT) memo_sum 
+from lm_dashboard_vw 
+where (DAYS_TO_EXTRACT >= {daysToExtractMin} or {daysToExtractMin} = 9999999) and
+      (DAYS_TO_EXTRACT <= {daysToExtractMax} or {daysToExtractMax} = 9999999) and
+      (HOME_DATA_BASe = {homeDataBase} or {homeDataBase} = 'emptyParam')      and
+      (STATE_ABBREVIATION = {stateCode} or {stateCode} = 'emptyParam')  and
+      (Product_type = {productType} or {productType} = 'Both')
+group by product_code) minus select * from (select product_code product, 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end value, count(product_code) products_count, sum(REJ_COUNT) rej_sum, sum(MEMO_COUNT) memo_sum 
+from lm_dashboard_vw 
+where (DAYS_TO_EXTRACT >= {daysToExtractMin} or {daysToExtractMin} = 9999999) and
+      (DAYS_TO_EXTRACT <= {daysToExtractMax} or {daysToExtractMax} = 9999999) and
+      (HOME_DATA_BASe = {homeDataBase} or {homeDataBase} = 'emptyParam')      and
+      (STATE_ABBREVIATION = {stateCode} or {stateCode} = 'emptyParam')  and
+      (Product_type = {productType} or {productType} = 'Both')
+group by product_code
+having 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end
+> 0
+order by  value desc) where rownum < 20) 
+where exists ( select 1 from ( select count(*) count_total from (select product_code product, 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end value, count(product_code) products_count, sum(REJ_COUNT) rej_sum, sum(MEMO_COUNT) memo_sum 
+from lm_dashboard_vw 
+where (DAYS_TO_EXTRACT >= {daysToExtractMin} or {daysToExtractMin} = 9999999) and
+      (DAYS_TO_EXTRACT <= {daysToExtractMax} or {daysToExtractMax} = 9999999) and
+      (HOME_DATA_BASe = {homeDataBase} or {homeDataBase} = 'emptyParam')      and
+      (STATE_ABBREVIATION = {stateCode} or {stateCode} = 'emptyParam')  and
+      (Product_type = {productType} or {productType} = 'Both')
+group by product_code
+having 
+case when {currentChartBy} = 'Products' then count(product_code) 
+     when {currentChartBy} = 'Rejects' then sum(REJ_COUNT)
+     when {currentChartBy} = 'Memos' then sum(MEMO_COUNT)
+     else count(product_code) 
+end
+> 0
+order by  value desc) ) where count_total = 20 )
+	]]></statement>
+	
+	<statement code="LMDashboardStackChartQueryRegion" clientObject="LMpub"><![CDATA[	
+select  count(case when id = 1 and days_to_extract < 0 then 1
+                   when id = 2 and days_to_extract >= 0 and days_to_extract <= 5 then 1
+                   when id = 3 and days_to_extract > 5 and days_to_extract <= 10 then 1
+                   when id = 4 and days_to_extract > 10 and days_to_extract <= 15 then 1
+                   when id = 5 and days_to_extract > 15 and days_to_extract <= 30 then 1
+                   when id = 6 and days_to_extract > 30 and days_to_extract <= 60 then 1
+                   when id = 7 and days_to_extract > 60 then 1
+              end) cnt
+      , sum(case when id = 1 and days_to_extract < 0 then memo_count
+                 when id = 2 and days_to_extract >= 0 and days_to_extract <= 5 then memo_count
+                 when id = 3 and days_to_extract > 5 and days_to_extract <= 10 then memo_count
+                 when id = 4 and days_to_extract > 10 and days_to_extract <= 15 then memo_count
+                 when id = 5 and days_to_extract > 15 and days_to_extract <= 30 then memo_count
+                 when id = 6 and days_to_extract > 30 and days_to_extract <= 60 then memo_count
+                 when id = 7 and days_to_extract > 60 then memo_count
+                 else 0
+            end) memos
+      , sum(case when id = 1 and days_to_extract < 0 then rej_count
+                 when id = 2 and days_to_extract >= 0 and days_to_extract <= 5 then rej_count
+                 when id = 3 and days_to_extract > 5 and days_to_extract <= 10 then rej_count
+                 when id = 4 and days_to_extract > 10 and days_to_extract <= 15 then rej_count
+                 when id = 5 and days_to_extract > 15 and days_to_extract <= 30 then rej_count
+                 when id = 6 and days_to_extract > 30 and days_to_extract <= 60 then rej_count
+                 when id = 7 and days_to_extract > 60 then rej_count
+                 else 0
+            end) rejects
+      , (case when id = 1 then 'Passed Extract'
+              when id = 2 then '0 to 5'
+              when id = 3 then '5 to 10'
+              when id = 4 then '10 to 15'
+              when id = 5 then '15 to 30'
+              when id = 6 then '30 to 60'
+              when id = 7 then '> 60'
+         end) extract
+       , dd.home_data_base
+from     (select 1 id from dual
+          union all select 2 id from dual
+          union all select 3 id from dual
+          union all select 4 id from dual
+          union all select 5 id from dual
+          union all select 6 id from dual
+          union all select 7 id from dual) gen1
+         cross join
+         (select code_value home_data_base
+          from   domain_decodes 
+          where  domain_code='HOMEDB' 
+          and    code_value in ('B','S','M','W')) dd
+         join (select * 
+               from   lm_dashboard_vw
+               where  {productType} = 'Both'
+               or     product_type = {productType}) l
+           on dd.home_data_base = l.home_data_base
+group by (case when id = 1 then 'Passed Extract'
+             when id = 2 then '0 to 5'
+             when id = 3 then '5 to 10'
+             when id = 4 then '10 to 15'
+             when id = 5 then '15 to 30'
+             when id = 6 then '30 to 60'
+             when id = 7 then '> 60'
+          end)
+       , dd.home_data_base
+       , id
+order by dd.home_data_base
+       , id
+    ]]></statement>
+	
+	<statement code="LMDashboardStackChartQueryState" clientObject="LMpub"><![CDATA[
+select  count(case when id = 1 and days_to_extract < 0 then 1
+                   when id = 2 and days_to_extract >= 0 and days_to_extract <= 5 then 1
+                   when id = 3 and days_to_extract > 5 and days_to_extract <= 10 then 1
+                   when id = 4 and days_to_extract > 10 and days_to_extract <= 15 then 1
+                   when id = 5 and days_to_extract > 15 and days_to_extract <= 30 then 1
+                   when id = 6 and days_to_extract > 30 and days_to_extract <= 60 then 1
+                   when id = 7 and days_to_extract > 60 then 1
+              end) cnt
+      , sum(case when id = 1 and days_to_extract < 0 then memo_count
+                 when id = 2 and days_to_extract >= 0 and days_to_extract <= 5 then memo_count
+                 when id = 3 and days_to_extract > 5 and days_to_extract <= 10 then memo_count
+                 when id = 4 and days_to_extract > 10 and days_to_extract <= 15 then memo_count
+                 when id = 5 and days_to_extract > 15 and days_to_extract <= 30 then memo_count
+                 when id = 6 and days_to_extract > 30 and days_to_extract <= 60 then memo_count
+                 when id = 7 and days_to_extract > 60 then memo_count
+                 else 0
+            end) memos
+      , sum(case when id = 1 and days_to_extract < 0 then rej_count
+                 when id = 2 and days_to_extract >= 0 and days_to_extract <= 5 then rej_count
+                 when id = 3 and days_to_extract > 5 and days_to_extract <= 10 then rej_count
+                 when id = 4 and days_to_extract > 10 and days_to_extract <= 15 then rej_count
+                 when id = 5 and days_to_extract > 15 and days_to_extract <= 30 then rej_count
+                 when id = 6 and days_to_extract > 30 and days_to_extract <= 60 then rej_count
+                 when id = 7 and days_to_extract > 60 then rej_count
+                 else 0
+            end) rejects
+      , (case when id = 1 then 'Passed Extract'
+              when id = 2 then '0 to 5'
+              when id = 3 then '5 to 10'
+              when id = 4 then '10 to 15'
+              when id = 5 then '15 to 30'
+              when id = 6 then '30 to 60'
+              when id = 7 then '> 60'
+         end) extract
+       , dd.state_abbreviation
+       , dd.state_name
+from     (select 1 id from dual
+          union all select 2 id from dual
+          union all select 3 id from dual
+          union all select 4 id from dual
+          union all select 5 id from dual
+          union all select 6 id from dual
+          union all select 7 id from dual) gen1
+         cross join
+         (select l.state_abbreviation
+               , nvl(dd.decode_display, 'Unknown') state_name
+          from   (select distinct STATE_ABBREVIATION 
+                  from   lm_dashboard_vw) l
+                 left outer join domain_decodes dd
+                   on l.state_abbreviation = dd.code_value
+                  and domain_code like '%GNSTATEABBR%') dd
+         join (select * 
+               from   lm_dashboard_vw
+               where  {productType} = 'Both'
+               or     product_type = {productType}) l
+           on dd.state_abbreviation = l.state_abbreviation
+group by (case when id = 1 then 'Passed Extract'
+             when id = 2 then '0 to 5'
+             when id = 3 then '5 to 10'
+             when id = 4 then '10 to 15'
+             when id = 5 then '15 to 30'
+             when id = 6 then '30 to 60'
+             when id = 7 then '> 60'
+          end)
+       , dd.state_abbreviation
+       , dd.state_name
+       , id
+order by dd.state_abbreviation
+       , dd.state_name
+       , id
+	]]></statement>
+	
+	<statement code="LMDashboardStackChartQueryAll" clientObject="LMpub"><![CDATA[
+select  count(case when id = 1 and days_to_extract < 0 then 1
+                   when id = 2 and days_to_extract >= 0 and days_to_extract <= 5 then 1
+                   when id = 3 and days_to_extract > 5 and days_to_extract <= 10 then 1
+                   when id = 4 and days_to_extract > 10 and days_to_extract <= 15 then 1
+                   when id = 5 and days_to_extract > 15 and days_to_extract <= 30 then 1
+                   when id = 6 and days_to_extract > 30 and days_to_extract <= 60 then 1
+                   when id = 7 and days_to_extract > 60 then 1
+              end) cnt
+      , sum(case when id = 1 and days_to_extract < 0 then memo_count
+                 when id = 2 and days_to_extract >= 0 and days_to_extract <= 5 then memo_count
+                 when id = 3 and days_to_extract > 5 and days_to_extract <= 10 then memo_count
+                 when id = 4 and days_to_extract > 10 and days_to_extract <= 15 then memo_count
+                 when id = 5 and days_to_extract > 15 and days_to_extract <= 30 then memo_count
+                 when id = 6 and days_to_extract > 30 and days_to_extract <= 60 then memo_count
+                 when id = 7 and days_to_extract > 60 then memo_count
+                 else 0
+            end) memos
+      , sum(case when id = 1 and days_to_extract < 0 then rej_count
+                 when id = 2 and days_to_extract >= 0 and days_to_extract <= 5 then rej_count
+                 when id = 3 and days_to_extract > 5 and days_to_extract <= 10 then rej_count
+                 when id = 4 and days_to_extract > 10 and days_to_extract <= 15 then rej_count
+                 when id = 5 and days_to_extract > 15 and days_to_extract <= 30 then rej_count
+                 when id = 6 and days_to_extract > 30 and days_to_extract <= 60 then rej_count
+                 when id = 7 and days_to_extract > 60 then rej_count
+                 else 0
+            end) rejects
+      , (case when id = 1 then 'Passed Extract'
+              when id = 2 then '0 to 5'
+              when id = 3 then '5 to 10'
+              when id = 4 then '10 to 15'
+              when id = 5 then '15 to 30'
+              when id = 6 then '30 to 60'
+              when id = 7 then '> 60'
+         end) extract
+from     (select 1 id from dual
+          union all select 2 id from dual
+          union all select 3 id from dual
+          union all select 4 id from dual
+          union all select 5 id from dual
+          union all select 6 id from dual
+          union all select 7 id from dual) gen1
+         cross join
+         (select * 
+          from   lm_dashboard_vw
+          where  {productType} = 'Both'
+          or     product_type = {productType}) l
+group by (case when id = 1 then 'Passed Extract'
+             when id = 2 then '0 to 5'
+             when id = 3 then '5 to 10'
+             when id = 4 then '10 to 15'
+             when id = 5 then '15 to 30'
+             when id = 6 then '30 to 60'
+             when id = 7 then '> 60'
+          end)
+       , id
+order by id
+	]]></statement>
+	
+	<statement code="LMDashboardRegionStateQuery" clientObject="LMpub"><![CDATA[
+SELECT a.home_data_base, a.state_abbreviation, 
+case when b.decode_display is null then 'Unknown' else b.decode_display end state_name
+FROM 
+    (SELECT DISTINCT state_abbreviation,HOME_DATA_BASE
+    FROM lm_dashboard_vw
+	ORDER BY state_abbreviation) a,
+	(SELECT code_value, decode_display
+	FROM domain_decodes
+	WHERE domain_code = 'GNSTATEABBR') b
+WHERE b.code_value (+) = a.state_abbreviation
+ORDER BY 2				
+	]]>
+	</statement>
+	
+	<statement code="LMDashboardStateListQuery" clientObject="LMpub"><![CDATA[
+SELECT  a.state_abbreviation, 
+case when b.decode_display is null then 'Unknown' else b.decode_display end state_name,
+case when b.decode_display is null then 'Unknown' else b.decode_display end id
+FROM 
+    (SELECT DISTINCT state_abbreviation
+    FROM lm_dashboard_vw
+	ORDER BY state_abbreviation) a,
+	(SELECT code_value, decode_display
+	FROM domain_decodes
+	WHERE domain_code = 'GNSTATEABBR') b
+WHERE b.code_value (+) = a.state_abbreviation
+ORDER BY 2			
+	]]>
+	</statement>
+	
+	<statement code="LMDashboardPopUp" clientObject="LMpub"><![CDATA[
+			select 
+case when  HOME_DATA_BASE = 'W' then 'West'
+     when  HOME_DATA_BASE = 'M' then 'Midwest'
+     when  HOME_DATA_BASE = 'B' then 'Southeast'
+     when  HOME_DATA_BASE = 'S' then 'Southwest'
+end HOME_DATA_BASE
+,
+case when  REGION_CODE = '1' then 'ATT-MIDWEST'
+     when  REGION_CODE = '3' then 'ATT-WEST'
+     when  REGION_CODE = '4' then 'ATT-EAST'
+     when  REGION_CODE = '5' then 'ATT-SW'
+     when  REGION_CODE = '6' then 'NON-ATT'
+     when  REGION_CODE = '7' then 'ATT-SE-SEA'
+     when  REGION_CODE = '8' then 'ATT-SE-SCA'
+end REGION_CODE
+,STATE_ABBREVIATION
+, case when b.decode_display is null then 'Unknown' else b.decode_display end state_name
+,PRODUCT_CODE
+,PRODUCT_ISSUE_NUM
+,PRODUCT_NAME
+,ISSUE_DATE
+,WP_LAST_LIST_ACT_DATE
+,WP_PROD_EXT_DATE
+,WP_GALLEY_CLOSE_DATE
+,yp_last_list_act_date
+,yp_prod_ext_date
+,yp_galley_close_date
+,REJ_COUNT
+,MEMO_COUNT
+,DAYS_TO_EXTRACT
+,product_type 
+from lm_dashboard_vw a,(SELECT code_value, decode_display
+                        FROM domain_decodes
+                       WHERE domain_code LIKE '%GNSTATEABBR%') b
+WHERE b.code_value(+) = a.state_abbreviation
+and  ('Both' ={productType} or product_type = {productType})
+				
+	]]>
+	</statement>
+	
+
+</sql>
+

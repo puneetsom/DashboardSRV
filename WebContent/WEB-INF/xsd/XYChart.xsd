@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.amdocs.com/dashboard/mobile/XYChart"
+           xmlns:tn="http://www.amdocs.com/dashboard/mobile/XYChart"
+           elementFormDefault="qualified"
+           xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+           jxb:version="2.0">
+  
+	<xs:simpleType name="chartType">
+      	<xs:annotation>
+			<xs:documentation>line and area are only valid for lineSeries. clustered and stacked are only valid for columnSeries</xs:documentation>
+		</xs:annotation>
+    	<xs:restriction base="xs:string">
+      		<xs:enumeration value="line" />
+      		<xs:enumeration value="area" />
+      		<xs:enumeration value="clustered" />
+      		<xs:enumeration value="stacked" />
+    	</xs:restriction>
+	</xs:simpleType>
+
+    <xs:simpleType name="fieldType">
+    	<xs:restriction base="xs:string">
+      		<xs:enumeration value="string" />
+      		<xs:enumeration value="number" />
+      		<xs:enumeration value="currency" />
+      		<xs:enumeration value="percent" />
+    	</xs:restriction>
+	</xs:simpleType>
+  
+    <xs:simpleType name="positionType">
+    	<xs:restriction base="xs:string">
+      		<xs:enumeration value="top" />
+      		<xs:enumeration value="bottom" />
+      		<xs:enumeration value="left" />
+      		<xs:enumeration value="right" />
+    	</xs:restriction>
+	</xs:simpleType>
+	
+  	<xs:simpleType name="ServiceParamTypeAttr">
+    	<xs:restriction base="xs:string">
+      		<xs:enumeration value="string" />
+      		<xs:enumeration value="number" />
+    	</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:complexType name="ServiceParam">
+		<xs:attribute name="name" type="xs:string" />
+		<xs:attribute name="type" type="tn:ServiceParamTypeAttr" />
+		<xs:attribute name="required" type="xs:boolean" default="true" />
+	</xs:complexType>
+	
+	<xs:complexType name="ServiceElement">
+		<xs:sequence>
+			<xs:element type="tn:ServiceParam" name="Param" minOccurs="0" maxOccurs="unbounded">	
+      			<xs:annotation>
+        			<xs:appinfo>
+          				<jxb:property name="params" />
+        			</xs:appinfo>
+      			</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" />
+		<xs:attribute name="serviceCode" type="xs:string" />
+		<xs:attribute name="cacheLife" type="xs:int">
+			<xs:annotation>
+				<xs:documentation>Number of seconds data from service should be cached on client</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="seriesElement">
+		<xs:attribute type="xs:string" name="id" />
+		<xs:attribute type="xs:string" name="displayName" />
+		<xs:attribute type="xs:string" name="yField"/>
+		<xs:attribute type="xs:string" name="fillColor" use="optional">
+			<xs:annotation>
+				<xs:documentation>Fill color is only used for a lineSeries of type
+					area</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute type="xs:float" name="fillAlpha" use="optional" />
+	</xs:complexType>
+
+  	<xs:complexType name="columnSeriesElement">
+  		<xs:complexContent>
+  			<xs:extension base="tn:seriesElement" />
+  		</xs:complexContent>
+	</xs:complexType>
+ 
+	<xs:complexType name="seriesSetElement">
+		<xs:annotation>
+			<xs:documentation>
+				Column and Line charts can be plotted on a single chart, but do not use
+				the Set and Series elements of one type.
+				
+				For example, you can mix columnSet and lineSeries, or you can mix
+				columnSeries and lineSeries, but you cannot mix lineSet and lineSeries.
+				
+				Sets are used for more than one series. Series is used when you only have a 
+				single series.
+					</xs:documentation>
+		</xs:annotation>
+		<xs:sequence minOccurs="1" maxOccurs="1">
+			<xs:element name="columnSet" type="tn:columnSetElement" minOccurs="0" maxOccurs="1" />
+			<xs:element name="columnSeries" type="tn:columnSeriesElement" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="lineSet" type="tn:lineSetElement" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="lineSeries" type="tn:lineSeriesElement" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="type" type="tn:chartType" />
+	</xs:complexType>
+
+	<xs:complexType name="columnSetElement">
+		<xs:sequence minOccurs="0" maxOccurs="1">
+			<xs:element name="columnSeries" type="tn:columnSeriesElement"
+				minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="type" type="tn:chartType" />
+	</xs:complexType>
+
+	<xs:complexType name="lineSeriesElement">
+		<xs:complexContent>
+			<xs:extension base="tn:seriesElement">
+				<xs:attribute type="xs:string" name="lineColor" />
+				<xs:attribute type="xs:float" name="lineAlpha" />
+				<xs:attribute type="xs:float" name="lineWidth" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="lineSetElement">
+		<xs:sequence minOccurs="0" maxOccurs="1">
+			<xs:element name="lineSeries" type="tn:lineSeriesElement"
+				minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="type" type="tn:chartType" />
+	</xs:complexType>
+
+	<xs:complexType name="axisSetElement">
+		<xs:sequence minOccurs="1" maxOccurs="1">
+			<xs:element minOccurs="1" maxOccurs="unbounded" name="axis" type="tn:axisElement" />
+		</xs:sequence>
+	</xs:complexType>
+
+  	<xs:complexType name="axisElement">
+		<xs:attribute type="xs:string" name="id" />
+		<xs:attribute type="tn:positionType" name="position" />
+		<xs:attribute type="xs:string" name="categoryField" />
+		<xs:attribute type="tn:fieldType" name="type" />
+		<xs:attribute type="xs:string" name="title" />
+		<xs:attribute type="xs:boolean" name="showTitle"  use="optional"/>
+    	<xs:attribute type="xs:string" name="labelFormatter" use="optional"/>
+	</xs:complexType>
+
+	<xs:complexType name="formatterSetElement">
+		<xs:choice minOccurs="1" maxOccurs="unbounded">
+			<xs:element name="formatter" type="tn:formatterElement" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="formatterElement">
+		<xs:attribute type="xs:string" name="id" />
+		<xs:attribute type="tn:fieldType" name="type" />
+		<xs:attribute type="xs:byte" name="maxFractionalDigits" />
+		<xs:attribute type="xs:long" name="abbreviationThreshold">
+			<xs:annotation>
+				<xs:documentation>
+					Number of digits that are needed before the number will be abbreviated
+					0 -> no abbreviation
+
+					50 -> 50
+					500 -> 500
+					5000 -> 5,000
+					50000 -> 50,000
+					100000 -> 100.0k
+					5000000 -> 5.0m
+					5000000000 -> 5.0b
+					-5000000 -> -5.0m
+			</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute type="xs:byte" name="abbreviationFractionalDigits" default="1" >
+			<xs:annotation>
+				<xs:documentation>
+					Number of fractional digits to show for abbreviated values
+			</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+  
+	<xs:complexType name="XYChartElement">
+		<xs:sequence minOccurs="1" maxOccurs="1">
+			<xs:element name="Service" type="tn:ServiceElement" minOccurs="1" maxOccurs="1" />
+			<xs:element name="seriesSet" type="tn:seriesSetElement" minOccurs="1" maxOccurs="1" />
+			<xs:element name="axisSet" type="tn:axisSetElement" minOccurs="1" maxOccurs="1" />
+			<xs:element name="formatterSet" type="tn:formatterSetElement" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		
+		<xs:attribute name="locale" type="xs:string" default="en_US" />
+		<xs:attribute name="name" type="xs:string" />
+      	<xs:attribute name="height" type="xs:short" />
+      	<xs:attribute name="width" type="xs:short" />
+		<xs:attribute name="sliderField" type="xs:string" />
+	</xs:complexType>
+
+	<xs:element name="XYChart" type="tn:XYChartElement" />
+    
+</xs:schema>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.amdocs.com/dashboard/mobile"
+           xmlns:tn="http://www.amdocs.com/dashboard/mobile"
+           xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+           jxb:version="2.0"
+	       elementFormDefault="qualified">
+	
+	<!-- ******** COMPLEX TYPES ******** -->
+	
+	<xs:complexType name="ParamElement">
+		<xs:attribute name="name" type="xs:string" />
+		<xs:attribute name="value" type="xs:string" />
+		<xs:attribute name="default" type="xs:string" />
+	</xs:complexType>
+	<!--
+	<xs:complexType name="ParamElements">
+		<xs:sequence>
+			<xs:element name="Params" type="tn:ParamElement" minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType> -->	
+	
+	
+	<!-- ******** SIMPLE TYPES ******** -->
+	
+	<xs:simpleType name="AssetTypeAttribute">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="image" />
+			<xs:enumeration value="json" />
+			<xs:enumeration value="xml" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="CacheLifeAttribute">
+		<xs:annotation>
+			<xs:documentation>Number of seconds result should be stored in cache.  0 for no cache.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:long">
+			<xs:annotation>
+				<xs:documentation>
+					<xs:enumeration value="0" />
+					<xs:enumeration value="3600" />
+					<xs:enumeration value="86400" />
+					<xs:enumeration value="604800" />
+					<xs:enumeration value="31536000" />
+				</xs:documentation>
+			</xs:annotation>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="ServiceNameAttribute">
+		<xs:restriction base="xs:string">
+			<xs:annotation>
+				<xs:documentation>
+					<xs:enumeration value="activateQuery" />
+					<xs:enumeration value="getBase64Image" />
+					<xs:enumeration value="loadXML" />
+				</xs:documentation>
+			</xs:annotation>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="ServiceTypeAttribute">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="localStorage" />
+			<xs:enumeration value="mobileProxy" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+</xs:schema>

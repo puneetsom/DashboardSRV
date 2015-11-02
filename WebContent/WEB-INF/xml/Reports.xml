@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Reports xmlns="http://www.amdocs.com/dashboard/mobile/reports" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.amdocs.com/dashboard/mobile/reports ../xsd/Reports.xsd">
+<!--           
+	   <Report id="salesKpiReport"
+	           title="Sales Report" 
+	           description="Sales report for 2013" 
+	           image="asset://salesKpiReport.png" 
+	           securityProfiles="100,226,888,914"
+	           template="KpiReport"
+	           xmlCode="SalesKpiReportMetadata" />
+	            
+	   <Report id="revenueKpiReport"
+	           title="Revenue Report" 
+	           description="Monthly Digital revenue" 
+	           image="asset://revReport.png" 
+	           securityProfiles="100,226,888,914"
+	           template="KpiReport"
+	           xmlCode="RevReportMetadata" />
+-->
+	   <Report id="abrKpiReport"
+	           title="Internet ABR" 
+	           description="Activity Based Sales Results for Internet Products" 
+	           image="asset://abrKpiReport.png" 
+	           securityProfiles="100,200,226,240,888,914"
+	           template="KpiReport"
+	           xmlCode="ABRKpiReportMetadata" />
+<!-- 
+	   <Report id="prodDefectsReport"
+	           title="Defects Repository" 
+	           description="Production Defects from Quality Center" 
+	           image="asset://prodDefects.png" 
+	           securityProfiles="226,914"
+	           template="GridReport"
+	           xmlCode="ProdDefectsMetadata" />
+-->
+	   <!-- 
+	   <Report id="opsKpiReport"
+	           title="Coming Soon!" 
+	           description="More reports to come..." 
+	           image="asset://opsKpiReport.png" 
+	           securityProfiles="100,914"
+	           template="KpiReport"
+	           xmlCode="OpsKpiReportMetadata" />
+	   -->
+</Reports>
+<!--
+JSON representation ...
+Reports = {
+	Report:
+		[ { id: "salesKpiReport", title: "Sales KPI Report", description: "Sales KPI Report",
+            image: "asset://salesKpiReport.png", securityProfiles: "100,914", templateDescriptor: "salesKpiReport/main.xml" },
+		  { id: "cmsnKpiReport", title: "Commission KPI Report", description: "Commission KPI Report", 
+		    image: "asset://cmsnKpiReport.png", securityProfiles: "100,914", templateDescriptor: "cmsnKpiReport/main.xml" }, 
+		  { id: "opsKpiReport", title: "Operations KPI Report", description: "Operations KPI Report", 
+		    image: "asset://opsKpiReport.png", securityProfiles: "100,914", templateDescriptor: "opsKpiReport/main.xml" }
+		]
+}
+-->

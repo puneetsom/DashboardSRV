@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.amdocs.com/dashboard/mobile/report"
+           xmlns:tn="http://www.amdocs.com/dashboard/mobile/report"
+           xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+           jxb:version="2.0"
+	       elementFormDefault="qualified">
+	   
+  	<xs:simpleType name="ServiceParamTypeAttr">
+    	<xs:restriction base="xs:string">
+      		<xs:enumeration value="string" />
+      		<xs:enumeration value="number" />
+    	</xs:restriction>
+	</xs:simpleType>
+	   
+  	<xs:simpleType name="MetadataTypeAttr">
+    	<xs:restriction base="xs:string">
+      		<xs:enumeration value="default" />
+      		<xs:enumeration value="grid" />
+      		<xs:enumeration value="chart" />
+    	</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:complexType name="ServiceParam">
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="type" type="tn:ServiceParamTypeAttr" />
+		<xs:attribute name="required" type="xs:boolean" default="true" />
+		<xs:attribute name="value" type="xs:string" use="optional" /> <!-- Constant to use for param -->
+	</xs:complexType>
+	
+	<xs:complexType name="ServiceElement">
+		<xs:sequence>
+			<xs:element type="tn:ServiceParam" name="Param" minOccurs="0" maxOccurs="unbounded">	
+      			<xs:annotation>
+        			<xs:appinfo>
+          				<jxb:property name="params" />
+        			</xs:appinfo>
+      			</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"  />
+		<xs:attribute name="serviceCode" type="xs:string" use="required"  />
+		<xs:attribute name="cacheLife" type="xs:int" default="0">
+			<xs:annotation>
+				<xs:documentation>Number of seconds data from service should be cached on client</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="maxRows" type="xs:int" default="0">
+			<xs:annotation>
+				<xs:documentation>Max number of rows to be returned by this service</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	
+	<xs:complexType name="MetadataElement">
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="xmlCode" type="xs:string" use="required" />
+		<xs:attribute name="configurationId" type="xs:string">
+			<xs:annotation>
+				<xs:documentation>
+					Options id for configuration information (such as selected columns and column order)
+					If it is not defined, it will be based on the xmlCode
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="cacheLife" type="xs:int" default="0">
+			<xs:annotation>
+				<xs:documentation>Number of seconds metadata should be cached on client</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	
+	<xs:complexType name="ReportElement">
+		<xs:sequence minOccurs="1" maxOccurs="1">
+			<xs:element name="Metadata" type="tn:MetadataElement" minOccurs="0" maxOccurs="unbounded" />
+			
+			<xs:element name="Grid" type="tn:MetadataElement" minOccurs="0" maxOccurs="unbounded">			
+      			<xs:annotation>
+        			<xs:appinfo>
+          				<jxb:property name="grids" />
+        			</xs:appinfo>
+      			</xs:annotation>
+			</xs:element>
+			
+			<xs:element name="Service" type="tn:ServiceElement" minOccurs="0" maxOccurs="unbounded">
+      			<xs:annotation>
+        			<xs:appinfo>
+          				<jxb:property name="services" />
+        			</xs:appinfo>
+      			</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		
+		<xs:attribute name="locale" type="xs:string" default="en_US" />
+		<xs:attribute name="title" type="xs:string" use="required" />
+		<xs:attribute name="type" type="xs:string" />
+		<xs:attribute name="icon" type="xs:string" />
+	</xs:complexType>
+
+	<xs:element name="Report" type="tn:ReportElement" />
+
+</xs:schema>

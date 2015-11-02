@@ -1,0 +1,1412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+<sql type="CdwSQL">
+
+	<statement code="SLA_Helpdesk_Menu"><![CDATA[
+with sla_data as
+(select   shr2.FUTURE_INCLUDED
+        , hg.assign_group
+        , hg.support_category
+        , nvl(hg.group_manager,'UNDEFINED') group_manager
+        , hg.group_pm
+        , sm.sla_metric_name
+        , sum(nvl(shr.in_cnt,0)) in_cnt
+        , sum(nvl(out_cnt,0)) out_cnt
+        , sum(nvl(risk_cnt,0)) risk_cnt
+        , sum(shr2.high_risk_cnt) high_risk_cnt
+        , min_target
+        , exp_target
+        , prem_target
+ from     (select   to_date({slaMonth}, 'YYYYMM') sla_month
+                  , sla_type
+                  , future_included
+                  , priority
+                  , assign_group
+                  , sum(high_risk_cnt) high_risk_cnt
+             from     SLA_HD_CHART_MV
+             where    (sla_month = to_date({slaMonth}, 'YYYYMM')
+             or       risk_cnt > 0
+             or       high_risk_cnt > 0)
+             group by sla_type
+                    , future_included
+                    , priority
+                    , assign_group) shr2
+          left outer join SLA_HD_CHART_MV shr
+            on shr2.sla_type = shr.sla_type
+           and shr2.future_included = shr.future_included
+           and shr2.priority = shr.priority
+           and shr2.assign_group = shr.assign_group
+           and shr2.sla_month = shr.sla_month 
+          join SLA_METRIC sm
+            on (case shr2.sla_type when 'RESPONSE' then shr2.sla_type 
+            when 'WEB-RESPONSE' then shr2.sla_type else shr2.sla_type||'-'||shr2.priority end) = sm.sla_metric
+           and shr2.sla_month between sm.effective_from_date and sm.effective_to_date
+          join HELPDESK_GROUP hg
+            on shr2.assign_group = hg.assign_group
+ group by hg.assign_group
+        , hg.support_category
+        , hg.group_manager
+        , hg.group_pm
+        , shr2.FUTURE_INCLUDED
+        , sm.sla_metric_name
+        , min_target
+        , exp_target
+        , prem_target)
+, sla_data2 as
+(select   FUTURE_INCLUDED
+        , assign_group
+        , support_category
+        , group_manager
+        , group_pm
+        , sla_metric_name
+        , in_cnt
+        , out_cnt
+        , risk_cnt
+        , high_risk_cnt
+        , min_target
+        , exp_target
+        , prem_target
+        , sum(case when FUTURE_INCLUDED = 'Y' then in_cnt+out_cnt+risk_cnt else 0 end) over (partition by support_category) support_category_adsell_cnt
+        , sum(case when FUTURE_INCLUDED = 'Y' then in_cnt+out_cnt+risk_cnt else 0 end) over (partition by group_manager) group_manager_adsell_cnt
+        , sum(case when FUTURE_INCLUDED = 'Y' then in_cnt+out_cnt+risk_cnt else 0 end) over (partition by group_pm, group_manager) group_pm_adsell_cnt
+ from     sla_data)       
+, sla_data3 as 
+(select   type
+        , FUTURE_INCLUDED
+        , assign_group
+        , support_category
+        , group_manager
+        , group_pm
+        , sla_metric_name
+        , in_cnt
+        , out_cnt
+        , risk_cnt
+        , high_risk_cnt
+        , (case when in_cnt+out_cnt = 0 then null else round(in_cnt/(in_cnt+out_cnt) * 100,2) end) value
+        , (case when in_cnt+out_cnt = 0 then 99
+                when in_cnt/(in_cnt+out_cnt) * 100 < min_target then 0
+                when in_cnt/(in_cnt+out_cnt) * 100 < exp_target then 1
+                when in_cnt/(in_cnt+out_cnt) * 100 < prem_target then 2
+                when in_cnt/(in_cnt+out_cnt) * 100 >= prem_target then 3
+           end) status
+       , min_target
+       , exp_target
+       , prem_target
+ from    (select   'ASSIGN_GROUP' type
+                 , FUTURE_INCLUDED
+                 , assign_group
+                 , support_category
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , in_cnt 
+                 , out_cnt 
+                 , risk_cnt
+                 , high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          union all
+          select   'SUPPORT_CATEGORY' type
+                 , (case when support_category_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , null assign_group
+                 , support_category
+                 , null group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          group by (case when support_category_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , support_category
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'SUPPORT_CATEGORY' type
+                 , 'N' FUTURE_INCLUDED
+                 , null assign_group
+                 , support_category
+                 , null group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          where    support_category_adsell_cnt > 0
+          and      FUTURE_INCLUDED = 'A'
+          group by s.FUTURE_INCLUDED
+                 , support_category
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'PROJECT_MANAGER' type
+                 , (case when group_pm_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , null assign_group
+                 , null support_category
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          group by (case when group_pm_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'PROJECT_MANAGER' type
+                 , 'N' FUTURE_INCLUDED
+                 , null assign_group
+                 , null support_category
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          where    group_pm_adsell_cnt > 0
+          and      FUTURE_INCLUDED = 'A'
+          group by s.FUTURE_INCLUDED
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'PROJECT_MANAGER2' type
+                 , (case when group_pm_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , null assign_group
+                 , null support_category
+                 , null group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          group by (case when group_pm_adsell_cnt > 0 then 'Y' else 'A' end)
+                 --, group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'PROJECT_MANAGER2' type
+                 , 'N' FUTURE_INCLUDED
+                 , null assign_group
+                 , null support_category
+                 , null group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          where    group_pm_adsell_cnt > 0
+          and      FUTURE_INCLUDED = 'A'
+          group by s.FUTURE_INCLUDED
+                 --, group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'DIRECTOR' type
+                 , (case when group_manager_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , null assign_group
+                 , null support_category
+                 , s.group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          group by (case when group_manager_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , s.group_manager
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'DIRECTOR' type
+                 , 'N' FUTURE_INCLUDED
+                 , null assign_group
+                 , null support_category
+                 , s.group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          where    group_manager_adsell_cnt > 0
+          and      FUTURE_INCLUDED = 'A'
+          group by s.group_manager
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'ALL' type
+                 , 'Y' FUTURE_INCLUDED
+                 , null assign_group
+                 , null support_category
+                 , null group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          group by sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'ALL' type
+                 , 'N' FUTURE_INCLUDED
+                 , null assign_group
+                 , null support_category
+                 , null group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          where    s.FUTURE_INCLUDED = 'A'
+          group by sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          )
+), sla_data4 as 
+(select   type
+        , FUTURE_INCLUDED
+        , assign_group
+        , support_category
+        , group_manager
+        , group_pm
+        , (case min(status)
+                when 0 then 'Red' 
+                when 1 then 'Yellow' 
+                when 2 then 'Green' 
+                when 3 then 'Blue' 
+                else 'Disabled' 
+              end) status
+        , sum(in_cnt) in_cnt
+        , sum(out_cnt) out_cnt
+        , sum(risk_cnt) risk_cnt
+        , sum(high_risk_cnt) high_risk_cnt
+ from     sla_data3
+ group by type
+        , FUTURE_INCLUDED
+        , assign_group
+        , support_category
+        , group_manager 
+        , group_pm
+)
+select   h.type
+       , h.FUTURE_INCLUDED
+       , h.type     header_text
+       , h.status   header_status
+       , h.in_cnt   header_in_cnt
+       , h.out_cnt  header_out_cnt
+       , h.risk_cnt header_risk_cnt
+       , h.high_risk_cnt header_high_risk_cnt 
+       , null       item_text
+       , null       item_status
+       , null       item_in_cnt
+       , null       item_out_cnt
+       , null       item_risk_cnt
+       , null       item_high_risk_cnt
+from     sla_data4 h 
+where    h.type = 'ALL'
+union all
+select   h.type
+       , h.FUTURE_INCLUDED
+       , h.group_manager header_text
+       , h.status        header_status
+       , h.in_cnt        header_in_cnt
+       , h.out_cnt       header_out_cnt
+       , h.risk_cnt      header_risk_cnt
+       , h.high_risk_cnt header_high_risk_cnt  
+       , i.group_pm      item_text
+       , i.status        item_status
+       , i.in_cnt        item_in_cnt
+       , i.out_cnt       item_out_cnt
+       , i.risk_cnt      item_risk_cnt
+       , i.high_risk_cnt item_high_risk_cnt
+from     sla_data4 h
+         join sla_data4 i
+           on h.group_manager = i.group_manager
+          and (h.FUTURE_INCLUDED = i.FUTURE_INCLUDED or i.FUTURE_INCLUDED = 'A')
+where    h.type = 'DIRECTOR'
+and      i.type = 'PROJECT_MANAGER'
+union all
+select   'PROJECT_MANAGER' type
+       , h.FUTURE_INCLUDED
+       , h.group_pm      header_text
+       , h.status        header_status
+       , h.in_cnt        header_in_cnt
+       , h.out_cnt       header_out_cnt
+       , h.risk_cnt      header_risk_cnt
+       , h.high_risk_cnt header_high_risk_cnt  
+       , i.assign_group  item_text
+       , i.status        item_status
+       , i.in_cnt        item_in_cnt
+       , i.out_cnt       item_out_cnt
+       , i.risk_cnt      item_risk_cnt
+       , i.high_risk_cnt item_high_risk_cnt 
+from     sla_data4 h
+         join sla_data4 i
+           on h.group_pm = i.group_pm
+          and (h.FUTURE_INCLUDED = i.FUTURE_INCLUDED or i.FUTURE_INCLUDED = 'A')
+where    h.type = 'PROJECT_MANAGER2'
+and      i.type = 'ASSIGN_GROUP'
+union all
+select   h.type
+       , h.FUTURE_INCLUDED
+       , h.support_category header_text
+       , h.status           header_status
+       , h.in_cnt           header_in_cnt
+       , h.out_cnt          header_out_cnt
+       , h.risk_cnt         header_risk_cnt
+       , h.high_risk_cnt header_high_risk_cnt  
+       , i.assign_group     item_text
+       , i.status           item_status
+       , i.in_cnt           item_in_cnt
+       , i.out_cnt          item_out_cnt
+       , i.risk_cnt         item_risk_cnt 
+       , i.high_risk_cnt item_high_risk_cnt 
+from     sla_data4 h
+         join sla_data4 i
+           on h.support_category = i.support_category
+          and (h.FUTURE_INCLUDED = i.FUTURE_INCLUDED or i.FUTURE_INCLUDED = 'A')
+where    h.type = 'SUPPORT_CATEGORY'
+and      i.type = 'ASSIGN_GROUP'
+order by 1, 3, 9, 8, 2
+	]]></statement>
+
+	<statement code="SLA_Helpdesk_Gauges"><![CDATA[
+with sla_data as
+(select   t.future_included
+        , t.assign_group
+        , t.support_category
+        , nvl(t.group_manager,'UNDEFINED') group_manager
+        , t.group_pm
+        , t.sla_metric_name
+        , sum(nvl(mv.in_cnt,0)) in_cnt
+        , sum(nvl(mv.out_cnt,0)) out_cnt
+        , sum(nvl(mv.risk_cnt,0)) risk_cnt
+        , sum(nvl(mv.high_risk_cnt,0)) high_risk_cnt
+        , t.min_target
+        , t.exp_target
+        , t.prem_target
+ from     (select (case when hg.sla_bypass_ind = 'F' then 'Y' else 'A' end) future_included
+                , hg.assign_group
+                , hg.support_category
+                , hg.group_manager
+                , hg.group_pm
+                , sm.min_target
+                , sm.exp_target
+                , sm.prem_target
+                , sm.sla_metric
+                , sm.sla_metric_name
+                , params.sla_month
+           from   HELPDESK_GROUP hg
+                , SLA_METRIC sm
+                , (select to_date({slaMonth},'YYYYMM') sla_month from dual) params
+           where  params.sla_month between sm.effective_from_date and sm.effective_to_date
+           and    hg.active_ind = 'Y'
+           and    sm.sla_category = 'HD') t
+          left outer join SLA_HD_CHART_MV mv
+            on t.assign_group = mv.assign_group
+           and t.sla_metric = (case mv.sla_type when 'RESPONSE' then mv.sla_type 
+           						when 'WEB-RESPONSE' then mv.sla_type
+           						else mv.sla_type||'-'||mv.priority end)
+           and t.sla_month = mv.sla_month 
+ group by t.future_included
+        , t.assign_group
+        , t.support_category
+        , t.group_manager
+        , t.group_pm
+        , t.sla_metric_name
+        , t.min_target
+        , t.exp_target
+        , t.prem_target)
+, sla_data2 as
+(select   FUTURE_INCLUDED
+        , assign_group
+        , support_category
+        , group_manager
+        , group_pm
+        , sla_metric_name
+        , in_cnt
+        , out_cnt
+        , risk_cnt
+        , high_risk_cnt
+        , min_target
+        , exp_target
+        , prem_target
+        , sum(case when FUTURE_INCLUDED = 'Y' then in_cnt+out_cnt+risk_cnt else 0 end) over (partition by support_category) support_category_adsell_cnt
+        , sum(case when FUTURE_INCLUDED = 'Y' then in_cnt+out_cnt+risk_cnt else 0 end) over (partition by group_manager) group_manager_adsell_cnt
+        , sum(case when FUTURE_INCLUDED = 'Y' then in_cnt+out_cnt+risk_cnt else 0 end) over (partition by group_pm, group_manager) group_pm_adsell_cnt
+ from     sla_data) 
+select   type
+       , FUTURE_INCLUDED
+       , assign_group
+       , support_category
+       , group_manager
+       , group_pm
+       , sla_metric_name
+       , in_cnt
+       , out_cnt
+       , risk_cnt
+       , high_risk_cnt
+       , (case when in_cnt+out_cnt = 0 then 100 else round(in_cnt/(in_cnt+out_cnt) * 100,2) end) value
+       , (case when in_cnt+out_cnt = 0 then 'Blue'
+               when in_cnt/(in_cnt+out_cnt) * 100 < min_target then 'Red'
+               when in_cnt/(in_cnt+out_cnt) * 100 < exp_target then 'Yellow'
+               when in_cnt/(in_cnt+out_cnt) * 100 < prem_target then 'Green'
+               when in_cnt/(in_cnt+out_cnt) * 100 >= prem_target then 'Blue'
+          end) status
+       , min_target
+       , exp_target
+       , prem_target
+from     (select   'ASSIGN_GROUP' type
+                 , FUTURE_INCLUDED
+                 , assign_group
+                 , support_category
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , in_cnt 
+                 , out_cnt 
+                 , risk_cnt
+                 , high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          union all
+          select   'SUPPORT_CATEGORY' type
+                 , (case when support_category_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , null assign_group
+                 , support_category
+                 , null group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          group by (case when support_category_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , support_category
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'SUPPORT_CATEGORY' type
+                 , 'N' FUTURE_INCLUDED
+                 , null assign_group
+                 , support_category
+                 , null group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          where    support_category_adsell_cnt > 0
+          and      FUTURE_INCLUDED = 'A'
+          group by s.FUTURE_INCLUDED
+                 , support_category
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'PROJECT_MANAGER' type
+                 , (case when group_pm_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , null assign_group
+                 , null support_category
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          group by (case when group_pm_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'PROJECT_MANAGER' type
+                 , 'N' FUTURE_INCLUDED
+                 , null assign_group
+                 , null support_category
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          where    group_pm_adsell_cnt > 0
+          and      FUTURE_INCLUDED = 'A'
+          group by s.FUTURE_INCLUDED
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+           select   'PROJECT_MANAGER' type
+                 , (case when group_pm_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , null assign_group
+                 , null support_category
+                 , 'Multiple' group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          group by (case when group_pm_adsell_cnt > 0 then 'Y' else 'A' end)
+                 --, group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'PROJECT_MANAGER' type
+                 , 'N' FUTURE_INCLUDED
+                 , null assign_group
+                 , null support_category
+                 , 'Multiple' group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          where    group_pm_adsell_cnt > 0
+          and      FUTURE_INCLUDED = 'A'
+          group by s.FUTURE_INCLUDED
+                 --, group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all       
+          select   'DIRECTOR' type
+                 , (case when group_manager_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , null assign_group
+                 , null support_category
+                 , s.group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          group by (case when group_manager_adsell_cnt > 0 then 'Y' else 'A' end)
+                 , s.group_manager
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'DIRECTOR' type
+                 , 'N' FUTURE_INCLUDED
+                 , null assign_group
+                 , null support_category
+                 , s.group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          where    group_manager_adsell_cnt > 0
+          and      FUTURE_INCLUDED = 'A'
+          group by s.group_manager
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'ALL' type
+                 , 'Y' FUTURE_INCLUDED
+                 , null assign_group
+                 , null support_category
+                 , null group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          group by sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'ALL' type
+                 , 'N' FUTURE_INCLUDED
+                 , null assign_group
+                 , null support_category
+                 , null group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , sum(high_risk_cnt) high_risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data2 s
+          where    s.FUTURE_INCLUDED = 'A'
+          group by s.FUTURE_INCLUDED
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+         )
+order by 1, 3, 4, 5, 6, 7, 2
+	]]></statement>
+
+
+<!-- 
+Returns help desk detail data for dashboard.
+
+Parameters
+  - slaMonth      : ALL if all months
+  - itemType      : ALL, GROUP_MANAGER, GROUP_PM, SUPPORT_CATEGORY, ASSIGN_GROUP
+  - itemName      : Value to filter group_manger, group_pm, or support_category on. 
+  - priority      : ALL, STANDARD, HIGH, or CRITICAL
+  - slaType       : ALL, RESPONSE, REPAIR, or RESOLUTION
+  - slaStatus     : IN, OUT, RISK
+  - status        : ALL or OPEN  (not CLOSED, RESOLVED, CANCELLED)
+  - futureIncluded: Y or N
+  
+To select all risks, you'd pass { slaMonth: "ALL"
+                                , itemType: "ALL"
+                                , itemName: "ALL"
+                                , priority: "ALL"
+                                , slaType: "ALL"
+                                , slaStatus: "RISK"
+                                , status: "ALL"
+                                , futureIncluded: "Y" }
+
+ -->
+	<statement code="SLA_Helpdesk_Detail_Data"><![CDATA[	
+select /*+ parallel(a,6) */
+	 (case when a.sla_bypass_ind = 'F' then 'Y' else 'A' end) FUTURE_INCLUDED
+     ,  TICKET_ID
+     , TO_CHAR(TO_DATE(OPEN_MONTH,'YYYYMM'),'mm/yyyy') OPEN_MONTH
+     , ASSIGN_GROUP
+     , TICKET_STATUS
+     , SUPPORT_CATEGORY
+     , SUBMITTED_DATE
+     , RESOLVED_DATE
+     , NVL(TRUNC(RESOLVED_DATE), TRUNC(SYSDATE)) - TRUNC(SUBMITTED_DATE) TICKET_AGE
+     , ASSIGNEE
+     , LAST_MODIFIED_BY
+     , LAST_MODIFIED_DATE
+     , PRIORITY
+     , STATUS
+     , PENDING
+     , CATEGORY
+     , TYPE
+     , ITEM
+     , SUMMARY
+     , REGEXP_REPLACE(SOLUTION_SUMMARY, '[[:cntrl:]]', ' ') SOLUTION_SUMMARY
+     , ROOT_CAUSE
+     , REGION
+     , SITE
+     , ORIG_SUBMITTER
+     , SUBMITTER_NAME
+     , RESOLUTION_CATEGORY
+     , RESOLUTION_CATEGORY_TIER_2
+     , STATUS_REASON_DESC
+     , DEPARTMENT
+     , REPAIRED_TIME
+     , CUS_STATUS_REASON
+     , ASSIGNED_GROUP1
+     , START_ASSIGNED_TIME1
+     , TOTAL_TIME_SPENT_IN_ASSIGNED1
+     , END_ASSIGNED_TIME1
+     , CREATED_ON
+     , RESOLUTION_CATEGORY_AUDIT
+     , GROUP_MANAGER
+     , GROUP_PM
+     , SLA_BYPASS_IND
+     , DESKTOP_IND
+     -- , RESPONSE_TARGET_IND
+     , WEB_RESPONSE_TARGET_IND
+     , REPAIR_TARGET_IND
+     , RESOLUTION_TARGET_IND
+     , REPORTED_SOURCE
+     , REPORTED_SOURCE_AUDIT
+     , CLIENT_NAME
+     , QC_DEFECT_ID
+     , WRF_ID
+     , SUMMARY_DESC
+     , WEB_RESPONSE_DUE_BY
+     , START_ASSIGNED_TIME2
+     , END_ASSIGNED_TIME2
+     , TOTAL_TIME_SPENT_IN_ASSIGNED2
+     , BUSINESS_UNIT
+     --, RESPONSE_DUE_BY
+     , REPAIR_DUE_BY
+     , RESOLUTION_DUE_BY
+     , ENTRY_ID
+     , PRIORITY_AUDIT
+     , ASSIGNEE_DATE
+     , SALES_CODE
+     , LAST_UPD_USER_ID
+     , LAST_UPD_USER_NAME
+     , (case when web_response_target_ind != 'EXC' then 'Web'
+        when response_target_ind != 'EXC' then 'Call'
+       end) response_type
+     , (case when web_response_target_ind != 'EXC' then web_response_target_ind
+        Else response_target_ind 
+       end) response_target_ind
+     , (case when web_response_target_ind != 'EXC' then web_response_due_by
+         when response_target_ind != 'EXC' then response_due_by 
+        end) response_due_by
+     , case when response_target_ind   = 'RISK' then 'CALL-RESPONSE'
+     	 when web_response_target_ind   = 'RISK' then 'WEB-RESPONSE'
+         when repair_target_ind     = 'RISK' then 'REPAIR'
+         when resolution_target_ind = 'RISK' then 'RESOLUTION'
+         else 'NONE' END SLA_AT_RISK
+     , case when response_target_ind   = 'RISK' then response_due_by
+     	 when web_response_target_ind   = 'RISK' then web_response_due_by
+         when repair_target_ind     = 'RISK' then repair_due_by
+         when resolution_target_ind = 'RISK' then resolution_due_by
+         else NULL END SLA_DUE_BY
+     , case when response_target_ind   = 'RISK' then response_due_by
+     	 when web_response_target_ind   = 'RISK' then web_response_due_by
+         when repair_target_ind     = 'RISK' then repair_due_by
+         when resolution_target_ind = 'RISK' then resolution_due_by
+         else NULL END SLA_DUE_DATE
+     , QC_DEFECT_STATUS
+     , QC_DEFECT_SOURCE
+     , QC_DEFECT_PLANNED_CLOSING_VER
+     , (CASE
+                   WHEN (    a.response_target_ind = 'RISK'
+                         AND TRUNC (a.response_due_by) = TRUNC (SYSDATE)
+                        )
+                    OR (    a.repair_target_ind = 'RISK'
+                        AND TRUNC (a.repair_due_by) = TRUNC (SYSDATE)
+                       )
+                    OR (    a.resolution_target_ind = 'RISK'
+                        AND TRUNC (a.resolution_due_by) = TRUNC (SYSDATE)
+                       )
+                    OR (    a.web_response_target_ind = 'RISK'
+                     	AND TRUNC (a.web_response_due_by) = TRUNC (SYSDATE)
+                    	)
+                    THEN 'Y'
+                    ELSE
+                        'N'
+                END
+       ) high_risk_ind    
+     , CLOSED_DATE
+     , CLOSED_MONTH                                            
+     , ENV_PARM_IND                                            
+     , VENDOR_OPERATING_CO                                            
+     , INCIDENT_ASSOCIATION_TYPE                               
+     , ORIGINAL_INCIDENT_NUMBER                                
+     , CITY                                                    
+	 , STATE_PROVINCE                                            
+	 , ASSIGNED_SUPPORT_COMPANY                                  
+	 , OWNER_GROUP                                               
+	 , RESPONSE_TARGET                                           
+	 , RESPONSE_STATUS                                           
+	 , RESPONSE_DATE                                             
+	 , RESPONSE_SET                                              
+	 , REPAIR_TARGET                                             
+	 , REPAIR_STATUS                                             
+	 , REPAIR_DATE                                               
+	 , REPAIR_SET                                                
+	 , RESOLUTION_TARGET                                         
+	 , RESOLUTION_STATUS                                         
+	 , RESOLUTION_DATE                                           
+	 , RESOLUTION_SET                                            
+	 , VIP                                                       
+	 , ASSIGNED_SUPPORT_ORGANIZATION                             
+	 , RQC_SLA_START  
+from   dash_helpdesk a
+where  ( 'ALL' = {slaMonth} or to_char(to_date(open_month,'YYYYMM'),'Mon-RR') = {slaMonth} )
+and    (    {itemType} = 'ALL'
+        or ({itemType} = 'DIRECTOR'         and group_manager = {itemName} )
+        or ({itemType} = 'PROJECT_MANAGER'  and group_pm = {itemName} )
+        or ({itemType} = 'SUPPORT_CATEGORY' and support_category = {itemName} )
+        or ({itemType} = 'ASSIGN_GROUP'     and assign_group = {itemName} )
+       )
+and    ( 'ALL' = {priority} or priority = {priority} )
+and    (   ('ALL' = {slaType}        and 'ALL' = {slaStatus} )
+        or ('ALL' = {slaType}        and (WEB_RESPONSE_TARGET_IND = {slaStatus} or RESPONSE_TARGET_IND = {slaStatus} or REPAIR_TARGET_IND = {slaStatus} or RESOLUTION_TARGET_IND = {slaStatus} ) )
+        or ('RESPONSE' = {slaType}   and RESPONSE_TARGET_IND = {slaStatus})
+        or ('WEB-RESPONSE' = {slaType}   and WEB_RESPONSE_TARGET_IND = {slaStatus})
+        or ('REPAIR' = {slaType}     and REPAIR_TARGET_IND = {slaStatus})
+        or ('RESOLUTION' = {slaType} and RESOLUTION_TARGET_IND = {slaStatus} )
+       )
+and    ( 'ALL' = {status} or ( {status} = 'OPEN' and STATUS not in ('CLOSED', 'RESOLVED', 'CANCELLED') ) )
+and    (a.sla_bypass_ind = 'N' or ({futureIncluded} = 'Y' and a.sla_bypass_ind = 'F'))
+    ]]></statement>
+    
+	<!-- Returns 13 months of chart data that will be filtered and aggregated on the dashboard -->
+	<statement code="SLA_Helpdesk_Chart_Data"><![CDATA[	
+select   shc.sla_month
+       , shc.future_included
+       , shc.sla_type
+       , shc.priority
+       , shc.assign_group
+       , hg.support_category
+       , hg.group_manager
+       , hg.group_pm
+       , shc.in_cnt
+       , shc.out_cnt
+       , shc.risk_cnt
+       , shc.all_in_cnt
+       , shc.all_out_cnt
+       , shc.all_risk_cnt
+       , shc.all_cnt
+from     dash_process_control pc
+       , sla_hd_chart_mv shc
+         join helpdesk_group hg
+           on shc.assign_group = hg.assign_group
+where    sla_month > trunc(add_months(pc.helpdesk_load_date,-13),'MM')
+order by 1, 2, 3, 4
+    ]]></statement>
+    
+	<!-- Returns last load date for Helpdesk data -->
+	<statement code="SLA_Helpdesk_Load_Date"><![CDATA[	
+select helpdesk_load_date from dash_process_control
+    ]]></statement>
+    
+    <statement code="SLA_Future_SLA_Data"><![CDATA[
+select distinct ASSIGN_GROUP 
+from   dash_helpdesk 
+where  sla_bypass_ind = 'F' 
+and    open_month = {slaMonth}
+  	]]></statement>
+    
+    
+    <statement code="SLA_Run_Time_Data"><![CDATA[	
+SELECT   nvl(r.da_region_name, da.da_region) da_region
+       , nvl(s.da_state_name, da.da_state) da_state
+       , da.da_region as region
+       , da.da_state as state
+       , CYCLE_DATE
+       , CYCLE_NUM
+       , DA_EXTRACTS
+       , TO_DATE(TO_CHAR(TARGET_DATE,'MMDDYYYY')||TARGET_TIME,'MMDDYYYYHH24:MI SS') TARGET_DATETIME
+       , TO_DATE(TO_CHAR(ACTUAL_DATE,'MMDDYYYY')||ACTUAL_TIME,'MMDDYYYYHH24:MI SS') ACTUAL_DATETIME
+       , DA_ADJUST
+       , DA_ONTIME
+       , DA_COMMENTS
+FROM     DIR_ASSIST da
+         JOIN DIR_ASSIST_REGION r
+         on da.da_region = r.da_region
+         JOIN DIR_ASSIST_STATE s
+         on da.da_state = s.da_state
+WHERE    TO_CHAR(CYCLE_DATE,'YYYYMM') = {slaMonth}
+AND      DA_EXTRACTS IS NOT NULL		 
+ORDER BY 1, 2, 3
+    ]]></statement>
+  	
+  <statement code="SLA_DA_Extract_Menu"><![CDATA[
+with sla_data as
+(select   nvl(r.da_region_name, da.da_region) da_region
+        , nvl(s.da_state_name, da.da_state) da_state
+        , t.sla_metric_name
+        , count(case when da.da_ontime + nvl(da.da_adjust,0) > 0 then 1 end) in_cnt
+        , count(case when da.da_ontime + nvl(da.da_adjust,0) = 0 then 1 end) out_cnt
+        , t.min_target
+        , t.exp_target
+        , t.prem_target
+ from     (select sm.min_target
+                , sm.exp_target
+                , sm.prem_target
+                , sm.sla_metric
+                , sm.sla_metric_name
+                , params.sla_month
+           from   SLA_METRIC sm
+                , (select to_date({slaMonth}, 'YYYYMM') sla_month from dual) params
+           where  params.sla_month between sm.effective_from_date and sm.effective_to_date
+           and    sm.sla_category = 'DA'
+           and    sm.sla_metric = 'DA_EXTRACT') t
+          join DIR_ASSIST da
+            on t.sla_month = trunc(da.cycle_date,'MM')
+          left outer join DIR_ASSIST_REGION r
+            on da.da_region = r.da_region
+          left outer join DIR_ASSIST_STATE s
+            on da.da_state = s.da_state
+ where    da.da_ontime is not null
+ group by nvl(r.da_region_name, da.da_region)
+        , nvl(s.da_state_name, da.da_state)
+        , t.sla_metric_name
+        , t.min_target
+        , t.exp_target
+        , t.prem_target)
+, sla_data2 as 
+(select   type
+        , da_region
+        , da_state
+        , sla_metric_name
+        , in_cnt
+        , out_cnt
+        , (case when in_cnt+out_cnt = 0 then null else round(in_cnt/(in_cnt+out_cnt) * 100,2) end) value
+        , (case when in_cnt+out_cnt = 0 then 99
+                when in_cnt/(in_cnt+out_cnt) * 100 < min_target then 0
+                when in_cnt/(in_cnt+out_cnt) * 100 < exp_target then 1
+                when in_cnt/(in_cnt+out_cnt) * 100 >= exp_target then 2
+                --when in_cnt/(in_cnt+out_cnt) * 100 >= prem_target then 3
+           end) status
+       , min_target
+       , exp_target
+       , prem_target
+ from    (select   'STATE' type
+                 , s.* 
+          from     sla_data s
+          union all
+          select   'REGION' type
+                 , da_region
+                 , null da_state
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data s
+          group by da_region
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'ALL' type
+                 , null da_region
+                 , null da_state
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data s
+          group by sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          )
+), sla_data3 as 
+(select   type
+        , da_region
+        , da_state
+        , (case min(status)
+                when 0 then 'Red' 
+                when 1 then 'Yellow' 
+                when 2 then 'Green' 
+                when 3 then 'Blue' 
+                else 'Disabled' 
+              end) status
+        , sum(in_cnt) in_cnt
+        , sum(out_cnt) out_cnt
+ from     sla_data2
+ group by type
+        , da_region
+        , da_state
+)
+select  h.type
+      , initcap(h.type) header_text
+      , h.status   header_status
+      , h.in_cnt   header_in_cnt
+      , h.out_cnt  header_out_cnt
+      , null       item_text
+      , null       item_status
+      , null       item_in_cnt
+      , null       item_out_cnt
+from    sla_data3 h 
+where   h.type = 'ALL'
+union all
+select  h.type
+      , h.da_region     header_text
+      , h.status        header_status
+      , h.in_cnt        header_in_cnt
+      , h.out_cnt       header_out_cnt
+      , i.da_state      item_text
+      , i.status        item_status
+      , i.in_cnt        item_in_cnt
+      , i.out_cnt       item_out_cnt
+from    sla_data3 h
+        join sla_data3 i
+          on h.da_region = i.da_region
+where   h.type = 'REGION'
+and     i.type = 'STATE'
+order by 1, 2, 6
+    ]]></statement>
+    
+    
+    <statement code="SLA_DA_Extract_Gauges"><![CDATA[
+with sla_data as
+(select   nvl(r.da_region_name, da.da_region) da_region
+        , nvl(s.da_state_name, da.da_state) da_state
+        , t.sla_metric_name
+        , count(case when da.da_ontime + nvl(da.da_adjust,0) > 0 then 1 end) in_cnt
+        , count(case when da.da_ontime + nvl(da.da_adjust,0) = 0 then 1 end) out_cnt
+        , t.min_target
+        , t.exp_target
+        , t.prem_target
+ from     (select sm.min_target
+                , sm.exp_target
+                , sm.prem_target
+                , sm.sla_metric
+                , sm.sla_metric_name
+                , params.sla_month
+           from   SLA_METRIC sm
+                , (select to_date({slaMonth}, 'YYYYMM') sla_month from dual) params
+           where  params.sla_month between sm.effective_from_date and sm.effective_to_date
+           and    sm.sla_category = 'DA'
+           and    sm.sla_metric = 'DA_EXTRACT') t
+          join DIR_ASSIST da
+            on t.sla_month = trunc(da.cycle_date,'MM')
+          left outer join DIR_ASSIST_REGION r
+            on da.da_region = r.da_region
+          left outer join DIR_ASSIST_STATE s
+            on da.da_state = s.da_state
+ where    da.da_ontime is not null
+ group by nvl(r.da_region_name, da.da_region)
+        , nvl(s.da_state_name, da.da_state)
+        , t.sla_metric_name
+        , t.min_target
+        , t.exp_target
+        , t.prem_target)
+select   type
+       , da_region
+       , da_state
+       , in_cnt
+       , out_cnt
+       , (case when in_cnt+out_cnt = 0 then 100 else round(in_cnt/(in_cnt+out_cnt) * 100,2) end) value
+       , (case when in_cnt+out_cnt = 0 then 'Blue'
+               when in_cnt/(in_cnt+out_cnt) * 100 < min_target then 'Red'
+               when in_cnt/(in_cnt+out_cnt) * 100 < exp_target then 'Yellow'
+               when in_cnt/(in_cnt+out_cnt) * 100 >= exp_target then 'Green'
+               --when in_cnt/(in_cnt+out_cnt) * 100 >= prem_target then 'Blue'
+          end) status
+       , min_target
+       , exp_target
+       , prem_target
+from     (select   'STATE' type
+                  , s.* 
+          from     sla_data s
+          union all
+          select   'REGION' type
+                 , da_region
+                 , null da_state
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data s
+          group by da_region
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'ALL' type
+                 , null da_region
+                 , null da_state
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data s
+          group by sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+         )
+order by 1, 2, 3, 4, 5, 6
+    ]]></statement>
+    
+    <statement code="SLA_SAME_GROUP_PM_MULTIPLE_DIRECTORS"><![CDATA[
+	 SELECT GROUP_PM 
+	 FROM (SELECT DISTINCT HG.GROUP_MANAGER, GROUP_PM FROM HELPDESK_GROUP HG 
+	        JOIN (SELECT GROUP_MANAGER FROM HELPDESK_GROUP where active_ind = 'Y'
+	              GROUP BY GROUP_MANAGER ) GM
+	        ON HG.GROUP_MANAGER = GM.GROUP_MANAGER
+	        AND HG.GROUP_PM IS NOT NULL
+	        where HG.active_ind = 'Y'
+	        ORDER BY HG.GROUP_MANAGER)
+	 GROUP BY GROUP_PM
+	 HAVING COUNT(GROUP_MANAGER) > 1
+  	]]></statement>
+
+<!-- 
+  <statement code="SLA_CLOSED_TICKET_CHART_DATA">
+  	<![CDATA[
+  	    select nvl(other, 0) other, 
+		  nvl(mnp, 0) mnp, 
+		  nvl(all_tkt, 0) all_tkt,  
+		  TO_CHAR ( eax.mnth_date, 'YYYY/MM') closed_date,
+          TO_CHAR ( eax.mnth_date, 'Mon-YY') chart_month, 
+		  eax.mnth_date close_month        		  
+from (
+select  SUM (Non_MP_tkt_count) Other,
+                SUM (mp_tkt_count) mnp,
+                sum(all_tkt_count) all_tkt,
+                to_char(Close_month, 'YYYY/MM') closed_date, chart_month, close_month
+    FROM SLA_MNP_CHART_MV,dash_process_control pc
+    where  (priority = {priority} or {priority} = 'ALL')
+    AND close_month > TRUNC (ADD_MONTHS (pc.helpdesk_load_date, -13), 'MM')    
+    AND ((ENV_PARM_IND = 'Y' and {envParm} = 'Y') or ({envParm} = 'N'))
+    AND (assign_group = {helpdeskItemName} 
+    		or  support_category = {helpdeskItemName}
+    		or  group_manager = {helpdeskItemName}
+    		or  group_pm = {helpdeskItemName}
+    		or {helpdeskItemName} = 'ALL')    
+    group by  to_char(Close_month, 'YYYY/MM'), chart_month, close_month
+    order by  to_char(Close_month, 'YYYY/MM')
+) ab,
+   (    SELECT ADD_MONTHS (TRUNC (helpdesk_load_date, 'MM'), 1 - LEVEL)
+                        mnth_date
+                FROM dash_process_control
+          CONNECT BY LEVEL <= 13
+            ORDER BY ADD_MONTHS (TRUNC (helpdesk_load_date, 'MM'), 1 - LEVEL)) eax
+            where   ab.close_month(+)= eax.mnth_date 
+            order by eax.mnth_date
+  	]]></statement> 
+  	
+  	<statement code="CLOSED_TICKET_DETAIL_DATA">
+  	<![CDATA[
+      select /*+ parallel(a,6) */
+       TICKET_ID
+     , TO_CHAR(TO_DATE(OPEN_MONTH,'YYYYMM'),'mm/yyyy') OPEN_MONTH
+     , ASSIGN_GROUP
+     , TICKET_STATUS
+     , SUPPORT_CATEGORY
+     , SUBMITTED_DATE
+     , RESOLVED_DATE
+     , NVL(TRUNC(RESOLVED_DATE), TRUNC(SYSDATE)) - TRUNC(SUBMITTED_DATE) TICKET_AGE
+     , ASSIGNEE
+     , LAST_MODIFIED_BY
+     , LAST_MODIFIED_DATE
+     , PRIORITY
+     , STATUS
+     , PENDING
+     , CATEGORY
+     , TYPE
+     , ITEM
+     , SUMMARY
+     , REGEXP_REPLACE(SOLUTION_SUMMARY, '[[:cntrl:]]', ' ') SOLUTION_SUMMARY
+     , ROOT_CAUSE
+     , REGION
+     , SITE
+     , ORIG_SUBMITTER
+     , SUBMITTER_NAME
+     , RESOLUTION_CATEGORY
+     , RESOLUTION_CATEGORY_TIER_2
+     , STATUS_REASON_DESC
+     , DEPARTMENT
+     , REPAIRED_TIME
+     , CUS_STATUS_REASON
+     , ASSIGNED_GROUP1
+     , START_ASSIGNED_TIME1
+     , TOTAL_TIME_SPENT_IN_ASSIGNED1
+     , END_ASSIGNED_TIME1
+     , CREATED_ON
+     , RESOLUTION_CATEGORY_AUDIT
+     , GROUP_MANAGER
+     , GROUP_PM
+     , SLA_BYPASS_IND
+     , DESKTOP_IND
+     , REPAIR_TARGET_IND
+     , RESOLUTION_TARGET_IND
+     , REPORTED_SOURCE
+     , REPORTED_SOURCE_AUDIT
+     , CLIENT_NAME
+     , QC_DEFECT_ID
+     , WRF_ID
+     , SUMMARY_DESC
+     , WEB_RESPONSE_DUE_BY
+     , START_ASSIGNED_TIME2
+     , END_ASSIGNED_TIME2
+     , TOTAL_TIME_SPENT_IN_ASSIGNED2
+     , BUSINESS_UNIT
+     , REPAIR_DUE_BY
+     , RESOLUTION_DUE_BY
+     , ENTRY_ID
+     , PRIORITY_AUDIT
+     , ASSIGNEE_DATE
+     , SALES_CODE
+     , LAST_UPD_USER_ID
+     , LAST_UPD_USER_NAME
+     , QC_DEFECT_STATUS
+     , QC_DEFECT_SOURCE
+     , QC_DEFECT_PLANNED_CLOSING_VER
+     , CLOSED_DATE
+     , CLOSED_MONTH                                            
+     , ENV_PARM_IND                                            
+     , VENDOR_OPERATING_CO                                            
+     , INCIDENT_ASSOCIATION_TYPE                               
+     , ORIGINAL_INCIDENT_NUMBER                                
+     , CITY                                                    
+	 , STATE_PROVINCE                                            
+	 , ASSIGNED_SUPPORT_COMPANY                                  
+	 , OWNER_GROUP                                               
+	 , RESPONSE_TARGET                                           
+	 , RESPONSE_STATUS                                           
+	 , RESPONSE_DATE                                             
+	 , RESPONSE_SET                                              
+	 , REPAIR_TARGET                                             
+	 , REPAIR_STATUS                                             
+	 , REPAIR_DATE                                               
+	 , REPAIR_SET                                                
+	 , RESOLUTION_TARGET                                         
+	 , RESOLUTION_STATUS                                         
+	 , RESOLUTION_DATE                                           
+	 , RESOLUTION_SET                                            
+	 , VIP                                                       
+	 , ASSIGNED_SUPPORT_ORGANIZATION                             
+	 , RQC_SLA_START                                             
+     , ROWNUM                                                  
+     , CASE
+               WHEN ( upper(root_cause) like '%M&P%'
+            		 OR upper(root_cause) like '%M & P%'
+             		 OR UPPER (root_cause) = 'METHODS & PROCEDURES'
+                     OR UPPER (root_cause) LIKE 'METHODS AND PROCED%')
+               THEN 'Y' ELSE 'N'
+            END mnp_ind
+from   dash_helpdesk a
+where  closed_date IS NOT NULL
+AND status = 'CLOSED'
+AND (assign_group = {helpdeskItemName} 
+	or support_category = {helpdeskItemName}
+	or  group_manager = {helpdeskItemName}
+    or  group_pm = {helpdeskItemName} 
+	or {helpdeskItemName} = 'ALL')
+AND (priority = {priority} or {priority} = 'ALL')
+AND closed_month = replace({slaMonth},'/')
+AND ((ENV_PARM_IND = 'Y' and {envParm} = 'Y') or ({envParm} = 'N'))
+AND (CASE WHEN (root_cause is not null
+			and ( upper(root_cause) like '%M&P%'
+            or  upper(root_cause) like '%M & P%'
+            or  UPPER (root_cause) = 'METHODS & PROCEDURES'
+            OR UPPER (root_cause) LIKE 'METHODS AND PROCED%'))
+          THEN 'Y' ELSE 'N' END = {MNPInd} or {MNPInd} = 'ALL')
+  	]]>
+  	</statement>
+ -->
+</sql>

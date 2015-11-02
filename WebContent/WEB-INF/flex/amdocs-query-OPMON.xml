@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+<sql type="OpMonSQL">
+
+  <statement code="AmdOpSlowestTxs">
+select /*+ parallel(a,8) full(a) */
+    transaction_description,
+    ROUND(median(case when total_time> total_server_time then total_time else NULL end)/1000,2) User_Experience_median,
+    ROUND(AVG(case when total_time>total_server_time then total_time else NULL end) /1000,2) User_Experience,
+    ROUND(AVG(case when (other_time>0 and total_time>=total_server_time) then (total_time-other_time) else NULL end)/1000,2)  JS_time,
+    ROUND(AVG(case when (other_time>0 and total_time>=total_server_time) then (other_time-total_server_time) else NULL end)/1000,2) network_time,
+    ROUND(AVG(total_server_time)/1000 ,2) Server_Time,
+    ROUND(AVG(total_server_time - app_server_time)/1000,2) JSP_Time,
+    ROUND(AVG(app_server_time)/1000,2) EJB_Time,
+    ROUND(median (case when (other_time> 0 and total_time>=total_server_time) then (total_time-other_time) else NULL end)/1000,2) JS_median_time,
+    ROUND(median(case when (other_time> 0 and total_time>=total_server_time) then (other_time-total_server_time) else NULL end)/1000,2) Network_median_time,
+    ROUND(median(total_server_time)/1000,2) Server_median_Time,
+    ROUND(median(total_server_time - app_server_time)/1000,2) JSP_median_Time,
+    ROUND(median(app_server_time)/1000,2) EJB_median_Time,
+    ROUND(min(total_server_time)/1000,2) Server_minimum_Time,
+    ROUND(max(total_server_time)/1000,2) Server_maximum_Time,
+    ROUND(PERCENTILE_DISC(0.9) WITHIN GROUP (ORDER BY  (total_server_time)/1000),2)  Server_90_percentile,
+    count(*)
+  from monitoring  a
+ where TOTAL_SERVER_TIME > 0
+   AND transaction_type not like 'A'
+   AND transaction_type not like 'I'
+   AND transaction_type not like 'J'
+   AND transaction_type not like 'B'
+ group by transaction_description
+having count(*) > 5
+ order by User_Experience_median desc
+  </statement>
+
+  <statement code="AmdOpTxByUser">
+select TRANSACTION_DESCRIPTION,
+       TIMESTAMP,
+       ROUND(case when total_time>total_server_time then total_time else NULL end/1000,2) User_Experience,
+       ROUND(case when (other_time>0 and total_time>=total_server_time) then (other_time-total_server_time) else NULL end/1000,2) network_time,
+       ROUND(total_server_time/1000 ,2) Server_Time,
+       ROUND(app_server_time/1000,2) EJB_Time,
+       ROUND(total_server_time - app_server_time/1000,2) JSP_Time,
+       ROUND(case when (other_time>0 and total_time>=total_server_time) then (total_time-other_time) else NULL end/1000,2)  JS_time,
+       APPL_SERVER_NAME,
+       SERVER_IP,
+       USER_IP_ADDRESS,
+       USER_ID,
+       WORKMODE,
+       MESSAGE_TYPE,
+       TRANSACTION_TYPE
+  from MONITORING
+ where USER_ID = {userId}
+  and substr(TIMESTAMP,1,10) between {selectedDate} and {selectedDate}
+  </statement>
+
+  <statement code="AmdOpEmployeeSLV">
+select employee_id, login_name, emp_first_name, NVL(emp_middle_name, ''), employee_surname
+  from employee
+ where employee_id in (select distinct user_id from monitoring)
+ order by employee_surname, emp_first_name
+  </statement>
+
+</sql>

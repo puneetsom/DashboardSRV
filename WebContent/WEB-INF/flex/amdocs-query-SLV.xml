@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+<sql type="CdwSQL">
+
+<statement code="employee_slv_all"><![CDATA[
+	 SELECT EMPLOYEE_ID,
+         EMP_FIRST_NAME,
+         EMPLOYEE_SURNAME,
+         EMPLOYEE_POSITION,
+         EMPLOYEE.OFFICE_CODE,
+         EMPLOYEE.OFFICE_TYPE,
+         EMPLOYEE.SUPERVISOR_ID,
+         EMPLOYEE.LAPTOP_IND
+    FROM EMPLOYEE
+ORDER BY UPPER (EMPLOYEE_SURNAME), UPPER (EMP_FIRST_NAME)
+	]]></statement>
+	
+<statement code="employee_slv_active"><![CDATA[
+	SELECT EMPLOYEE_ID,
+         EMP_FIRST_NAME,
+         EMPLOYEE_SURNAME,
+         EMPLOYEE_POSITION,
+         EMPLOYEE.OFFICE_CODE,
+         EMPLOYEE.OFFICE_TYPE,
+         EMPLOYEE.SUPERVISOR_ID,
+         EMPLOYEE.EMPLOYEE_STATUS
+    FROM EMPLOYEE
+   WHERE EMPLOYEE.EMPLOYEE_STATUS = 0
+ORDER BY UPPER (EMPLOYEE_SURNAME), UPPER (EMP_FIRST_NAME)
+]]></statement>
+	
+<statement code="product_slv_all"><![CDATA[
+ SELECT DISTINCT
+         PRODUCT_ISSUE.PRODUCT_CODE,
+         PRODUCT_ISSUE.PRODUCT_NAME,
+         TO_CHAR (PRODUCT_ISSUE.ISSUE_DATE, 'mm/yyyy') PRODUCT_ISSUE_DATE,
+         PRODUCT_ISSUE.PRODUCT_ISSUE_NUM
+    FROM PRODUCT_ISSUE
+   WHERE PRODUCT_ISSUE.PRODUCT_ISSUE_NUM in 
+            (SELECT PRDISS2.PRODUCT_ISSUE_NUM 
+               FROM PRODUCT_ISSUE PRDISS2
+              WHERE PRDISS2.PRODUCT_CODE = PRODUCT_ISSUE.PRODUCT_CODE
+                )
+ORDER BY PRODUCT_NAME DESC
+        ]]></statement>
+        
+<statement code="product_slv_period"><![CDATA[
+SELECT DISTINCT
+         PRODUCT_ISSUE.PRODUCT_CODE,
+         PRODUCT_ISSUE.PRODUCT_NAME,
+         TO_CHAR (PRODUCT_ISSUE.ISSUE_DATE, 'mm/yyyy') PRODUCT_ISSUE_DATE,
+         PRODUCT_ISSUE.PRODUCT_ISSUE_NUM
+    FROM PRODUCT_ISSUE
+   WHERE PRODUCT_ISSUE.PRODUCT_ISSUE_NUM in 
+            (SELECT PRDISS2.PRODUCT_ISSUE_NUM 
+               FROM PRODUCT_ISSUE PRDISS2
+              WHERE PRDISS2.PRODUCT_CODE = PRODUCT_ISSUE.PRODUCT_CODE
+             	and to_char(PRDISS2.ISSUE_DATE, 'YYYY') > (to_char(sysdate, 'YYYY')-3)
+                )
+ORDER BY PRODUCT_NAME DESC
+]]></statement>     
+  
+<statement code="canvass_slv_all"><![CDATA[
+  SELECT CANVASS_CODE,
+         CANVASS_ISSUE_NUM,
+         CANVASS_NAME,
+         CANVASS_ISSUE_MNTH,
+         CANVASS_ISSUE_YEAR,
+         DECODE (
+            (CANVASS.CANVASS_ISSUE_MNTH || '/' || CANVASS.CANVASS_ISSUE_YEAR),
+            '/', ' ',
+            (CANVASS.CANVASS_ISSUE_MNTH || '/' || CANVASS.CANVASS_ISSUE_YEAR))
+            CANVASS_ISSUE_DATE
+    FROM CANVASS
+ORDER BY CANVASS_NAME, CANVASS_ISSUE_NUM DESC
+ ]]></statement>  	
+ 
+ <statement code="canvass_slv_period"><![CDATA[
+ SELECT CANVASS_CODE,
+         CANVASS_ISSUE_NUM,
+         CANVASS_NAME,
+         CANVASS_ISSUE_MNTH,
+         CANVASS_ISSUE_YEAR,
+         DECODE (
+            (CANVASS.CANVASS_ISSUE_MNTH || '/' || CANVASS.CANVASS_ISSUE_YEAR),
+            '/', ' ',
+            (CANVASS.CANVASS_ISSUE_MNTH || '/' || CANVASS.CANVASS_ISSUE_YEAR))
+            CANVASS_ISSUE_DATE
+    FROM CANVASS
+    where canvass_issue_year > (to_char(sysdate, 'YYYY')-3) 
+ORDER BY CANVASS_NAME, CANVASS_ISSUE_NUM DESC]]></statement>
+
+
+<statement code="CBPB_rep_slv"><![CDATA[
+select value employee_id
+     , display
+     , emp_first_name
+     , employee_surname
+     , login_name
+from   (select   a.value
+               , a.display
+               , a.employee_surname
+               , a.emp_first_name
+               , a.login_name
+               , row_number()
+                       over(partition by value
+                            order by     instr(lower(a.search), lower({search}))
+                                       , a.display) rnum
+        from     employee_ac a
+        where    lower(a.search) like lower('%'||{search}||'%')
+        and      (a.value in (select distinct rep_id from CSO_CMSN_EXTRACT_CA where cmsn_handle_status in ('N') and last_version_ind = 'Y')
+               or a.value in (select distinct rep_id from CMSN_CBPB_MV))
+        order by instr(lower(a.search), lower({search}))
+               , a.display)
+where  rnum = 1
+and    rownum <= 50
+]]></statement>
+
+</sql>

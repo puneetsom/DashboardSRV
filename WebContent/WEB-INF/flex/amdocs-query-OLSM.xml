@@ -1,0 +1,712 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+<sql type="OlsmSQL">
+
+	<statement code="EarlyDownBySelectedSlvData" clientObject="EarlyDown">
+select ED.CUSTOMER_ID,
+       ED.CUSTOMER_NAME,
+       CUSTOMER_TN,
+       PRODUCT_CODE,
+       PRODUCT_ISSUE_NUM,
+       (select PRODUCT_NAME from PRODUCT_ISSUE PI where ED.PRODUCT_CODE = PI.PRODUCT_CODE and ED.PRODUCT_ISSUE_NUM =
+PI.PRODUCT_ISSUE_NUM) PRODUCT_NAME,
+       PRODUCT_ISSUE_DATE,
+       BC_PHASE_II_DATE,
+       ITEM_ID,
+       UDAC_CODE,
+       ACTION_CODE,                    
+       NEW_ITEM_STATUS,               
+       ITEM_BOTS_AMT,
+       ITEM_NISD_AMT,
+       CANVASS_CODE,
+       CANVASS_ISSUE_NUM,
+       CANVASS_ISSUE_DATE,
+       RG_PROSPECT_CODE,               
+       RETIREMENT_STATUS,              
+       ACTUAL_START_DATE,
+       ACTUAL_END_DATE,
+       PREV_ACT_START_DT,
+       PREV_ACT_END_DT,
+       (select DESCRIPTION from EARLY_DOWN_REASON where EARLY_DOWN_CODE = EARLY_DOWN_REASON_CD) EARLY_DOWN_REASON_CD,
+       LIVE_DATE,
+       FULFILLMENT_STATUS,             
+       ED_DATE,
+       (select trunc(logical_date - ED_DATE) from op_logical_date where logical_date_type = 'O') ED_DAYS,
+       ED_REPORT_GROUP,
+      (case ED_REPORT_GROUP 
+       when 1 then 'Delinquent'
+       when 2 then 'Expired Non-evergreen'
+       when 3 then 'Early Down'
+       when 4 then 'Early Up Exception'
+       else 'Nothing'
+       end) ED_REPORT_GROUP_DESC ,
+       REG_REP_ID,
+       REP_NAME,
+       REG_SALES_MNGR_CODE,
+       REG_SALES_MNGR_ID,
+       SALES_MNGR_NAME,
+       REG_BRANCH_CODE,
+       REG_OFFICE_CODE,
+       REG_CHANNEL_CODE,
+       CLAIM_INDICATOR,
+       PYMT_ARRANG_IND,
+       UNAPPLIED_ADVC_AMT,
+       LAST_PAYMENT_DATE,
+       LAST_PAYMENT_AMT,
+       BILLING_CYCLE,
+       AR_BALANCE,
+       CREDIT_CLASS,
+       MPD,
+       ASN_FIELD_COLL_ID,
+       ASN_FIELD_COLL_NAME,
+       ASSIGNED_COLLECTOR,
+       ASSIGNED_COLLECTOR_NAME,
+       NEXT_STEP_DATE,       
+       DECODE(NVL (EMAIL_NOTIFY_IND,' '), 'N', 'Stop', 'Y', ' ',EMAIL_NOTIFY_IND) EMAIL_NOTIFY_IND,   
+       DECODE(NVL(GEO_AREA,' '), ' ', ' ',GEO_AREA||' - '||(select PRODUCT_NAME from PRODUCT_ISSUE PI where ED.GEO_AREA = PI.PRODUCT_CODE and ROWNUM=1)) GEO_AREA,
+       DECODE(NVL(REG_GENERAL_MNGR_ID, 0), 0, ' ', REG_GENERAL_MNGR_ID||' - '||(select EMP_FIRST_NAME||' '||EMP_MIDDLE_NAME||' '||EMPLOYEE_SURNAME From EMPLOYEE where EMPLOYEE_ID=ED.REG_GENERAL_MNGR_ID)) REG_GENERAL_MNGR_ID,       
+       DECODE(NVL (REG_SALES_REP_ACTIVE_IND,'N'), ' ', 'N', REG_SALES_REP_ACTIVE_IND) REG_SALES_REP_ACTIVE_IND,
+       NORMALIZED_NISD       
+ from (select ED.CUSTOMER_ID,
+       ED.CUSTOMER_NAME,
+       '(' || CUSTOMER_TN_NPA || ')' || CUSTOMER_TN_COP || '-' || CUSTOMER_TN_LINE_NO as CUSTOMER_TN,
+       PRODUCT_CODE,
+       PRODUCT_ISSUE_NUM,
+       PRODUCT_ISSUE_DATE,
+       BC_PHASE_II_DATE,
+       ITEM_ID,
+       UDAC_CODE,
+       decode(ACTION_CODE,'L', 'Locked Item', 'X', 'No Previous','I', 
+              'New Item','N','Check No Print','P','Check Print', 'O','Delete Item', 
+              'E','Exist In Bots', 'S','Save','N/A') ACTION_CODE,
+       decode(NEW_ITEM_STATUS, 
+              'E1', 'Exist-Canceled early down', 'E2', 'Exist-Canceled Pending', 'E3', 'Exist-Future Cancel',
+              'E4', 'Exist-Canceled', 'E5', 'Exist-Sold', 'E6', 'Exist-Sold Pending',
+              'I1', 'New-Canceled early down', 'I2', 'New-Canceled Pending', 'I3', 'New-Future Cancel',
+              'I4', 'New-Canceled', 'I5', 'New-Sold', 'I6', 'New-Sold Pending',
+              'L1', 'Locked-Canceled early down', 'L2', 'Locked-Canceled Pending', 'L3', 'Locked-Future Cancel',
+              'L4', 'Locked-Canceled', 'L5', 'Locked-Sold', 'L6', 'Locked-Sold Pending',
+              'O1', 'Delete-Canceled early down', 'O2', 'Delete-Canceled Pending', 'O3', 'Delete-Future Cancel',
+              'O4', 'Delete-Canceled', 'O5', 'Delete-Sold', 'O6', 'Delete-Sold Pending',
+              'S1', 'Saved-Canceled early down', 'S2', 'Saved-Canceled Pending', 'S3', 'Saved-Future Cancel',
+              'S4', 'Saved-Canceled', 'S5', 'Saved-Sold', 'S6', 'Saved-Sold Pending',
+              'N1', 'Check No Print-Canceled early down', 'N2', 'Check No Print-Canceled Pending', 'N3', 'Check No Print-Future Cancel',
+              'N4', 'Check No Print-Canceled', 'N5', 'Check No Print-Sold', 'N6', 'Check No Print-Sold Pending',
+              'P1', 'Check Print-Canceled early down', 'P2', 'Check Print-Canceled Pending', 'P3', 'Check Print-Future Cancel',
+              'P4', 'Check Print-Canceled', 'P5', 'Check Print-Sold', 'P6', 'Check Print-Sold Pending',
+              'X1', 'No Previous-Canceled early down', 'X2', 'No Previous-Canceled Pending', 'X3', 'No Previous-Future Cancel',
+              'X4', 'No Previous-Canceled', 'X5', 'No Previous-Sold', 'X6', 'No Previous-Sold Pending', 'N/A') NEW_ITEM_STATUS,
+       ITEM_BOTS_AMT,
+       ITEM_NISD_AMT,
+       CANVASS_CODE,
+       CANVASS_ISSUE_NUM,
+       CANVASS_ISSUE_DATE,
+       decode(RG_PROSPECT_CODE,'-','Not Relevant', 'A','Advertiser','N','New Connect',
+              'O','Old Prospect') RG_PROSPECT_CODE,
+       decode(RETIREMENT_STATUS,'A', 'Assigned','C','Closed','M','Must Be Rehandled',
+          'N','Not Assigned','O','None','R','Retired','U','Uploaded','N/A') RETIREMENT_STATUS,
+       ACTUAL_START_DATE,
+       ACTUAL_END_DATE,
+       PREV_ACT_START_DT,
+       PREV_ACT_END_DT,
+       EARLY_DOWN_REASON_CD,
+       LIVE_DATE,
+       decode(FULFILLMENT_STATUS,'A','Rejected A-Frontier','F','Full Downgrade','G','Pending',
+          'L','Live','N','Resend','P','Partial Downgrade','R','Reservation Confirmed',
+          'S','Success','Y','Rejected YPC') FULFILLMENT_STATUS,
+       ED_DATE,
+       ED_REPORT_GROUP,
+       (case ED_REPORT_GROUP 
+       when 1 then 'Delinquent'
+       when 2 then 'Expired Non-evergreen'
+       when 3 then 'Early Down'
+       when 4 then 'Early Up Exception'
+       else 'Nothing'
+       end) ED_REPORT_GROUP_DESC ,
+       REG_REP_ID,
+       REG_REP_NAME as REP_NAME,
+       REG_SALES_MNGR_CODE,
+       REG_SALES_MNGR_ID,
+       REG_SALES_MNGR_NAME as SALES_MNGR_NAME,
+       REG_BRANCH_CODE,
+       REG_OFFICE_CODE,
+       REG_CHANNEL_CODE,
+       CLAIM_INDICATOR,
+       PYMT_ARRANG_IND,
+       UNAPPLIED_ADVC_AMT,
+       LAST_PAYMENT_DATE,
+       LAST_PAYMENT_AMT,
+       BILLING_CYCLE,
+       AR_BALANCE,
+       CREDIT_CLASS,
+       MPD,
+       ASN_FIELD_COLL_ID,
+       ASN_FIELD_COLL_NAME,
+       ASSIGNED_COLLECTOR,
+       ASSIGNED_COLLECTOR_NAME,
+       NEXT_STEP_DATE, 
+       EMAIL_NOTIFY_IND,
+       GEO_AREA,
+       REG_GENERAL_MNGR_ID,
+       REG_SALES_REP_ACTIVE_IND,
+       NORMALIZED_NISD            
+from OLSM_ED_DASHBOARD ED
+where   ((ED_DATE &gt;= (select logical_date - 120 from op_logical_date where logical_date_type = 'O')
+    and ED_DATE &lt;= (select logical_date + 90 from op_logical_date where logical_date_type = 'O')
+    --or ed_report_group=4
+    )
+    or
+    ED.PRODUCT_CODE like ('UNI%I')
+    )
+    and ( ('9') in ({{regionCode}})  
+    or REG_REGION_CODE in ({{regionCode}}) )
+    and ( 'emptyParam' = {officeCode}
+    or REG_OFFICE_CODE = {officeCode} )
+    and ( '0' = {employeeId}
+    or REG_REP_ID = {employeeId}
+    or REG_SALES_MNGR_ID = {employeeId}
+    or REG_GENERAL_MNGR_ID = {employeeId}
+    or REG_RVP_ID = {employeeId} )
+    and ( 'emptyParam' = {productCode}
+    or ( PRODUCT_CODE = {productCode}
+    and PRODUCT_ISSUE_NUM = {productIssueNum} ) )
+    and ( 'emptyParam' = {customerId}
+     or ED.CUSTOMER_ID = {customerId} )
+    and ( 'emptyParam' = {geoArea}
+     or ED.GEO_AREA = {geoArea} )
+  union 
+select ED.CUSTOMER_ID,
+       ED.CUSTOMER_NAME,
+       '(' || CUSTOMER_TN_NPA || ')' || CUSTOMER_TN_COP || '-' || CUSTOMER_TN_LINE_NO as CUSTOMER_TN,
+       PRODUCT_CODE,
+       PRODUCT_ISSUE_NUM,
+       PRODUCT_ISSUE_DATE,
+       BC_PHASE_II_DATE,
+       ITEM_ID,
+       UDAC_CODE,
+       decode(ACTION_CODE,'L', 'Locked Item', 'X', 'No Previous','I', 
+              'New Item','N','Check No Print','P','Check Print', 'O','Delete Item', 
+              'E','Exist In Bots', 'S','Save','N/A') ACTION_CODE,
+       decode(NEW_ITEM_STATUS, 
+              'E1', 'Exist-Canceled early down', 'E2', 'Exist-Canceled Pending', 'E3', 'Exist-Future Cancel',
+              'E4', 'Exist-Canceled', 'E5', 'Exist-Sold', 'E6', 'Exist-Sold Pending',
+              'I1', 'New-Canceled early down', 'I2', 'New-Canceled Pending', 'I3', 'New-Future Cancel',
+              'I4', 'New-Canceled', 'I5', 'New-Sold', 'I6', 'New-Sold Pending',
+              'L1', 'Locked-Canceled early down', 'L2', 'Locked-Canceled Pending', 'L3', 'Locked-Future Cancel',
+              'L4', 'Locked-Canceled', 'L5', 'Locked-Sold', 'L6', 'Locked-Sold Pending',
+              'O1', 'Delete-Canceled early down', 'O2', 'Delete-Canceled Pending', 'O3', 'Delete-Future Cancel',
+              'O4', 'Delete-Canceled', 'O5', 'Delete-Sold', 'O6', 'Delete-Sold Pending',
+              'S1', 'Saved-Canceled early down', 'S2', 'Saved-Canceled Pending', 'S3', 'Saved-Future Cancel',
+              'S4', 'Saved-Canceled', 'S5', 'Saved-Sold', 'S6', 'Saved-Sold Pending',
+              'N1', 'Check No Print-Canceled early down', 'N2', 'Check No Print-Canceled Pending', 'N3', 'Check No Print-Future Cancel',
+              'N4', 'Check No Print-Canceled', 'N5', 'Check No Print-Sold', 'N6', 'Check No Print-Sold Pending',
+              'P1', 'Check Print-Canceled early down', 'P2', 'Check Print-Canceled Pending', 'P3', 'Check Print-Future Cancel',
+              'P4', 'Check Print-Canceled', 'P5', 'Check Print-Sold', 'P6', 'Check Print-Sold Pending',
+              'X1', 'No Previous-Canceled early down', 'X2', 'No Previous-Canceled Pending', 'X3', 'No Previous-Future Cancel',
+              'X4', 'No Previous-Canceled', 'X5', 'No Previous-Sold', 'X6', 'No Previous-Sold Pending', 'N/A') NEW_ITEM_STATUS,
+       ITEM_BOTS_AMT,
+       ITEM_NISD_AMT,
+       CANVASS_CODE,
+       CANVASS_ISSUE_NUM,
+       CANVASS_ISSUE_DATE,
+       decode(RG_PROSPECT_CODE,'-','Not Relevant', 'A','Advertiser','N','New Connect',
+              'O','Old Prospect') RG_PROSPECT_CODE,
+       decode(RETIREMENT_STATUS,'A', 'Assigned','C','Closed','M','Must Be Rehandled',
+          'N','Not Assigned','O','None','R','Retired','U','Uploaded','N/A') RETIREMENT_STATUS,
+       ACTUAL_START_DATE,
+       ACTUAL_END_DATE,
+       PREV_ACT_START_DT,
+       PREV_ACT_END_DT,
+       EARLY_DOWN_REASON_CD,
+       LIVE_DATE,
+       decode(FULFILLMENT_STATUS,'A','Rejected A-Frontier','F','Full Downgrade','G','Pending',
+          'L','Live','N','Resend','P','Partial Downgrade','R','Reservation Confirmed',
+          'S','Success','Y','Rejected YPC') FULFILLMENT_STATUS,
+       ED_DATE,
+       ED_REPORT_GROUP,
+       (case ED_REPORT_GROUP 
+       when 1 then 'Delinquent'
+       when 2 then 'Expired Non-evergreen'
+       when 3 then 'Early Down'
+       when 4 then 'Early Up Exception'
+       else 'Nothing'
+       end) ED_REPORT_GROUP_DESC ,
+       REG_REP_ID,
+       REG_REP_NAME as REP_NAME,
+       REG_SALES_MNGR_CODE,
+       REG_SALES_MNGR_ID,
+       REG_SALES_MNGR_NAME as SALES_MNGR_NAME,
+       REG_BRANCH_CODE,
+       REG_OFFICE_CODE,
+       REG_CHANNEL_CODE,
+       CLAIM_INDICATOR,
+       PYMT_ARRANG_IND,
+       UNAPPLIED_ADVC_AMT,
+       LAST_PAYMENT_DATE,
+       LAST_PAYMENT_AMT,
+       BILLING_CYCLE,
+       AR_BALANCE,
+       CREDIT_CLASS,
+       MPD,
+       ASN_FIELD_COLL_ID,
+       ASN_FIELD_COLL_NAME,
+       ASSIGNED_COLLECTOR,
+       ASSIGNED_COLLECTOR_NAME,
+       NEXT_STEP_DATE, 
+       EMAIL_NOTIFY_IND,
+       GEO_AREA,
+       REG_GENERAL_MNGR_ID,
+       REG_SALES_REP_ACTIVE_IND,
+       NORMALIZED_NISD            
+from  OLSM_ED_DASHBOARD  ED
+where  ((ED_DATE &gt;= (select logical_date - 120 from op_logical_date where logical_date_type = 'O')
+    and ED_DATE &lt;= (select logical_date + 90 from op_logical_date where logical_date_type = 'O')
+    --or ed_report_group=4
+    )
+    or
+    ED.PRODUCT_CODE like ('UNI%I')
+    )
+    and ( ('9') in ({{regionCode}})  
+    or TEMP_REGION_CODE in ({{regionCode}}) )
+    and ( 'emptyParam' = {officeCode}
+    or TEMP_OFFICE_CODE = {officeCode} )
+    and ( '0' = {employeeId}
+    or TEMP_REP_ID = {employeeId}
+    or TEMP_SALES_MNGR_ID = {employeeId}
+    or TEMP_GENERAL_MNGR_ID = {employeeId}
+    or TEMP_RVP_ID = {employeeId} )
+    and ( 'emptyParam' = {productCode}
+    or ( PRODUCT_CODE = {productCode}
+    and PRODUCT_ISSUE_NUM = {productIssueNum} ) )
+    and ( 'emptyParam' = {customerId}
+     or ED.CUSTOMER_ID = {customerId} )
+    and ( 'emptyParam' = {geoArea}
+     or ED.GEO_AREA = {geoArea} )
+ union 
+ select ED.CUSTOMER_ID, 
+       ED.CUSTOMER_NAME,
+       '(' || CUSTOMER_TN_NPA || ')' || CUSTOMER_TN_COP || '-' || CUSTOMER_TN_LINE_NO as CUSTOMER_TN,
+       PRODUCT_CODE,
+       PRODUCT_ISSUE_NUM,
+       PRODUCT_ISSUE_DATE,
+       BC_PHASE_II_DATE,
+       ITEM_ID,
+       UDAC_CODE,
+       decode(ACTION_CODE,'L', 'Locked Item', 'X', 'No Previous','I', 
+              'New Item','N','Check No Print','P','Check Print', 'O','Delete Item', 
+              'E','Exist In Bots', 'S','Save','N/A') ACTION_CODE,
+       decode(NEW_ITEM_STATUS, 
+              'E1', 'Exist-Canceled early down', 'E2', 'Exist-Canceled Pending', 'E3', 'Exist-Future Cancel',
+              'E4', 'Exist-Canceled', 'E5', 'Exist-Sold', 'E6', 'Exist-Sold Pending',
+              'I1', 'New-Canceled early down', 'I2', 'New-Canceled Pending', 'I3', 'New-Future Cancel',
+              'I4', 'New-Canceled', 'I5', 'New-Sold', 'I6', 'New-Sold Pending',
+              'L1', 'Locked-Canceled early down', 'L2', 'Locked-Canceled Pending', 'L3', 'Locked-Future Cancel',
+              'L4', 'Locked-Canceled', 'L5', 'Locked-Sold', 'L6', 'Locked-Sold Pending',
+              'O1', 'Delete-Canceled early down', 'O2', 'Delete-Canceled Pending', 'O3', 'Delete-Future Cancel',
+              'O4', 'Delete-Canceled', 'O5', 'Delete-Sold', 'O6', 'Delete-Sold Pending',
+              'S1', 'Saved-Canceled early down', 'S2', 'Saved-Canceled Pending', 'S3', 'Saved-Future Cancel',
+              'S4', 'Saved-Canceled', 'S5', 'Saved-Sold', 'S6', 'Saved-Sold Pending',
+              'N1', 'Check No Print-Canceled early down', 'N2', 'Check No Print-Canceled Pending', 'N3', 'Check No Print-Future Cancel',
+              'N4', 'Check No Print-Canceled', 'N5', 'Check No Print-Sold', 'N6', 'Check No Print-Sold Pending',
+              'P1', 'Check Print-Canceled early down', 'P2', 'Check Print-Canceled Pending', 'P3', 'Check Print-Future Cancel',
+              'P4', 'Check Print-Canceled', 'P5', 'Check Print-Sold', 'P6', 'Check Print-Sold Pending',
+              'X1', 'No Previous-Canceled early down', 'X2', 'No Previous-Canceled Pending', 'X3', 'No Previous-Future Cancel',
+              'X4', 'No Previous-Canceled', 'X5', 'No Previous-Sold', 'X6', 'No Previous-Sold Pending', 'N/A') NEW_ITEM_STATUS,
+       ITEM_BOTS_AMT,
+       ITEM_NISD_AMT,
+       CANVASS_CODE,
+       CANVASS_ISSUE_NUM,
+       CANVASS_ISSUE_DATE,
+       decode(RG_PROSPECT_CODE,'-','Not Relevant', 'A','Advertiser','N','New Connect',
+              'O','Old Prospect') RG_PROSPECT_CODE,
+       decode(RETIREMENT_STATUS,'A', 'Assigned','C','Closed','M','Must Be Rehandled',
+          'N','Not Assigned','O','None','R','Retired','U','Uploaded','N/A') RETIREMENT_STATUS,
+       ACTUAL_START_DATE,
+       ACTUAL_END_DATE,
+       PREV_ACT_START_DT,
+       PREV_ACT_END_DT,
+       EARLY_DOWN_REASON_CD,
+       LIVE_DATE,
+       decode(FULFILLMENT_STATUS,'A','Rejected A-Frontier','F','Full Downgrade','G','Pending',
+          'L','Live','N','Resend','P','Partial Downgrade','R','Reservation Confirmed',
+          'S','Success','Y','Rejected YPC') FULFILLMENT_STATUS,
+       ED_DATE,
+       ED_REPORT_GROUP,
+       (case ED_REPORT_GROUP 
+       when 1 then 'Delinquent'
+       when 2 then 'Expired Non-evergreen'
+       when 3 then 'Early Down'
+       when 4 then 'Early Up Exception'
+       else 'Nothing'
+       end) ED_REPORT_GROUP_DESC ,
+       REG_REP_ID,
+       REG_REP_NAME as REP_NAME,
+       REG_SALES_MNGR_CODE,
+       REG_SALES_MNGR_ID,
+       REG_SALES_MNGR_NAME as SALES_MNGR_NAME,
+       REG_BRANCH_CODE,
+       REG_OFFICE_CODE,
+       REG_CHANNEL_CODE,
+       CLAIM_INDICATOR,
+       PYMT_ARRANG_IND,
+       UNAPPLIED_ADVC_AMT,
+       LAST_PAYMENT_DATE,
+       LAST_PAYMENT_AMT,
+       BILLING_CYCLE,
+       AR_BALANCE,
+       CREDIT_CLASS,
+       MPD,
+       ASN_FIELD_COLL_ID,
+       ASN_FIELD_COLL_NAME,
+       ASSIGNED_COLLECTOR,
+       ASSIGNED_COLLECTOR_NAME,
+       NEXT_STEP_DATE, 
+       EMAIL_NOTIFY_IND,
+       GEO_AREA,
+       REG_GENERAL_MNGR_ID,
+       REG_SALES_REP_ACTIVE_IND,
+       NORMALIZED_NISD            
+from  OLSM_ED_DASHBOARD  ED
+where   ((ED_DATE &gt;= (select logical_date - 120 from op_logical_date where logical_date_type = 'O')
+    and ED_DATE &lt;= (select logical_date + 90 from op_logical_date where logical_date_type = 'O')
+    --or ed_report_group=4
+    )
+    or
+    ED.PRODUCT_CODE like ('UNI%I')
+    )
+    and ( ('9') in ({{regionCode}})  
+    or SPC_REGION_CODE in ({{regionCode}}) )
+    and ( 'emptyParam' = {officeCode}
+    or SPC_OFFICE_CODE = {officeCode} )
+    and ( '0' = {employeeId}
+    or SPC_REP_ID = {employeeId}
+    or SPC_SALES_MNGR_ID = {employeeId}
+    or SPC_GENERAL_MNGR_ID = {employeeId}
+    or SPC_RVP_ID = {employeeId} )
+    and ( 'emptyParam' = {productCode}
+    or ( PRODUCT_CODE = {productCode}
+    and PRODUCT_ISSUE_NUM = {productIssueNum} ) )
+    and ( 'emptyParam' = {customerId}
+     or ED.CUSTOMER_ID = {customerId} )
+    and ( 'emptyParam' = {geoArea}
+     or ED.GEO_AREA = {geoArea} )
+   union 
+  select ED.CUSTOMER_ID,
+       ED.CUSTOMER_NAME,
+       '(' || CUSTOMER_TN_NPA || ')' || CUSTOMER_TN_COP || '-' || CUSTOMER_TN_LINE_NO as CUSTOMER_TN,
+       PRODUCT_CODE,
+       PRODUCT_ISSUE_NUM,
+       PRODUCT_ISSUE_DATE,
+       BC_PHASE_II_DATE,
+       ITEM_ID,
+       UDAC_CODE,
+       decode(ACTION_CODE,'L', 'Locked Item', 'X', 'No Previous','I', 
+              'New Item','N','Check No Print','P','Check Print', 'O','Delete Item', 
+              'E','Exist In Bots', 'S','Save','N/A') ACTION_CODE,
+       decode(NEW_ITEM_STATUS, 
+              'E1', 'Exist-Canceled early down', 'E2', 'Exist-Canceled Pending', 'E3', 'Exist-Future Cancel',
+              'E4', 'Exist-Canceled', 'E5', 'Exist-Sold', 'E6', 'Exist-Sold Pending',
+              'I1', 'New-Canceled early down', 'I2', 'New-Canceled Pending', 'I3', 'New-Future Cancel',
+              'I4', 'New-Canceled', 'I5', 'New-Sold', 'I6', 'New-Sold Pending',
+              'L1', 'Locked-Canceled early down', 'L2', 'Locked-Canceled Pending', 'L3', 'Locked-Future Cancel',
+              'L4', 'Locked-Canceled', 'L5', 'Locked-Sold', 'L6', 'Locked-Sold Pending',
+              'O1', 'Delete-Canceled early down', 'O2', 'Delete-Canceled Pending', 'O3', 'Delete-Future Cancel',
+              'O4', 'Delete-Canceled', 'O5', 'Delete-Sold', 'O6', 'Delete-Sold Pending',
+              'S1', 'Saved-Canceled early down', 'S2', 'Saved-Canceled Pending', 'S3', 'Saved-Future Cancel',
+              'S4', 'Saved-Canceled', 'S5', 'Saved-Sold', 'S6', 'Saved-Sold Pending',
+              'N1', 'Check No Print-Canceled early down', 'N2', 'Check No Print-Canceled Pending', 'N3', 'Check No Print-Future Cancel',
+              'N4', 'Check No Print-Canceled', 'N5', 'Check No Print-Sold', 'N6', 'Check No Print-Sold Pending',
+              'P1', 'Check Print-Canceled early down', 'P2', 'Check Print-Canceled Pending', 'P3', 'Check Print-Future Cancel',
+              'P4', 'Check Print-Canceled', 'P5', 'Check Print-Sold', 'P6', 'Check Print-Sold Pending',
+              'X1', 'No Previous-Canceled early down', 'X2', 'No Previous-Canceled Pending', 'X3', 'No Previous-Future Cancel',
+              'X4', 'No Previous-Canceled', 'X5', 'No Previous-Sold', 'X6', 'No Previous-Sold Pending', 'N/A') NEW_ITEM_STATUS,
+       ITEM_BOTS_AMT,
+       ITEM_NISD_AMT,
+       CANVASS_CODE,
+       CANVASS_ISSUE_NUM,
+       CANVASS_ISSUE_DATE,
+       decode(RG_PROSPECT_CODE,'-','Not Relevant', 'A','Advertiser','N','New Connect',
+              'O','Old Prospect') RG_PROSPECT_CODE,
+       decode(RETIREMENT_STATUS,'A', 'Assigned','C','Closed','M','Must Be Rehandled',
+          'N','Not Assigned','O','None','R','Retired','U','Uploaded','N/A') RETIREMENT_STATUS,
+       ACTUAL_START_DATE,
+       ACTUAL_END_DATE,
+       PREV_ACT_START_DT,
+       PREV_ACT_END_DT,
+       EARLY_DOWN_REASON_CD,
+       LIVE_DATE,
+       decode(FULFILLMENT_STATUS,'A','Rejected A-Frontier','F','Full Downgrade','G','Pending',
+          'L','Live','N','Resend','P','Partial Downgrade','R','Reservation Confirmed',
+          'S','Success','Y','Rejected YPC') FULFILLMENT_STATUS,
+       ED_DATE,
+       ED_REPORT_GROUP,
+       (case ED_REPORT_GROUP 
+       when 1 then 'Delinquent'
+       when 2 then 'Expired Non-evergreen'
+       when 3 then 'Early Down'
+       when 4 then 'Early Up Exception'
+       else 'Nothing'
+       end) ED_REPORT_GROUP_DESC ,
+       REG_REP_ID,
+       REG_REP_NAME as REP_NAME,
+       REG_SALES_MNGR_CODE,
+       REG_SALES_MNGR_ID,
+       REG_SALES_MNGR_NAME as SALES_MNGR_NAME,
+       REG_BRANCH_CODE,
+       REG_OFFICE_CODE,
+       REG_CHANNEL_CODE,
+       CLAIM_INDICATOR,
+       PYMT_ARRANG_IND,
+       UNAPPLIED_ADVC_AMT,
+       LAST_PAYMENT_DATE,
+       LAST_PAYMENT_AMT,
+       BILLING_CYCLE,
+       AR_BALANCE,
+       CREDIT_CLASS,
+       MPD,
+       ASN_FIELD_COLL_ID,
+       ASN_FIELD_COLL_NAME,
+       ASSIGNED_COLLECTOR,
+       ASSIGNED_COLLECTOR_NAME,
+       NEXT_STEP_DATE, 
+       EMAIL_NOTIFY_IND,
+       GEO_AREA,
+       REG_GENERAL_MNGR_ID,
+       REG_SALES_REP_ACTIVE_IND,
+       NORMALIZED_NISD          
+from  OLSM_ED_DASHBOARD  ED
+where ((ED_DATE &gt;= (select logical_date - 120 from op_logical_date where logical_date_type = 'O')
+    and ED_DATE &lt;= (select logical_date + 90 from op_logical_date where logical_date_type = 'O')
+    --or ed_report_group=4
+    )
+    or
+    ED.PRODUCT_CODE like ('UNI%I')
+    )
+    and ( ('9') in ({{regionCode}})  
+    or REF_REGION_CODE in ({{regionCode}}) )
+    and ( 'emptyParam' = {officeCode}
+    or REF_OFFICE_CODE = {officeCode} )
+    and ( '0' = {employeeId}
+    or REF_REP_ID = {employeeId}
+    or REF_SALES_MNGR_ID = {employeeId}
+    or REF_GENERAL_MNGR_ID = {employeeId}
+    or REF_RVP_ID = {employeeId} )
+    and ( 'emptyParam' = {productCode}
+    or ( PRODUCT_CODE = {productCode}
+    and PRODUCT_ISSUE_NUM = {productIssueNum} ) )
+   and ( 'emptyParam' = {customerId}
+     or ED.CUSTOMER_ID = {customerId} )
+    and ( 'emptyParam' = {geoArea}
+     or ED.GEO_AREA = {geoArea} ) ) ED
+	</statement>
+
+
+	<statement code="FutureEarlyDownByNumberOfDays" clientObject="EarlyDown" ><![CDATA[
+select count(case when ED_DATE between ED_START_DATE and ED_END_DATE then 1 end) as ITEM_COUNT,
+       sum(case when ED_DATE between ED_START_DATE and ED_END_DATE then ITEM_NISD_AMT else 0 end) as REVENUE,
+       count(distinct (case when ED_DATE between ED_START_DATE and ED_END_DATE then customer_id end)) AS CUSTOMER_COUNT,
+       sum(ITEM_NISD_AMT) as GRID_REVENUE,
+       count(distinct customer_id) AS GRID_CUSTOMER_COUNT,       
+       ED_REPORT_GROUP
+  from OLSM_ED_DASHBOARD, 
+       (select logical_date ed_start_date from op_logical_date where logical_date_type = 'O'), 
+       (select logical_date + {numberOfDays} ed_end_date from op_logical_date where logical_date_type = 'O')
+where  (((ED_DATE between ED_START_DATE and ED_END_DATE
+     --or ed_report_group=4
+          )
+     or
+     PRODUCT_CODE like ('UNI%I')
+     )
+     and ( ('9') in ({{regionCode}})  
+     or REG_REGION_CODE in ({{regionCode}}) )
+     and ( 'emptyParam' = {officeCode}
+     or REG_OFFICE_CODE = {officeCode} )
+     and ( '0' = {employeeId}
+     or REG_REP_ID = {employeeId}
+     or REG_SALES_MNGR_ID = {employeeId}
+     or REG_GENERAL_MNGR_ID = {employeeId}
+     or REG_RVP_ID = {employeeId} )
+     and ( 'emptyParam' = {productCode}
+     or ( PRODUCT_CODE = {productCode}
+     and PRODUCT_ISSUE_NUM = {productIssueNum} ) ) 
+     and ( 'emptyParam' = {customerId}
+     or CUSTOMER_ID = {customerId} )     
+     and ( 'emptyParam' = {geoArea}
+     or GEO_AREA = {geoArea} ) )
+    or (((ED_DATE between ED_START_DATE and ED_END_DATE
+     --or ed_report_group=4
+          )
+     or
+     PRODUCT_CODE like ('UNI%I')
+     )
+     and ( ('9') in ({{regionCode}})  
+     or TEMP_REGION_CODE in ({{regionCode}}) )
+     and ( 'emptyParam' = {officeCode}
+     or TEMP_OFFICE_CODE = {officeCode} )
+     and ( '0' = {employeeId}
+     or TEMP_REP_ID = {employeeId}
+     or TEMP_SALES_MNGR_ID = {employeeId}
+     or TEMP_GENERAL_MNGR_ID = {employeeId}
+     or TEMP_RVP_ID = {employeeId} )
+     and ( 'emptyParam' = {productCode}
+     or ( PRODUCT_CODE = {productCode}
+     and PRODUCT_ISSUE_NUM = {productIssueNum} ) )
+     and ( 'emptyParam' = {customerId}
+     or CUSTOMER_ID = {customerId} )      
+     and ( 'emptyParam' = {geoArea}
+     or GEO_AREA = {geoArea} ) )
+    or (((ED_DATE between ED_START_DATE and ED_END_DATE
+     --or ed_report_group=4
+          )
+     or
+     PRODUCT_CODE like ('UNI%I')
+     )
+     and ( ('9') in ({{regionCode}})  
+     or SPC_REGION_CODE in ({{regionCode}}) )
+     and ( 'emptyParam' = {officeCode}
+     or SPC_OFFICE_CODE = {officeCode} )
+     and ( '0' = {employeeId}
+     or SPC_REP_ID = {employeeId}
+     or SPC_SALES_MNGR_ID = {employeeId}
+     or SPC_GENERAL_MNGR_ID = {employeeId}
+     or SPC_RVP_ID = {employeeId} )
+     and ( 'emptyParam' = {productCode}
+     or ( PRODUCT_CODE = {productCode}
+     and PRODUCT_ISSUE_NUM = {productIssueNum} ) )
+     and ( 'emptyParam' = {customerId}
+     or CUSTOMER_ID = {customerId} )      
+     and ( 'emptyParam' = {geoArea}
+     or GEO_AREA = {geoArea} ) )
+    or (((ED_DATE between ED_START_DATE and ED_END_DATE
+     --or ed_report_group=4
+          )
+     or
+     PRODUCT_CODE like ('UNI%I')
+     )
+     and ( ('9') in ({{regionCode}})  
+     or REF_REGION_CODE in ({{regionCode}}) )
+     and ( 'emptyParam' = {officeCode}
+     or REF_OFFICE_CODE = {officeCode} )
+     and ( '0' = {employeeId}
+     or REF_REP_ID = {employeeId}
+     or REF_SALES_MNGR_ID = {employeeId}
+     or REF_GENERAL_MNGR_ID = {employeeId}
+     or REF_RVP_ID = {employeeId} )
+     and ( 'emptyParam' = {productCode}
+     or ( PRODUCT_CODE = {productCode}
+     and PRODUCT_ISSUE_NUM = {productIssueNum} ) )
+     and ( 'emptyParam' = {customerId}
+     or CUSTOMER_ID = {customerId} )      
+     and ( 'emptyParam' = {geoArea}
+     or GEO_AREA = {geoArea} ) )
+ group by ED_REPORT_GROUP
+	]]></statement>
+
+
+	<statement code="PastEarlyDownByNumberOfDays" clientObject="EarlyDown" ><![CDATA[
+select count(case when ED_DATE between ED_START_DATE and ED_END_DATE then 1 end) as ITEM_COUNT,
+       sum(case when ED_DATE between ED_START_DATE and ED_END_DATE then ITEM_NISD_AMT else 0 end) as REVENUE,
+       count(distinct (case when ED_DATE between ED_START_DATE and ED_END_DATE then customer_id end)) AS CUSTOMER_COUNT,
+       sum(ITEM_NISD_AMT) as GRID_REVENUE,
+       count(distinct customer_id) AS GRID_CUSTOMER_COUNT,
+       ED_REPORT_GROUP
+  from OLSM_ED_DASHBOARD , 
+       (select logical_date ed_end_date from op_logical_date where logical_date_type = 'O'), 
+       (select logical_date - {numberOfDays} ed_start_date from op_logical_date where logical_date_type = 'O')  
+ where (((ED_DATE between ED_START_DATE and ED_END_DATE
+       --or ed_report_group=4
+       )
+      or
+       PRODUCT_CODE like ('UNI%I')
+      )
+     and ( ('9') in ({{regionCode}})  
+     or REG_REGION_CODE in ({{regionCode}}) )
+     and ( 'emptyParam' = {officeCode}
+     or REG_OFFICE_CODE = {officeCode} )
+     and ( '0' = {employeeId}
+     or REG_REP_ID = {employeeId}
+     or REG_SALES_MNGR_ID = {employeeId}
+     or REG_GENERAL_MNGR_ID = {employeeId}
+     or REG_RVP_ID = {employeeId} )
+     and ( 'emptyParam' = {productCode}
+     or ( PRODUCT_CODE = {productCode}
+     and PRODUCT_ISSUE_NUM = {productIssueNum} ) )
+     and ( 'emptyParam' = {customerId}
+     or CUSTOMER_ID = {customerId} )      
+     and ( 'emptyParam' = {geoArea}
+     or GEO_AREA = {geoArea} ) )
+    or (((ED_DATE between ED_START_DATE and ED_END_DATE
+       --or ed_report_group=4
+       )
+      or
+       PRODUCT_CODE like ('UNI%I')
+      )
+     and ( ('9') in ({{regionCode}})  
+     or TEMP_REGION_CODE in ({{regionCode}}) )
+     and ( 'emptyParam' = {officeCode}
+     or TEMP_OFFICE_CODE = {officeCode} )
+     and ( '0' = {employeeId}
+     or TEMP_REP_ID = {employeeId}
+     or TEMP_SALES_MNGR_ID = {employeeId}
+     or TEMP_GENERAL_MNGR_ID = {employeeId}
+     or TEMP_RVP_ID = {employeeId} )
+     and ( 'emptyParam' = {productCode}
+     or ( PRODUCT_CODE = {productCode}
+     and PRODUCT_ISSUE_NUM = {productIssueNum} ) ) 
+     and ( 'emptyParam' = {customerId}
+     or CUSTOMER_ID = {customerId} )     
+     and ( 'emptyParam' = {geoArea}
+     or GEO_AREA = {geoArea} ) )
+    or (((ED_DATE between ED_START_DATE and ED_END_DATE
+       --or ed_report_group=4
+       )
+      or
+       PRODUCT_CODE like ('UNI%I')
+      )
+     and ( ('9') in ({{regionCode}})  
+     or SPC_REGION_CODE in ({{regionCode}}) )
+     and ( 'emptyParam' = {officeCode}
+     or SPC_OFFICE_CODE = {officeCode} )
+     and ( '0' = {employeeId}
+     or SPC_REP_ID = {employeeId}
+     or SPC_SALES_MNGR_ID = {employeeId}
+     or SPC_GENERAL_MNGR_ID = {employeeId}
+     or SPC_RVP_ID = {employeeId} )
+     and ( 'emptyParam' = {productCode}
+     or ( PRODUCT_CODE = {productCode}
+     and PRODUCT_ISSUE_NUM = {productIssueNum} ) )
+     and ( 'emptyParam' = {customerId}
+     or CUSTOMER_ID = {customerId} )      
+     and ( 'emptyParam' = {geoArea}
+     or GEO_AREA = {geoArea} ) )
+    or (((ED_DATE between ED_START_DATE and ED_END_DATE
+       --or ed_report_group=4
+       )
+      or
+       PRODUCT_CODE like ('UNI%I')
+      )
+     and ( ('9') in ({{regionCode}})  
+      or REF_REGION_CODE in ({{regionCode}}) )
+     and ( 'emptyParam' = {officeCode}
+     or REF_OFFICE_CODE = {officeCode} )
+     and ( '0' = {employeeId}
+     or REF_REP_ID = {employeeId}
+     or REF_SALES_MNGR_ID = {employeeId}
+     or REF_GENERAL_MNGR_ID = {employeeId}
+     or REF_RVP_ID = {employeeId} )
+     and ( 'emptyParam' = {productCode}
+      or ( PRODUCT_CODE = {productCode}
+       and PRODUCT_ISSUE_NUM = {productIssueNum} ) )
+       and ( 'emptyParam' = {customerId}
+     or CUSTOMER_ID = {customerId} )      
+     and ( 'emptyParam' = {geoArea}
+     or GEO_AREA = {geoArea} ) )
+ group by ED_REPORT_GROUP
+	]]></statement>
+
+
+	<statement code="OlsmOnlineLogicalDate" clientObject="LogicalDate" >
+select logical_date from op_logical_date where logical_date_type = 'O'	
+	</statement>
+
+</sql>

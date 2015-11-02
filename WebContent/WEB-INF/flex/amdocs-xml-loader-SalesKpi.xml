@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml-files SYSTEM "amdocs-xml-loader-config.dtd">
+<xml-files type="SalesKpi-XML">
+   <xml-file code="ReportsMetadata" context="com.amdocs.dashboard.mobile.reports" location="WEB-INF\xml\Reports.xml" clientObject="" />
+   <xml-file code="AssetsMetadata" context="com.amdocs.dashboard.mobile.assets" location="WEB-INF\xml\Assets.xml" clientObject="" />
+   
+   <xml-file code="ProdDefectsMetadata" context="com.amdocs.dashboard.mobile.report" location="WEB-INF\xml\ProdDefects.xml" clientObject="" />
+   <xml-file code="ProdDefectsColumns" context="com.amdocs.dashboard.mobile.grid" location="WEB-INF\xml\ProdDefectsColumns.xml" clientObject="" />
+   
+   <xml-file code="SalesKpiReportMetadata" context="com.amdocs.dashboard.mobile.kpiReport" location="WEB-INF\xml\SalesKpiReport.xml" clientObject="" />
+   <xml-file code="SalesKpiCategoryColumns" context="com.amdocs.dashboard.mobile.grid" location="WEB-INF\xml\SalesKpiCategoryColumns.xml" clientObject="" />
+   <xml-file code="SalesKpiCustomerColumns" context="com.amdocs.dashboard.mobile.grid" location="WEB-INF\xml\SalesKpiCustomerColumns.xml" clientObject="" />
+ 
+   <xml-file code="SalesKpiTrendChartMetadata" context="com.amdocs.dashboard.mobile.xyChart" location="WEB-INF\xml\SalesKpiTrendChart.xml" clientObject="" />
+   <xml-file code="SalesKpiYOYChartMetadata" context="com.amdocs.dashboard.mobile.xyChart" location="WEB-INF\xml\SalesKpiYOYChart.xml" clientObject="" />
+   
+   <xml-file code="RevReportMetadata" context="com.amdocs.dashboard.mobile.kpiReport" location="WEB-INF\xml\RevReport.xml" clientObject="" />
+   <xml-file code="RevReportCategoryColumns" context="com.amdocs.dashboard.mobile.grid" location="WEB-INF\xml\RevReportCategoryColumns.xml" clientObject="" />
+   <xml-file code="RevReportCustomerColumns" context="com.amdocs.dashboard.mobile.grid" location="WEB-INF\xml\RevReportCustomerColumns.xml" clientObject="" />
+   
+   <xml-file code="RevReportTrendChartMetadata" context="com.amdocs.dashboard.mobile.xyChart" location="WEB-INF\xml\RevReportTrendChart.xml" clientObject="" />
+   <xml-file code="RevReportYOYChartMetadata" context="com.amdocs.dashboard.mobile.xyChart" location="WEB-INF\xml\RevReportYOYChart.xml" clientObject="" />
+   
+   <xml-file code="ABRKpiReportMetadata" context="com.amdocs.dashboard.mobile.kpiReport" location="WEB-INF\xml\ABRKpiReport.xml" clientObject="" />
+   <xml-file code="ABRKpiCategoryColumns" context="com.amdocs.dashboard.mobile.grid" location="WEB-INF\xml\ABRKpiCategoryColumns.xml" clientObject="" /> 
+   <xml-file code="ABRKpiTrendChartMetadata" context="com.amdocs.dashboard.mobile.xyChart" location="WEB-INF\xml\ABRKpiTrendChart.xml" clientObject="" />
+   <xml-file code="ABRKpiYOYChartMetadata" context="com.amdocs.dashboard.mobile.xyChart" location="WEB-INF\xml\ABRKpiYOYChart.xml" clientObject="" />
+   <xml-file code="ABRKpiDetailColumns" context="com.amdocs.dashboard.mobile.grid" location="WEB-INF\xml\ABRKpiDetailColumns.xml" clientObject="" />
+   
+</xml-files>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.amdocs.com/dashboard/mobile"
+           xmlns:tn="http://www.amdocs.com/dashboard/mobile"
+           xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+           jxb:version="2.0"
+	       elementFormDefault="qualified">
+	       
+	<xs:include schemaLocation="Types.xsd" />
+	
+	<xs:complexType name="AssetElement">
+		<xs:sequence>
+			<xs:element name="param" type="tn:ParamElement" minOccurs="0" maxOccurs="unbounded">
+      			<xs:annotation>
+        			<xs:appinfo>
+          				<jxb:property name="params"/>
+        			</xs:appinfo>
+      			</xs:annotation>
+			</xs:element>			
+		</xs:sequence>
+		<xs:attribute name="cacheLife" type="tn:CacheLifeAttribute" default="3600" />
+		<xs:attribute name="name" type="xs:string" />
+		<xs:attribute name="serviceType" type="tn:ServiceTypeAttribute" default="mobileProxy" />
+		<xs:attribute name="serviceName" type="tn:ServiceNameAttribute" default="getBase64Image" />
+		<xs:attribute name="type" type="tn:AssetTypeAttribute" />
+		<xs:attribute name="version" type="xs:int" />
+	</xs:complexType>
+
+	<xs:complexType name="AssetsElement">
+		<xs:annotation>
+			<xs:documentation>Assets are retrieved from server through Mobile Proxy after the user logs in.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Asset" type="tn:AssetElement" minOccurs="1" maxOccurs="unbounded">			
+      			<xs:annotation>
+        			<xs:appinfo>
+          				<jxb:property name="assets"/>
+        			</xs:appinfo>
+      			</xs:annotation>
+			</xs:element>			
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:element name="Assets" type="tn:AssetsElement" />
+
+</xs:schema>

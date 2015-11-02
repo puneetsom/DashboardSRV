@@ -1,0 +1,1180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+<sql type="CdwSQL">
+
+<!--  
+SQL for generating RR_DETAIL insert statement ...
+select   (Case when column_name in ('CREATE_DATE','UPDATE_DATE') then 'sysdate'
+               when data_type='DATE' then 'to_date(trim(:'||lower(column_name)||'), ''MM/DD/YYYY'')'
+               else ':'||lower(column_name) end) col_name
+from     user_tab_columns
+where    table_name='RR_DETAILS'
+order by column_id
+ -->
+	<statement code="INSERT_REQ">
+   		<![CDATA[
+insert into rr_details
+       (requirement_id
+      , rr_status
+      , amdocs_owner
+      , leading_func_area
+      , rr_subject
+      , rr_summary
+      , dev_owner
+      , release_version
+      , production_milestone
+      , req_id
+      , main_application
+      , client_owner
+      , affected_apps
+      , development_version
+      , xref_req_num
+      , assigned_to
+      , phle_adb_sent
+      , bau_ind
+      , modified
+      , affected_func_areas
+      , dev_ctr_poc
+      , ba_owner
+      , de_id
+      , last_adb_est
+      , drd_status
+      , de_status
+      , st_ready_planned
+      , amdocs_sme_ba
+      , jeopardy_status
+      , phle_start
+      , css_impact
+      , general_status
+      , lifecycle_phase
+      , amdocs_pending_item
+      , work_authorized
+      , de_adb_sent
+      , work_auth_adb_amt
+      , fast_track
+      , billing_version
+      , capitalized
+      , t_adb
+      , itic_nf
+      , program
+      , client_ind
+      , appr_st_drop_date
+      , last_status_date
+      , status_review_date
+      , general_status_date
+      , lifecycle_phase_date
+      , pending_item_date
+      , pre_wa_date
+      , scope_request_date
+      , de_due_date
+      , de_ta_walkthru_date
+      , de_ta_approval_date
+      , work_auth_date
+      , dev_comp_act_date
+      , dev_comp_plan_date
+      , sst_exec_act_date
+      , sst_exec_plan_date
+      , st_ready_act_date
+      , delivery_est_notes
+      , st_test_start
+      , requested_version
+      , yp_series
+      , yp_program_mgr
+      , m1_actual_date
+      , m2_actual_date
+      , m3_actual_date
+      , m4_actual_date
+      , m5_actual_date
+      , m6_actual_date
+      , m7_actual_date
+      , m8_actual_date
+      , m9_actual_date
+      , m10_actual_date
+      , dg1_actual_date
+      , dg2_actual_date
+      , dg3_actual_date
+      , dg4_actual_date
+      , m1_planned_date
+      , m2_planned_date
+      , m3_planned_date
+      , m4_planned_date
+      , m5_planned_date
+      , m6_planned_date
+      , m7_planned_date
+      , m8_planned_date
+      , m9_planned_date
+      , m10_planned_date
+      , dg1_planned_date
+      , dg2_planned_date
+      , dg3_planned_date
+      , dg4_planned_date
+      , description
+      , comments
+      , dev_status_comments
+      , int_comments
+      , int_de_status_notes
+      , pmo_int_comments
+      , pmo_ext_comments
+      , update_oper_id
+      , update_date
+      , create_oper_id
+      , create_date
+      , project_status
+      , m11_actual_date
+      , m11_planned_date)
+values (:requirement_id
+      , :rr_status
+      , :amdocs_owner
+      , :leading_func_area
+      , :rr_subject
+      , :rr_summary
+      , :dev_owner
+      , :release_version
+      , :production_milestone
+      , :req_id
+      , :main_application
+      , :client_owner
+      , :affected_apps
+      , :development_version
+      , :xref_req_num
+      , :assigned_to
+      , :phle_adb_sent
+      , :bau_ind
+      , to_date(trim(:modified), 'MM/DD/YYYY')
+      , :affected_func_areas
+      , :dev_ctr_poc
+      , :ba_owner
+      , :de_id
+      , :last_adb_est
+      , :drd_status
+      , :de_status
+      , to_date(trim(:st_ready_planned), 'MM/DD/YYYY')
+      , :amdocs_sme_ba
+      , :jeopardy_status
+      , to_date(trim(:phle_start), 'MM/DD/YYYY')
+      , nvl(:css_impact, 'N')
+      , :general_status
+      , :lifecycle_phase
+      , :amdocs_pending_item
+      , :work_authorized
+      , :de_adb_sent
+      , :work_auth_adb_amt
+      , nvl(:fast_track, 'N')
+      , :billing_version
+      , nvl(:capitalized, 'N')
+      , :t_adb
+      , nvl(:itic_nf, 'N')
+      , :program
+      , nvl(:client_ind, 'N')
+      , to_date(trim(:appr_st_drop_date), 'MM/DD/YYYY')
+      , to_date(trim(:last_status_date), 'MM/DD/YYYY')
+      , to_date(trim(:status_review_date), 'MM/DD/YYYY')
+      , to_date(trim(:general_status_date), 'MM/DD/YYYY')
+      , to_date(trim(:lifecycle_phase_date), 'MM/DD/YYYY')
+      , to_date(trim(:pending_item_date), 'MM/DD/YYYY')
+      , to_date(trim(:pre_wa_date), 'MM/DD/YYYY')
+      , to_date(trim(:scope_request_date), 'MM/DD/YYYY')
+      , to_date(trim(:de_due_date), 'MM/DD/YYYY')
+      , to_date(trim(:de_ta_walkthru_date), 'MM/DD/YYYY')
+      , to_date(trim(:de_ta_approval_date), 'MM/DD/YYYY')
+      , to_date(trim(:work_auth_date), 'MM/DD/YYYY')
+      , to_date(trim(:dev_comp_act_date), 'MM/DD/YYYY')
+      , to_date(trim(:dev_comp_plan_date), 'MM/DD/YYYY')
+      , to_date(trim(:sst_exec_act_date), 'MM/DD/YYYY')
+      , to_date(trim(:sst_exec_plan_date), 'MM/DD/YYYY')
+      , to_date(trim(:st_ready_act_date), 'MM/DD/YYYY')
+      , :delivery_est_notes
+      , to_date(trim(:st_test_start), 'MM/DD/YYYY')
+      , :requested_version
+      , :yp_series
+      , :yp_program_mgr
+      , to_date(trim(:m1_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:m2_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:m3_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:m4_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:m5_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:m6_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:m7_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:m8_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:m9_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:m10_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:dg1_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:dg2_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:dg3_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:dg4_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:m1_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:m2_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:m3_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:m4_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:m5_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:m6_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:m7_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:m8_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:m9_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:m10_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:dg1_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:dg2_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:dg3_planned_date), 'MM/DD/YYYY')
+      , to_date(trim(:dg4_planned_date), 'MM/DD/YYYY')
+      , :description
+      , :comments
+      , :dev_status_comments
+      , :int_comments
+      , :int_de_status_notes
+      , :pmo_int_comments
+      , :pmo_ext_comments
+      , :update_oper_id
+      , sysdate
+      , :create_oper_id
+      , sysdate
+      , :project_status
+      , to_date(trim(:m11_actual_date), 'MM/DD/YYYY')
+      , to_date(trim(:m11_planned_date), 'MM/DD/YYYY'))
+   		]]>
+	</statement>
+
+<!--  
+SQL for generating RR_DETAIL update statement ...
+select   lower(column_name)||' = '||(Case when column_name = 'UPDATE_DATE' then 'sysdate'
+               when data_type='DATE' then 'to_date(trim(:'||lower(column_name)||'), ''MM/DD/YYYY'')'
+               else ':'||lower(column_name) end) col_name
+from     user_tab_columns
+where    table_name='RR_DETAILS'
+and      column_name not in ('CREATE_DATE','CREATE_OPER_ID')
+order by column_id
+ -->
+	<statement code="UPDATE_REQ">
+   		<![CDATA[
+update rr_details
+set   requirement_id = :requirement_id
+    , rr_status = :rr_status
+    , amdocs_owner = :amdocs_owner
+    , leading_func_area = :leading_func_area
+    , rr_subject = :rr_subject
+    , rr_summary = :rr_summary
+    , dev_owner = :dev_owner
+    , release_version = :release_version
+    , production_milestone = :production_milestone
+    , req_id = :req_id
+    , main_application = :main_application
+    , client_owner = :client_owner
+    , affected_apps = :affected_apps
+    , development_version = :development_version
+    , xref_req_num = :xref_req_num
+    , assigned_to = :assigned_to
+    , phle_adb_sent = :phle_adb_sent
+    , bau_ind = :bau_ind
+    , modified = to_date(trim(:modified), 'MM/DD/YYYY')
+    , affected_func_areas = :affected_func_areas
+    , dev_ctr_poc = :dev_ctr_poc
+    , ba_owner = :ba_owner
+    , de_id = :de_id
+    , last_adb_est = :last_adb_est
+    , drd_status = :drd_status
+    , de_status = :de_status
+    , st_ready_planned = to_date(trim(:st_ready_planned), 'MM/DD/YYYY')
+    , amdocs_sme_ba = :amdocs_sme_ba
+    , jeopardy_status = :jeopardy_status
+    , phle_start = to_date(trim(:phle_start), 'MM/DD/YYYY')
+    , css_impact = nvl(:css_impact, 'N')
+    , general_status = :general_status
+    , lifecycle_phase = :lifecycle_phase
+    , amdocs_pending_item = :amdocs_pending_item
+    , work_authorized = :work_authorized
+    , de_adb_sent = :de_adb_sent
+    , work_auth_adb_amt = :work_auth_adb_amt
+    , fast_track = nvl(:fast_track, 'N')
+    , billing_version = :billing_version
+    , capitalized = nvl(:capitalized, 'N')
+    , t_adb = :t_adb
+    , itic_nf = nvl(:itic_nf, 'N')
+    , program = :program
+    , client_ind = nvl(:client_ind, 'N')
+    , appr_st_drop_date = to_date(trim(:appr_st_drop_date), 'MM/DD/YYYY')
+    , last_status_date = to_date(trim(:last_status_date), 'MM/DD/YYYY')
+    , status_review_date = to_date(trim(:status_review_date), 'MM/DD/YYYY')
+    , general_status_date = to_date(trim(:general_status_date), 'MM/DD/YYYY')
+    , lifecycle_phase_date = to_date(trim(:lifecycle_phase_date), 'MM/DD/YYYY')
+    , pending_item_date = to_date(trim(:pending_item_date), 'MM/DD/YYYY')
+    , pre_wa_date = to_date(trim(:pre_wa_date), 'MM/DD/YYYY')
+    , scope_request_date = to_date(trim(:scope_request_date), 'MM/DD/YYYY')
+    , de_due_date = to_date(trim(:de_due_date), 'MM/DD/YYYY')
+    , de_ta_walkthru_date = to_date(trim(:de_ta_walkthru_date), 'MM/DD/YYYY')
+    , de_ta_approval_date = to_date(trim(:de_ta_approval_date), 'MM/DD/YYYY')
+    , work_auth_date = to_date(trim(:work_auth_date), 'MM/DD/YYYY')
+    , dev_comp_act_date = to_date(trim(:dev_comp_act_date), 'MM/DD/YYYY')
+    , dev_comp_plan_date = to_date(trim(:dev_comp_plan_date), 'MM/DD/YYYY')
+    , sst_exec_act_date = to_date(trim(:sst_exec_act_date), 'MM/DD/YYYY')
+    , sst_exec_plan_date = to_date(trim(:sst_exec_plan_date), 'MM/DD/YYYY')
+    , st_ready_act_date = to_date(trim(:st_ready_act_date), 'MM/DD/YYYY')
+    , delivery_est_notes = :delivery_est_notes
+    , st_test_start = to_date(trim(:st_test_start), 'MM/DD/YYYY')
+    , requested_version = :requested_version
+    , yp_series = :yp_series
+    , yp_program_mgr = :yp_program_mgr
+    , m1_actual_date = to_date(trim(:m1_actual_date), 'MM/DD/YYYY')
+    , m2_actual_date = to_date(trim(:m2_actual_date), 'MM/DD/YYYY')
+    , m3_actual_date = to_date(trim(:m3_actual_date), 'MM/DD/YYYY')
+    , m4_actual_date = to_date(trim(:m4_actual_date), 'MM/DD/YYYY')
+    , m5_actual_date = to_date(trim(:m5_actual_date), 'MM/DD/YYYY')
+    , m6_actual_date = to_date(trim(:m6_actual_date), 'MM/DD/YYYY')
+    , m7_actual_date = to_date(trim(:m7_actual_date), 'MM/DD/YYYY')
+    , m8_actual_date = to_date(trim(:m8_actual_date), 'MM/DD/YYYY')
+    , m9_actual_date = to_date(trim(:m9_actual_date), 'MM/DD/YYYY')
+    , m10_actual_date = to_date(trim(:m10_actual_date), 'MM/DD/YYYY')
+    , dg1_actual_date = to_date(trim(:dg1_actual_date), 'MM/DD/YYYY')
+    , dg2_actual_date = to_date(trim(:dg2_actual_date), 'MM/DD/YYYY')
+    , dg3_actual_date = to_date(trim(:dg3_actual_date), 'MM/DD/YYYY')
+    , dg4_actual_date = to_date(trim(:dg4_actual_date), 'MM/DD/YYYY')
+    , m1_planned_date = to_date(trim(:m1_planned_date), 'MM/DD/YYYY')
+    , m2_planned_date = to_date(trim(:m2_planned_date), 'MM/DD/YYYY')
+    , m3_planned_date = to_date(trim(:m3_planned_date), 'MM/DD/YYYY')
+    , m4_planned_date = to_date(trim(:m4_planned_date), 'MM/DD/YYYY')
+    , m5_planned_date = to_date(trim(:m5_planned_date), 'MM/DD/YYYY')
+    , m6_planned_date = to_date(trim(:m6_planned_date), 'MM/DD/YYYY')
+    , m7_planned_date = to_date(trim(:m7_planned_date), 'MM/DD/YYYY')
+    , m8_planned_date = to_date(trim(:m8_planned_date), 'MM/DD/YYYY')
+    , m9_planned_date = to_date(trim(:m9_planned_date), 'MM/DD/YYYY')
+    , m10_planned_date = to_date(trim(:m10_planned_date), 'MM/DD/YYYY')
+    , dg1_planned_date = to_date(trim(:dg1_planned_date), 'MM/DD/YYYY')
+    , dg2_planned_date = to_date(trim(:dg2_planned_date), 'MM/DD/YYYY')
+    , dg3_planned_date = to_date(trim(:dg3_planned_date), 'MM/DD/YYYY')
+    , dg4_planned_date = to_date(trim(:dg4_planned_date), 'MM/DD/YYYY')
+    , description = :description
+    , comments = :comments
+    , dev_status_comments = :dev_status_comments
+    , int_comments = :int_comments
+    , int_de_status_notes = :int_de_status_notes
+    , pmo_int_comments = :pmo_int_comments
+    , pmo_ext_comments = :pmo_ext_comments
+    , update_oper_id = :update_oper_id
+    , update_date = sysdate
+    , project_status = :project_status
+    , m11_actual_date = to_date(trim(:m11_actual_date), 'MM/DD/YYYY')
+    , m11_planned_date = to_date(trim(:m11_planned_date), 'MM/DD/YYYY')
+where requirement_id = :requirement_id
+   		]]>
+	</statement>
+	
+	<statement code="SELECT_MULTI_VALUE_DOMAIN_DECODES">
+   		<![CDATA[
+   		
+   			WITH DOMAIN_DATA AS (
+    			SELECT CODE_VALUE, DECODE_DISPLAY  FROM RR_DECODE    
+			), DOMAIN_DATA1 AS(
+
+				SELECT RRD.DOMAIN_CODE, DD.CODE_VALUE  RR_FIELD, COUNT(*) TOTAL  FROM  RR_DECODE RRD
+				JOIN DOMAIN_DATA DD
+				ON RRD.DOMAIN_CODE = DD.DECODE_DISPLAY
+				GROUP BY RRD.DOMAIN_CODE, DD.CODE_VALUE
+
+			), DOMAIN_DATA2 AS(
+				SELECT * FROM DOMAIN_DATA1 WHERE TOTAL > 1
+			)
+			SELECT RRD.DOMAIN_CODE, lower(DD.RR_FIELD) rr_field, CODE_VALUE, DECODE_DISPLAY FROM RR_DECODE RRD
+			JOIN DOMAIN_DATA2 DD
+			ON RRD.DOMAIN_CODE = DD.DOMAIN_CODE
+			order by rrd.domain_code, dd.rr_field, decode_display
+		]]>
+	</statement>
+	
+	<statement code="SELECT_ALL_DOMAIN_DECODES">
+   		<![CDATA[
+   		
+   			SELECT * FROM RR_DECODE
+   			ORDER BY DOMAIN_CODE, CODE_VALUE
+		]]>
+	</statement>
+	
+	<statement code="SELECT_SINGLE_VALUE_DOMAIN_DECODES">
+   		<![CDATA[
+			
+			WITH DOMAIN_DATA AS (
+    			SELECT CODE_VALUE, DECODE_DISPLAY  FROM RR_DECODE    
+			), DOMAIN_DATA1 AS(
+
+				SELECT RRD.DOMAIN_CODE, DD.CODE_VALUE  RR_FIELD, COUNT(*) TOTAL  FROM  RR_DECODE RRD
+				JOIN DOMAIN_DATA DD
+				ON RRD.DOMAIN_CODE = DD.DECODE_DISPLAY
+				GROUP BY RRD.DOMAIN_CODE, DD.CODE_VALUE
+
+			), DOMAIN_DATA2 AS(
+				SELECT * FROM DOMAIN_DATA1 WHERE TOTAL = 1
+			)
+			SELECT RRD.DOMAIN_CODE, lower(DD.RR_FIELD) rr_field, CODE_VALUE, DECODE_DISPLAY FROM RR_DECODE RRD
+			JOIN DOMAIN_DATA2 DD
+			ON RRD.DOMAIN_CODE = DD.DOMAIN_CODE
+			order by rrd.domain_code, dd.rr_field, decode_display
+		]]>
+	</statement>
+	
+	<statement code="SELECT_ALL_RR_EMPLOYEES">
+		<![CDATA[
+select   e.employee_id
+       , e.login_name
+       , e.employee_status     		  
+       , rrd.decode_display employee_status_display
+       , e.emp_first_name
+       , e.employee_surname
+       , nvl(e.amdocs_owner_ind, 'N') amdocs_owner_ind
+       , nvl(e.client_owner_ind, 'N') client_owner_ind
+       , nvl(e.dev_ctr_poc_ind, 'N') dev_ctr_poc_ind
+       , nvl(e.ba_owner_ind, 'N') ba_owner_ind
+       , nvl(e.amdocs_sme_ba_ind, 'N') amdocs_sme_ba_ind
+       , nvl(e.assigned_to_ind, 'N') assigned_to_ind
+       , nvl(e.yp_program_mgr_ind, 'N') yp_program_mgr_ind 
+       , trim(e.emp_first_name || ' ' || e.employee_surname) employee_name
+       , INITCAP(TRIM(EMP.EMP_FIRST_NAME || ' ' || EMP.EMPLOYEE_SURNAME)) CREATE_OPER
+       , INITCAP(TRIM(EMP1.EMP_FIRST_NAME || ' ' || EMP1.EMPLOYEE_SURNAME)) UPDATE_OPER
+       , e.update_oper_id
+       , e.update_date
+       , e.create_oper_id
+       , e.create_date
+from     rr_employee e
+         left outer join rr_decode rrd
+           on rrd.domain_code = 'EMPLOYEESTATUS'
+          and rrd.code_value = e.employee_status
+         LEFT OUTER JOIN EMPLOYEE EMP
+		    ON e.CREATE_OPER_ID = EMP.EMPLOYEE_ID
+		 LEFT OUTER JOIN EMPLOYEE EMP1
+		    ON e.UPDATE_OPER_ID = EMP1.EMPLOYEE_ID
+order by employee_name
+		]]>
+	</statement>
+		
+	<statement code="RR_EMPLYOEE_SLV">
+		<![CDATA[
+			SELECT EMPLOYEE_ID, EMPLOYEE_NAME, EMPLOYEE_NAME_DISPLAY, LOGIN_NAME
+			FROM 
+					(SELECT
+		                   EMPLOYEE_ID
+		                 , LOGIN_NAME
+		                 , EMPLOYEE_NAME
+		                 , EMPLOYEE_NAME_DISPLAY
+		                 , AMDOCS_OWNER_IND
+	            		 , CLIENT_OWNER_IND
+	            		 , DEV_CTR_POC_IND
+	            		 , BA_OWNER_IND
+	            		 , ASSIGNED_TO_IND
+	            		 , YP_PROGRAM_MGR_IND
+		                 , SEARCH
+		                 , ROW_NUMBER()
+		                       OVER(PARTITION BY EMPLOYEE_ID
+		                            ORDER BY INSTR(LOWER(SEARCH), LOWER({SEARCH})), EMPLOYEE_NAME) RNUM
+		            FROM (SELECT 
+		            			EMPLOYEE_ID
+		            		  , AMDOCS_OWNER_IND
+		            		  , CLIENT_OWNER_IND
+		            		  , DEV_CTR_POC_IND
+		            		  , BA_OWNER_IND
+		            		  , ASSIGNED_TO_IND
+		            		  , YP_PROGRAM_MGR_IND  
+		            		  , LOGIN_NAME
+		            		  , EMPLOYEE_SURNAME || ', ' || EMP_FIRST_NAME ||(CASE WHEN TRIM(LOGIN_NAME) IS NOT NULL THEN ' (' || LOGIN_NAME || ')' END) EMPLOYEE_NAME
+		            		  , EMP_FIRST_NAME || ' ' || EMPLOYEE_SURNAME EMPLOYEE_NAME_DISPLAY
+                          	  , (CASE ID WHEN 1 THEN to_char(EMPLOYEE_ID)
+                                        WHEN 2 THEN LOWER(EMPLOYEE_SURNAME)||', '||LOWER(EMP_FIRST_NAME)
+                                        WHEN 3 THEN LOWER(EMP_FIRST_NAME)||' '||LOWER(EMPLOYEE_SURNAME)
+                                        WHEN 4 THEN LOWER(LOGIN_NAME)
+                              END) SEARCH
+		                      FROM   RR_EMPLOYEE CROSS JOIN (SELECT LEVEL ID FROM DUAL CONNECT BY LEVEL <= 4)
+		            		  WHERE EMPLOYEE_STATUS = 0)
+		                                              
+		            WHERE SEARCH LIKE LOWER('%'||{SEARCH}||'%')
+		            AND ( ({FIELD} = 'AMDOCS_OWNER'
+                          	AND AMDOCS_OWNER_IND = 'Y')
+                          		 
+                       	OR ({FIELD} = 'CLIENT_OWNER' 
+                           AND CLIENT_OWNER_IND = 'Y') 
+                          
+                        OR ({FIELD} = 'DEV_CTR_POC' 
+                           AND DEV_CTR_POC_IND = 'Y')
+                          	   
+                     	OR ({FIELD} = 'BA_OWNER' 
+                     	   AND BA_OWNER_IND = 'Y')
+                     	   
+                       	OR ({FIELD} = 'ASSIGNED_TO' 
+                       	    AND ASSIGNED_TO_IND = 'Y')
+                       	         
+                        OR ({FIELD} = 'YP_PROGRAM_MGR' 
+                       	    AND YP_PROGRAM_MGR_IND = 'Y')                          
+                          )		            
+                     ORDER BY INSTR(LOWER(SEARCH), LOWER({SEARCH})), EMPLOYEE_NAME) 
+			WHERE RNUM = 1
+			AND ROWNUM <= 25
+		]]>
+	</statement>
+	<statement code="SELECT_REQ_EDIT">
+   		<![CDATA[
+select   a.requirement_id
+       , a.rr_status
+       , a.amdocs_owner
+       , a.leading_func_area
+       , a.rr_subject
+       , a.rr_summary
+       , a.dev_owner
+       , a.release_version
+       , a.production_milestone
+       , a.req_id
+       , a.main_application
+       , a.client_owner
+       , a.affected_apps
+       , a.development_version
+       , a.xref_req_num
+       , a.assigned_to
+       , a.phle_adb_sent
+       , a.bau_ind
+       , to_char(a.modified, 'MM/DD/YYYY') modified
+       , a.affected_func_areas
+       , a.dev_ctr_poc
+       , a.ba_owner
+       , a.de_id
+       , a.last_adb_est
+       , a.drd_status
+       , a.de_status
+       , to_char(a.st_ready_planned, 'MM/DD/YYYY') st_ready_planned
+       , a.amdocs_sme_ba
+       , a.jeopardy_status
+       , to_char(a.phle_start, 'MM/DD/YYYY') phle_start
+       , nvl(a.css_impact, 'N') css_impact 
+       , a.general_status
+       , a.lifecycle_phase
+       , a.amdocs_pending_item
+       , a.work_authorized
+       , a.de_adb_sent
+       , a.work_auth_adb_amt
+       , nvl(a.fast_track, 'N') fast_track 
+       , a.billing_version
+       , nvl(a.capitalized, 'N') capitalized 
+       , a.t_adb
+       , nvl(a.itic_nf, 'N') itic_nf 
+       , a.program
+       , nvl(a.client_ind, 'N') client_ind 
+       , to_char(a.appr_st_drop_date, 'MM/DD/YYYY') appr_st_drop_date
+       , to_char(a.last_status_date, 'MM/DD/YYYY') last_status_date
+       , to_char(a.status_review_date, 'MM/DD/YYYY') status_review_date
+       , to_char(a.general_status_date, 'MM/DD/YYYY') general_status_date
+       , to_char(a.lifecycle_phase_date, 'MM/DD/YYYY') lifecycle_phase_date
+       , to_char(a.pending_item_date, 'MM/DD/YYYY') pending_item_date
+       , to_char(a.pre_wa_date, 'MM/DD/YYYY') pre_wa_date
+       , to_char(a.scope_request_date, 'MM/DD/YYYY') scope_request_date
+       , to_char(a.de_due_date, 'MM/DD/YYYY') de_due_date
+       , to_char(a.de_ta_walkthru_date, 'MM/DD/YYYY') de_ta_walkthru_date
+       , to_char(a.de_ta_approval_date, 'MM/DD/YYYY') de_ta_approval_date
+       , to_char(a.work_auth_date, 'MM/DD/YYYY') work_auth_date
+       , to_char(a.dev_comp_act_date, 'MM/DD/YYYY') dev_comp_act_date
+       , to_char(a.dev_comp_plan_date, 'MM/DD/YYYY') dev_comp_plan_date
+       , to_char(a.sst_exec_act_date, 'MM/DD/YYYY') sst_exec_act_date
+       , to_char(a.sst_exec_plan_date, 'MM/DD/YYYY') sst_exec_plan_date
+       , to_char(a.st_ready_act_date, 'MM/DD/YYYY') st_ready_act_date
+       , a.delivery_est_notes
+       , to_char(a.st_test_start, 'MM/DD/YYYY') st_test_start
+       , a.requested_version
+       , a.yp_series
+       , a.yp_program_mgr
+       , to_char(a.m1_actual_date, 'MM/DD/YYYY') m1_actual_date
+       , to_char(a.m2_actual_date, 'MM/DD/YYYY') m2_actual_date
+       , to_char(a.m3_actual_date, 'MM/DD/YYYY') m3_actual_date
+       , to_char(a.m4_actual_date, 'MM/DD/YYYY') m4_actual_date
+       , to_char(a.m5_actual_date, 'MM/DD/YYYY') m5_actual_date
+       , to_char(a.m6_actual_date, 'MM/DD/YYYY') m6_actual_date
+       , to_char(a.m7_actual_date, 'MM/DD/YYYY') m7_actual_date
+       , to_char(a.m8_actual_date, 'MM/DD/YYYY') m8_actual_date
+       , to_char(a.m9_actual_date, 'MM/DD/YYYY') m9_actual_date
+       , to_char(a.m10_actual_date, 'MM/DD/YYYY') m10_actual_date
+       , to_char(a.m11_actual_date, 'MM/DD/YYYY') m11_actual_date
+       , to_char(a.dg1_actual_date, 'MM/DD/YYYY') dg1_actual_date
+       , to_char(a.dg2_actual_date, 'MM/DD/YYYY') dg2_actual_date
+       , to_char(a.dg3_actual_date, 'MM/DD/YYYY') dg3_actual_date
+       , to_char(a.dg4_actual_date, 'MM/DD/YYYY') dg4_actual_date
+       , to_char(a.m1_planned_date, 'MM/DD/YYYY') m1_planned_date
+       , to_char(a.m2_planned_date, 'MM/DD/YYYY') m2_planned_date
+       , to_char(a.m3_planned_date, 'MM/DD/YYYY') m3_planned_date
+       , to_char(a.m4_planned_date, 'MM/DD/YYYY') m4_planned_date
+       , to_char(a.m5_planned_date, 'MM/DD/YYYY') m5_planned_date
+       , to_char(a.m6_planned_date, 'MM/DD/YYYY') m6_planned_date
+       , to_char(a.m7_planned_date, 'MM/DD/YYYY') m7_planned_date
+       , to_char(a.m8_planned_date, 'MM/DD/YYYY') m8_planned_date
+       , to_char(a.m9_planned_date, 'MM/DD/YYYY') m9_planned_date
+       , to_char(a.m10_planned_date, 'MM/DD/YYYY') m10_planned_date
+       , to_char(a.m11_planned_date, 'MM/DD/YYYY') m11_planned_date
+       , to_char(a.dg1_planned_date, 'MM/DD/YYYY') dg1_planned_date
+       , to_char(a.dg2_planned_date, 'MM/DD/YYYY') dg2_planned_date
+       , to_char(a.dg3_planned_date, 'MM/DD/YYYY') dg3_planned_date
+       , to_char(a.dg4_planned_date, 'MM/DD/YYYY') dg4_planned_date
+       , a.project_status
+       , a.description
+       , a.comments
+       , a.dev_status_comments
+       , a.int_comments
+       , a.int_de_status_notes
+       , a.pmo_int_comments
+       , a.pmo_ext_comments
+       , a.update_oper_id
+       , a.update_date
+       , a.create_oper_id
+       , a.create_date
+	   , TRIM(RRE.EMP_FIRST_NAME || ' ' || RRE.EMPLOYEE_SURNAME) AMDOCS_OWNER_DISPLAY
+	   , TRIM(RRE1.EMP_FIRST_NAME || ' ' || RRE1.EMPLOYEE_SURNAME) CLIENT_OWNER_DISPLAY
+	   , TRIM(RRE2.EMP_FIRST_NAME || ' ' || RRE2.EMPLOYEE_SURNAME) DEV_CTR_POC_DISPLAY
+	   , TRIM(RRE3.EMP_FIRST_NAME || ' ' || RRE3.EMPLOYEE_SURNAME) BA_OWNER_DISPLAY
+	   , TRIM(RRE4.EMP_FIRST_NAME || ' ' || RRE4.EMPLOYEE_SURNAME) ASSIGNED_TO_DISPLAY
+	   , TRIM(RRE5.EMP_FIRST_NAME || ' ' || RRE5.EMPLOYEE_SURNAME) YP_PROGRAM_MGR_DISPLAY
+	   , INITCAP(TRIM(EMP.EMP_FIRST_NAME || ' ' || EMP.EMPLOYEE_SURNAME)) CREATE_OPER
+       , INITCAP(TRIM(EMP1.EMP_FIRST_NAME || ' ' || EMP1.EMPLOYEE_SURNAME)) UPDATE_OPER
+FROM     RR_DETAILS A
+         LEFT OUTER JOIN RR_EMPLOYEE RRE
+            ON A.AMDOCS_OWNER = RRE.EMPLOYEE_ID
+         LEFT OUTER JOIN RR_EMPLOYEE RRE1
+            ON A.CLIENT_OWNER = RRE1.EMPLOYEE_ID
+         LEFT OUTER JOIN RR_EMPLOYEE RRE2
+            ON A.DEV_CTR_POC = RRE2.EMPLOYEE_ID
+         LEFT OUTER JOIN RR_EMPLOYEE RRE3
+            ON A.BA_OWNER = RRE3.EMPLOYEE_ID
+         LEFT OUTER JOIN RR_EMPLOYEE RRE4
+            ON A.ASSIGNED_TO = RRE4.EMPLOYEE_ID
+         LEFT OUTER JOIN RR_EMPLOYEE RRE5
+            ON A.YP_PROGRAM_MGR = RRE5.EMPLOYEE_ID
+         LEFT OUTER JOIN EMPLOYEE EMP
+		    ON A.CREATE_OPER_ID = EMP.EMPLOYEE_ID
+		 LEFT OUTER JOIN EMPLOYEE EMP1
+		 	ON A.UPDATE_OPER_ID = EMP1.EMPLOYEE_ID
+                 
+WHERE    REQUIREMENT_ID = {requirement_id}
+   		]]>
+	</statement>
+	
+	<statement code="SELECT_REQ_LINKS">
+   		<![CDATA[
+		   SELECT * FROM RR_LINKS
+		   WHERE  REQUIREMENT_ID = {requirement_id}
+		   ORDER BY 1,2
+   		]]>
+	</statement>
+	
+	<statement code="INSERT_LINK">
+   		<![CDATA[
+   		 	INSERT INTO RR_LINKS
+   		 		(REQUIREMENT_ID
+			      , LINK_ID
+			      , LINK_URL
+			      , LINK_DESC
+			      , UPDATE_OPER_ID
+			      , UPDATE_DATE
+			      , CREATE_OPER_ID
+			      , CREATE_DATE)
+			VALUES (:requirement_id
+			      , :link_id
+			      , :link_url
+			      , :link_desc
+			      , :update_oper_id
+			      , SYSDATE
+			      , :create_oper_id
+			      , SYSDATE)
+   		]]>
+	</statement>
+	
+	<statement code="UPDATE_LINK">
+   		<![CDATA[
+   		 UPDATE RR_LINKS
+		       SET LINK_DESC = :link_desc
+		     , LINK_URL = :link_url
+		     , UPDATE_OPER_ID = :update_oper_id
+		     , UPDATE_DATE = SYSDATE
+   		 WHERE  REQUIREMENT_ID = :requirement_id
+   		 AND LINK_ID = :link_id
+   		]]>
+	</statement>
+	
+	<statement code="DELETE_LINK">
+   		<![CDATA[
+   		 DELETE RR_LINKS		       
+   		 WHERE  REQUIREMENT_ID = :requirement_id
+   		 AND LINK_ID = :link_id
+   		]]>
+	</statement>
+			
+	<statement code="SELECT_REQ_LIST">
+   		<![CDATA[
+select   a.requirement_id
+       , a.rr_status
+       , a.amdocs_owner
+       , a.leading_func_area
+       , a.rr_subject
+       , a.rr_summary
+       , a.dev_owner
+       , a.release_version
+       , a.production_milestone
+       , a.req_id
+       , a.main_application
+       , a.client_owner
+       , a.affected_apps
+       , a.development_version
+       , a.xref_req_num
+       , a.assigned_to
+       , a.phle_adb_sent
+       , a.bau_ind
+       , to_char(a.modified, 'MM/DD/YYYY') modified
+       , a.affected_func_areas
+       , a.dev_ctr_poc
+       , a.ba_owner
+       , a.de_id
+       , a.last_adb_est
+       , a.drd_status
+       , a.de_status
+       , to_char(a.st_ready_planned, 'MM/DD/YYYY') st_ready_planned
+       , a.amdocs_sme_ba
+       , a.jeopardy_status
+       , to_char(a.phle_start, 'MM/DD/YYYY') phle_start
+       , nvl(a.css_impact, 'N') css_impact
+       , a.general_status
+       , a.lifecycle_phase
+       , a.amdocs_pending_item
+       , a.work_authorized
+       , a.de_adb_sent
+       , a.work_auth_adb_amt
+       , nvl(a.fast_track, 'N') fast_track
+       , a.billing_version
+       , nvl(a.capitalized,'N') capitalized 
+       , a.t_adb
+       , nvl(a.itic_nf, 'N') itic_nf
+       , a.program
+       , nvl(a.client_ind, 'N') client_ind
+       , to_char(a.appr_st_drop_date, 'MM/DD/YYYY') appr_st_drop_date
+       , to_char(a.last_status_date, 'MM/DD/YYYY') last_status_date
+       , to_char(a.status_review_date, 'MM/DD/YYYY') status_review_date
+       , to_char(a.general_status_date, 'MM/DD/YYYY') general_status_date
+       , to_char(a.lifecycle_phase_date, 'MM/DD/YYYY') lifecycle_phase_date
+       , to_char(a.pending_item_date, 'MM/DD/YYYY') pending_item_date
+       , to_char(a.pre_wa_date, 'MM/DD/YYYY') pre_wa_date
+       , to_char(a.scope_request_date, 'MM/DD/YYYY') scope_request_date
+       , to_char(a.de_due_date, 'MM/DD/YYYY') de_due_date
+       , to_char(a.de_ta_walkthru_date, 'MM/DD/YYYY') de_ta_walkthru_date
+       , to_char(a.de_ta_approval_date, 'MM/DD/YYYY') de_ta_approval_date
+       , to_char(a.work_auth_date, 'MM/DD/YYYY') work_auth_date
+       , to_char(a.dev_comp_act_date, 'MM/DD/YYYY') dev_comp_act_date
+       , to_char(a.dev_comp_plan_date, 'MM/DD/YYYY') dev_comp_plan_date
+       , to_char(a.sst_exec_act_date, 'MM/DD/YYYY') sst_exec_act_date
+       , to_char(a.sst_exec_plan_date, 'MM/DD/YYYY') sst_exec_plan_date
+       , to_char(a.st_ready_act_date, 'MM/DD/YYYY') st_ready_act_date
+       , a.delivery_est_notes
+       , to_char(a.st_test_start, 'MM/DD/YYYY') st_test_start
+       , a.requested_version
+       , a.yp_series
+       , a.yp_program_mgr
+       , to_char(a.m1_actual_date, 'MM/DD/YYYY') m1_actual_date
+       , to_char(a.m2_actual_date, 'MM/DD/YYYY') m2_actual_date
+       , to_char(a.m3_actual_date, 'MM/DD/YYYY') m3_actual_date
+       , to_char(a.m4_actual_date, 'MM/DD/YYYY') m4_actual_date
+       , to_char(a.m5_actual_date, 'MM/DD/YYYY') m5_actual_date
+       , to_char(a.m6_actual_date, 'MM/DD/YYYY') m6_actual_date
+       , to_char(a.m7_actual_date, 'MM/DD/YYYY') m7_actual_date
+       , to_char(a.m8_actual_date, 'MM/DD/YYYY') m8_actual_date
+       , to_char(a.m9_actual_date, 'MM/DD/YYYY') m9_actual_date
+       , to_char(a.m10_actual_date, 'MM/DD/YYYY') m10_actual_date
+       , to_char(a.m11_actual_date, 'MM/DD/YYYY') m11_actual_date
+       , to_char(a.dg1_actual_date, 'MM/DD/YYYY') dg1_actual_date
+       , to_char(a.dg2_actual_date, 'MM/DD/YYYY') dg2_actual_date
+       , to_char(a.dg3_actual_date, 'MM/DD/YYYY') dg3_actual_date
+       , to_char(a.dg4_actual_date, 'MM/DD/YYYY') dg4_actual_date
+       , to_char(a.m1_planned_date, 'MM/DD/YYYY') m1_planned_date
+       , to_char(a.m2_planned_date, 'MM/DD/YYYY') m2_planned_date
+       , to_char(a.m3_planned_date, 'MM/DD/YYYY') m3_planned_date
+       , to_char(a.m4_planned_date, 'MM/DD/YYYY') m4_planned_date
+       , to_char(a.m5_planned_date, 'MM/DD/YYYY') m5_planned_date
+       , to_char(a.m6_planned_date, 'MM/DD/YYYY') m6_planned_date
+       , to_char(a.m7_planned_date, 'MM/DD/YYYY') m7_planned_date
+       , to_char(a.m8_planned_date, 'MM/DD/YYYY') m8_planned_date
+       , to_char(a.m9_planned_date, 'MM/DD/YYYY') m9_planned_date
+       , to_char(a.m10_planned_date, 'MM/DD/YYYY') m10_planned_date
+       , to_char(a.m11_planned_date, 'MM/DD/YYYY') m11_planned_date
+       , to_char(a.dg1_planned_date, 'MM/DD/YYYY') dg1_planned_date
+       , to_char(a.dg2_planned_date, 'MM/DD/YYYY') dg2_planned_date
+       , to_char(a.dg3_planned_date, 'MM/DD/YYYY') dg3_planned_date
+       , to_char(a.dg4_planned_date, 'MM/DD/YYYY') dg4_planned_date
+       , a.project_status
+       , a.description
+       , a.comments
+       , a.dev_status_comments
+       , a.int_comments
+       , a.int_de_status_notes
+       , a.pmo_int_comments
+       , a.pmo_ext_comments
+       , a.update_oper_id
+       , a.update_date
+       , a.create_oper_id
+       , a.create_date
+       , TRIM(RRE.EMP_FIRST_NAME || ' ' || RRE.EMPLOYEE_SURNAME) AMDOCS_OWNER_DISPLAY
+       , TRIM(RRE1.EMP_FIRST_NAME || ' ' || RRE1.EMPLOYEE_SURNAME) CLIENT_OWNER_DISPLAY
+       , TRIM(RRE2.EMP_FIRST_NAME || ' ' || RRE2.EMPLOYEE_SURNAME) DEV_CTR_POC_DISPLAY
+       , TRIM(RRE3.EMP_FIRST_NAME || ' ' || RRE3.EMPLOYEE_SURNAME) BA_OWNER_DISPLAY
+       , TRIM(RRE4.EMP_FIRST_NAME || ' ' || RRE4.EMPLOYEE_SURNAME) ASSIGNED_TO_DISPLAY
+       , TRIM(RRE5.EMP_FIRST_NAME || ' ' || RRE5.EMPLOYEE_SURNAME) YP_PROGRAM_MGR_DISPLAY
+       , INITCAP(TRIM(EMP.EMP_FIRST_NAME || ' ' || EMP.EMPLOYEE_SURNAME)) CREATE_OPER
+       , INITCAP(TRIM(EMP1.EMP_FIRST_NAME || ' ' || EMP1.EMPLOYEE_SURNAME)) UPDATE_OPER
+       --, B.DECODE_DISPLAY RR_STATUS_DISPLAY
+       --, C.DECODE_DISPLAY LEADING_FUNC_AREA_DISPLAY
+       --, D.DECODE_DISPLAY RR_SUBJECT_DISPLAY
+       --, E.DECODE_DISPLAY DEV_OWNER_DISPLAY
+       --, F.DECODE_DISPLAY RELEASE_VERSION_DISPLAY
+       --, G.DECODE_DISPLAY MAIN_APPLICATION_DISPLAY
+       --, H.DECODE_DISPLAY DEVELOPMENT_VERSION_DISPLAY
+       --, I.DECODE_DISPLAY DRD_STATUS_DISPLAY
+       --, J.DECODE_DISPLAY DE_STATUS_DISPLAY
+       --, K.DECODE_DISPLAY JEOPARDY_STATUS_DISPLAY
+       --, L.DECODE_DISPLAY CSS_IMPACT_DISPLAY
+       --, M.DECODE_DISPLAY GENERAL_STATUS_DISPLAY
+       --, N.DECODE_DISPLAY LIFECYCLE_PHASE_DISPLAY
+       --, O.DECODE_DISPLAY AMDOCS_PENDING_ITEM_DISPLAY
+       , P.DECODE_DISPLAY WORK_AUTHORIZED_DISPLAY
+       --, Q.DECODE_DISPLAY FAST_TRACK_DISPLAY
+       --, R.DECODE_DISPLAY BILLING_VERSION_DISPLAY
+       --, S.DECODE_DISPLAY CAPITALIZED_DISPLAY
+       --, T.DECODE_DISPLAY ITIC_NF_DISPLAY
+       --, U.DECODE_DISPLAY PROGRAM_DISPLAY
+FROM     RR_DETAILS A
+		     LEFT OUTER JOIN RR_EMPLOYEE RRE
+		       ON A.AMDOCS_OWNER = RRE.EMPLOYEE_ID
+		     LEFT OUTER JOIN RR_EMPLOYEE RRE1
+		       ON A.CLIENT_OWNER = RRE1.EMPLOYEE_ID
+		     LEFT OUTER JOIN RR_EMPLOYEE RRE2
+		       ON A.DEV_CTR_POC = RRE2.EMPLOYEE_ID
+		     LEFT OUTER JOIN RR_EMPLOYEE RRE3
+		       ON A.BA_OWNER = RRE3.EMPLOYEE_ID
+		     LEFT OUTER JOIN RR_EMPLOYEE RRE4
+		       ON A.ASSIGNED_TO = RRE4.EMPLOYEE_ID
+		     LEFT OUTER JOIN RR_EMPLOYEE RRE5
+		       ON A.YP_PROGRAM_MGR = RRE5.EMPLOYEE_ID
+		     LEFT OUTER JOIN EMPLOYEE EMP
+		       ON A.CREATE_OPER_ID = EMP.EMPLOYEE_ID
+		     LEFT OUTER JOIN EMPLOYEE EMP1
+		       ON A.UPDATE_OPER_ID = EMP1.EMPLOYEE_ID
+		     --LEFT OUTER JOIN RR_DECODE B
+		     --  ON A.RR_STATUS = B.CODE_VALUE
+		     -- AND B.DOMAIN_CODE = 'STATUS'
+		     --LEFT OUTER JOIN RR_DECODE C
+		     --  ON A.LEADING_FUNC_AREA = C.CODE_VALUE
+		     -- AND C.DOMAIN_CODE = 'LEADAREA'
+		     --LEFT OUTER JOIN RR_DECODE D
+		     --  ON A.RR_SUBJECT = D.CODE_VALUE
+		     -- AND D.DOMAIN_CODE = 'SUBJECT'
+		     --LEFT OUTER JOIN RR_DECODE E
+		     --  ON A.DEV_OWNER = E.CODE_VALUE
+		     -- AND E.DOMAIN_CODE = 'DEVOWNER'
+		     --LEFT OUTER JOIN RR_DECODE F
+		     --  ON A.RELEASE_VERSION = F.CODE_VALUE
+		     -- AND F.DOMAIN_CODE = 'RELVERSION'
+		     --LEFT OUTER JOIN RR_DECODE G
+		     --  ON A.MAIN_APPLICATION = F.CODE_VALUE
+		     -- AND G.DOMAIN_CODE = 'MAINAPP'
+		     --LEFT OUTER JOIN RR_DECODE H
+		     --  ON A.DEVELOPMENT_VERSION = H.CODE_VALUE
+		     -- AND H.DOMAIN_CODE = 'DEVVERSION'
+		     --LEFT OUTER JOIN RR_DECODE I
+		     --  ON A.DRD_STATUS = I.CODE_VALUE
+		     -- AND I.DOMAIN_CODE = 'DRDSTATUS'
+		     --LEFT OUTER JOIN RR_DECODE J
+		     --  ON A.DE_STATUS = J.CODE_VALUE
+		     -- AND J.DOMAIN_CODE = 'DESTATUS'
+		     --LEFT OUTER JOIN RR_DECODE K
+		     --  ON A.JEOPARDY_STATUS = K.CODE_VALUE
+		     -- AND K.DOMAIN_CODE = 'JEOPARDY'
+		     --LEFT OUTER JOIN RR_DECODE L
+		     --  ON A.CSS_IMPACT = L.CODE_VALUE
+		     -- AND L.DOMAIN_CODE = 'CSSIMPACT'
+		     --LEFT OUTER JOIN RR_DECODE M
+		     --  ON A.GENERAL_STATUS = M.CODE_VALUE
+		     -- AND M.DOMAIN_CODE = 'GENSTATUS'
+		     --LEFT OUTER JOIN RR_DECODE N
+		     --  ON A.LIFECYCLE_PHASE = N.CODE_VALUE
+		     -- AND N.DOMAIN_CODE = 'LIFEPHASE'
+		     --LEFT OUTER JOIN RR_DECODE O
+		     --  ON A.AMDOCS_PENDING_ITEM = O.CODE_VALUE
+		     -- AND O.DOMAIN_CODE = 'PENDING'
+		     LEFT OUTER JOIN RR_DECODE P
+		       ON A.WORK_AUTHORIZED = P.CODE_VALUE
+		      AND P.DOMAIN_CODE = 'WORKAUTH'
+		     --LEFT OUTER JOIN RR_DECODE Q
+		     --  ON A.FAST_TRACK = Q.CODE_VALUE
+		     -- AND Q.DOMAIN_CODE = 'FASTTRACK'
+		     --LEFT OUTER JOIN RR_DECODE R
+		     --  ON A.BILLING_VERSION = R.CODE_VALUE
+		     -- AND R.DOMAIN_CODE = 'BILLVER'
+		     --LEFT OUTER JOIN RR_DECODE S
+		     --  ON A.CAPITALIZED = S.CODE_VALUE
+		     -- AND S.DOMAIN_CODE = 'CAPITALIZED'
+		     --LEFT OUTER JOIN RR_DECODE T
+		     --  ON A.ITIC_NF = T.CODE_VALUE
+		     -- AND T.DOMAIN_CODE = 'ITICNF'
+		     --LEFT OUTER JOIN RR_DECODE U
+		     --  ON A.PROGRAM = U.CODE_VALUE
+		     -- AND U.DOMAIN_CODE = 'PROGRAM'
+		     --LEFT OUTER JOIN RR_DECODE V
+		     --  ON A.CLIENT_IND = V.CODE_VALUE
+		     -- AND V.DOMAIN_CODE = 'YPIND'
+ORDER BY REQUIREMENT_ID DESC
+   		]]>
+	</statement>
+	
+	
+	<statement code="SELECT_REL_VERSIONS">
+   		<![CDATA[
+		   
+		   select 
+		   		release_version
+		   	  , nvl(major_version_ind, 'N') major_version_ind
+		   	  , to_char(dg1_date, 'MM/DD/YYYY') dg1_date
+       		  , to_char(dg2_date, 'MM/DD/YYYY') dg2_date
+       		  , to_char(dg3_date, 'MM/DD/YYYY') dg3_date
+       		  , to_char(dg4_date, 'MM/DD/YYYY') dg4_date
+		   	  , to_char(m1_date, 'MM/DD/YYYY') m1_date
+       		  , to_char(m2_date, 'MM/DD/YYYY') m2_date
+       		  , to_char(m3_date, 'MM/DD/YYYY') m3_date
+       		  , to_char(m4_date, 'MM/DD/YYYY') m4_date
+       		  , to_char(m5_date, 'MM/DD/YYYY') m5_date
+       		  , to_char(m6_date, 'MM/DD/YYYY') m6_date
+       		  , to_char(m7_date, 'MM/DD/YYYY') m7_date
+       		  , to_char(m8_date, 'MM/DD/YYYY') m8_date
+       		  , to_char(m9_date, 'MM/DD/YYYY') m9_date
+       		  , to_char(m10_date, 'MM/DD/YYYY') m10_date
+       		  , to_char(m11_date, 'MM/DD/YYYY') m11_date
+       		  , a.update_oper_id
+       		  , a.update_date
+       		  , a.create_oper_id
+       		  , a.create_date
+       		  , INITCAP(TRIM(EMP.EMP_FIRST_NAME || ' ' || EMP.EMPLOYEE_SURNAME)) CREATE_OPER
+       		  , INITCAP(TRIM(EMP1.EMP_FIRST_NAME || ' ' || EMP1.EMPLOYEE_SURNAME)) UPDATE_OPER
+		   from (select release_version
+                		, major_version_ind
+                		, milestone_date
+                		, milestone_code
+                		, update_oper_id
+       		  			, update_date
+       		  			, create_oper_id
+       		  			, create_date
+          		from rr_version_milestones)
+					pivot (max(milestone_date) "DATE"
+          			for milestone_code in ('DG1' as DG1, 'DG2' as DG2, 'DG3' as DG3, 'DG4' as DG4
+                                			,'M1' as M1, 'M2' as M2, 'M3' as M3, 'M4' as M4
+                                			,'M5' as M5, 'M6' as M6, 'M7' as M7, 'M8' as M8
+                                			,'M9' as M9, 'M10' as M10, 'M11' as M11)) A
+           LEFT OUTER JOIN EMPLOYEE EMP
+		       ON A.CREATE_OPER_ID = EMP.EMPLOYEE_ID
+		     LEFT OUTER JOIN EMPLOYEE EMP1
+		       ON A.UPDATE_OPER_ID = EMP1.EMPLOYEE_ID
+			order by regexp_replace(release_version,'[^0-9]') desc, release_version
+   		]]>
+	</statement>
+	
+	<statement code="SELECT_VERSION_EDIT">
+   		<![CDATA[
+		   
+		   select 
+		   		release_version
+		   	  , nvl(major_version_ind, 'N') major_version_ind 
+		   	  , to_char(dg1_date, 'MM/DD/YYYY') dg1_date
+       		  , to_char(dg2_date, 'MM/DD/YYYY') dg2_date
+       		  , to_char(dg3_date, 'MM/DD/YYYY') dg3_date
+       		  , to_char(dg4_date, 'MM/DD/YYYY') dg4_date
+		   	  , to_char(m1_date, 'MM/DD/YYYY') m1_date
+       		  , to_char(m2_date, 'MM/DD/YYYY') m2_date
+       		  , to_char(m3_date, 'MM/DD/YYYY') m3_date
+       		  , to_char(m4_date, 'MM/DD/YYYY') m4_date
+       		  , to_char(m5_date, 'MM/DD/YYYY') m5_date
+       		  , to_char(m6_date, 'MM/DD/YYYY') m6_date
+       		  , to_char(m7_date, 'MM/DD/YYYY') m7_date
+       		  , to_char(m8_date, 'MM/DD/YYYY') m8_date
+       		  , to_char(m9_date, 'MM/DD/YYYY') m9_date
+       		  , to_char(m10_date, 'MM/DD/YYYY') m10_date
+       		  , to_char(m11_date, 'MM/DD/YYYY') m11_date
+       		  , a.update_oper_id
+       		  , a.update_date
+       		  , a.create_oper_id
+       		  , a.create_date
+       		  , INITCAP(TRIM(EMP.EMP_FIRST_NAME || ' ' || EMP.EMPLOYEE_SURNAME)) CREATE_OPER
+       		  , INITCAP(TRIM(EMP1.EMP_FIRST_NAME || ' ' || EMP1.EMPLOYEE_SURNAME)) UPDATE_OPER
+		   from (select release_version
+                		, major_version_ind
+                		, milestone_date
+                		, milestone_code
+                		, update_oper_id
+       		  			, update_date
+       		  			, create_oper_id
+       		  			, create_date
+          		from rr_version_milestones)
+					pivot (max(milestone_date) "DATE"
+          			for milestone_code in ('DG1' as DG1, 'DG2' as DG2, 'DG3' as DG3, 'DG4' as DG4
+                                			,'M1' as M1, 'M2' as M2, 'M3' as M3, 'M4' as M4
+                                			,'M5' as M5, 'M6' as M6, 'M7' as M7, 'M8' as M8
+                                			,'M9' as M9, 'M10' as M10, 'M11' as M11)) A
+			LEFT OUTER JOIN EMPLOYEE EMP
+		       ON A.CREATE_OPER_ID = EMP.EMPLOYEE_ID
+		     LEFT OUTER JOIN EMPLOYEE EMP1
+		       ON A.UPDATE_OPER_ID = EMP1.EMPLOYEE_ID
+			where release_version = {release_version}
+   		]]>
+	</statement>
+	
+	<statement code="INSERT_VERSION">
+   		<![CDATA[
+			insert into rr_version_milestones
+			       (release_version
+			      , milestone_code
+			      , milestone_date
+			      , major_version_ind      
+			      , update_oper_id
+			      , update_date
+			      , create_oper_id
+			      , create_date)
+			values (:release_version
+			      , :milestone_code
+			      , to_date(trim(:milestone_date), 'MM/DD/YYYY')
+			      , nvl(:major_version_ind, 'N')     
+			      , :update_oper_id
+			      , sysdate
+			      , :create_oper_id
+			      , sysdate)
+   		]]>
+	</statement>
+	
+	<statement code="UPDATE_VERSION">
+   		<![CDATA[
+   		 update rr_version_milestones
+		       set milestone_date = to_date(trim(:milestone_date), 'MM/DD/YYYY')
+		     , major_version_ind = nvl(:major_version_ind,'N')
+		     , update_oper_id = :update_oper_id
+		     , update_date = SYSDATE
+   		 where  release_version = :release_version
+   		 and milestone_code = :milestone_code
+   		]]>
+	</statement>
+	
+	<statement code="INSERT_EMPLOYEE">
+   		<![CDATA[
+			insert into rr_employee
+			       (employee_id
+			      , login_name
+			      , emp_first_name
+			      , employee_surname
+			      , employee_status
+			      , amdocs_owner_ind
+			      , client_owner_ind
+			      , dev_ctr_poc_ind
+			      , ba_owner_ind
+			      , amdocs_sme_ba_ind
+			      , yp_program_mgr_ind
+			      , assigned_to_ind       
+			      , update_oper_id
+			      , update_date
+			      , create_oper_id
+			      , create_date)
+			values (:employee_id
+			      , :login_name
+			      , :emp_first_name
+			      , :employee_surname
+			      , :employee_status
+			      , nvl(:amdocs_owner_ind,'N')
+			      , nvl(:client_owner_ind,'N')
+			      , nvl(:dev_ctr_poc_ind,'N')
+			      , nvl(:ba_owner_ind,'N')
+			      , nvl(:amdocs_sme_ba_ind,'N')
+			      , nvl(:yp_program_mgr_ind,'N')
+			      , nvl(:assigned_to_ind,'N')    
+			      , :update_oper_id
+			      , sysdate
+			      , :create_oper_id
+			      , sysdate)
+   		]]>
+	</statement>
+	
+	<statement code="UPDATE_EMPLOYEE">
+   		<![CDATA[
+   		
+   		 update rr_employee
+		       set login_name = :login_name
+		     , emp_first_name = :emp_first_name		     
+		     , employee_surname = :employee_surname
+		     , employee_status = :employee_status
+		     , amdocs_owner_ind = nvl(:amdocs_owner_ind,'N')
+		     , client_owner_ind = nvl(:client_owner_ind,'N')		     
+		     , dev_ctr_poc_ind = nvl(:dev_ctr_poc_ind,'N')
+		     , ba_owner_ind = nvl(:ba_owner_ind,'N')
+		     , amdocs_sme_ba_ind = nvl(:amdocs_sme_ba_ind,'N')
+		     , yp_program_mgr_ind = nvl(:yp_program_mgr_ind,'N')
+		     , assigned_to_ind = nvl(:assigned_to_ind,'N')		     
+		     , update_oper_id = :update_oper_id
+		     , update_date = sysdate
+   		 where  employee_id = :employee_id
+   		 
+   		]]>
+	</statement>
+	
+	<statement code="SELECT_EMPLOYEE_EDIT">
+   		<![CDATA[
+select   a.employee_id
+       , a.login_name
+       , a.employee_status
+       , rrd.decode_display employee_status_display
+       , a.emp_first_name
+       , a.employee_surname
+       , nvl(a.amdocs_owner_ind, 'N') amdocs_owner_ind
+       , nvl(a.client_owner_ind, 'N') client_owner_ind
+       , nvl(a.dev_ctr_poc_ind, 'N') dev_ctr_poc_ind
+       , nvl(a.ba_owner_ind, 'N') ba_owner_ind
+       , nvl(a.amdocs_sme_ba_ind, 'N') amdocs_sme_ba_ind
+       , nvl(a.assigned_to_ind, 'N') assigned_to_ind
+       , nvl(a.yp_program_mgr_ind, 'N') yp_program_mgr_ind 
+       , trim(a.emp_first_name || ' ' || a.employee_surname) employee_name
+       , a.update_oper_id
+       , a.update_date
+       , a.create_oper_id
+       , a.create_date
+       , INITCAP(TRIM(EMP.EMP_FIRST_NAME || ' ' || EMP.EMPLOYEE_SURNAME)) CREATE_OPER
+       , INITCAP(TRIM(EMP1.EMP_FIRST_NAME || ' ' || EMP1.EMPLOYEE_SURNAME)) UPDATE_OPER
+       , a.update_oper_id
+       , a.update_date
+       , a.create_oper_id
+       , a.create_date	 
+from     rr_employee a
+         left outer join rr_decode rrd
+           on rrd.domain_code = 'EMPLOYEESTATUS'
+          and rrd.code_value = a.employee_status
+         LEFT OUTER JOIN EMPLOYEE EMP
+		   ON A.CREATE_OPER_ID = EMP.EMPLOYEE_ID
+		 LEFT OUTER JOIN EMPLOYEE EMP1
+		   ON A.UPDATE_OPER_ID = EMP1.EMPLOYEE_ID
+where   a.employee_id = {employee_id}
+   		]]>
+	</statement>
+	
+	<statement code="INSERT_DOMAIN_DECODE">
+   		<![CDATA[
+			insert into rr_decode
+			       (domain_code
+			      , code_value
+			      , decode_display			            
+			      , update_oper_id
+			      , update_date
+			      , create_oper_id
+			      , create_date)
+			values (:domain_code
+			      , :code_value
+			      , :decode_display			           
+			      , :update_oper_id
+			      , sysdate
+			      , :create_oper_id
+			      , sysdate)
+   		]]>
+	</statement>
+	
+	<statement code="UPDATE_REQUIREMENT">
+   		<![CDATA[
+   		 update rr_details
+		       set [updatableColumns]		     
+		     , update_oper_id = :update_oper_id
+		     , update_date = SYSDATE
+   		 WHERE  requirement_id = :requirement_id
+   		]]>
+	</statement>
+	
+</sql>

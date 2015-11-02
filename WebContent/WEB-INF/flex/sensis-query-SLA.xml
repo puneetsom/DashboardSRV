@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+<sql type="CdwSQLSensisSLA">
+
+	<statement code="Sensis_SLA_Helpdesk_Menu"><![CDATA[
+with sla_data as
+(select   assign_group
+        --, hg.support_category
+        , nvl(group_manager,'UNDEFINED') group_manager
+        , group_pm
+        , sm.sla_metric_name
+        , sum(in_cnt) in_cnt
+        , sum(out_cnt) out_cnt
+        , sum(risk_cnt) risk_cnt
+        , min_target
+        , exp_target
+        , prem_target
+ from     sla_incidents_chart_mv shr
+          join SLA_METRIC_INCIDENTS sm
+            --on shr.sla_type||'-P'||shr.priority = sm.sla_metric
+            on shr.priority_in = sm.sla_metric
+           and shr.sla_month between sm.effective_from_date and sm.effective_to_date
+          /*join HELPDESK_GROUP hg
+            on shr.assign_group = hg.assign_group*/
+ where    shr.sla_month = to_date({slaMonth}, 'YYYYMM')
+ group by assign_group
+        --, hg.support_category
+        , group_manager
+        , group_pm
+        , sm.sla_metric_name
+        , min_target
+        , exp_target
+        , prem_target)
+, sla_data2 as 
+(select   type
+        , assign_group
+        --, support_category
+        , group_manager
+        , group_pm
+        , sla_metric_name
+        , in_cnt
+        , out_cnt
+        , risk_cnt
+        , (case when in_cnt+out_cnt = 0 then null else round(in_cnt/(in_cnt+out_cnt) * 100,2) end) value
+        , (case when in_cnt+out_cnt = 0 then 99
+                when in_cnt/(in_cnt+out_cnt) * 100 < min_target then 0
+                when in_cnt/(in_cnt+out_cnt) * 100 < exp_target then 1
+                when in_cnt/(in_cnt+out_cnt) * 100 < prem_target then 2
+                when in_cnt/(in_cnt+out_cnt) * 100 >= prem_target then 3
+           end) status
+       , min_target
+       , exp_target
+       , prem_target
+ from    (select   'ASSIGN_GROUP' type
+                 , s.* 
+          from     sla_data s
+          union all
+          select   'PROJECT_MANAGER' type
+                 , null assign_group
+                 --, null support_category
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data s
+          group by group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'DIRECTOR' type
+                 , null assign_group
+                -- , null support_category
+                 , group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data s
+          group by group_manager
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'ALL' type
+                 , null assign_group
+                -- , null support_category
+                 , null group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data s
+          group by sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          )
+), sla_data3 as 
+(select   type
+        , assign_group
+        --, support_category
+        , group_manager
+        , group_pm
+        , (case min(status)
+                when 0 then 'Red' 
+                when 1 then 'Yellow' 
+                when 2 then 'Green' 
+                when 3 then 'Blue' 
+                else 'Disabled' 
+              end) status
+        , sum(in_cnt) in_cnt
+        , sum(out_cnt) out_cnt
+        , sum(risk_cnt) risk_cnt
+ from     sla_data2
+ group by type
+        , assign_group
+        --, support_category
+        , group_manager 
+        , group_pm
+)
+select  h.type
+      , h.type     header_text
+      , h.status   header_status
+      , h.in_cnt   header_in_cnt
+      , h.out_cnt  header_out_cnt
+      , h.risk_cnt header_risk_cnt  
+      , null       item_text
+      , null       item_status
+      , null       item_in_cnt
+      , null       item_out_cnt
+      , null       item_risk_cnt
+from    sla_data3 h 
+where   h.type = 'ALL'
+union all
+select  h.type
+      , h.group_manager header_text
+      , h.status        header_status
+      , h.in_cnt        header_in_cnt
+      , h.out_cnt       header_out_cnt
+      , h.risk_cnt      header_risk_cnt  
+      , i.group_pm      item_text
+      , i.status        item_status
+      , i.in_cnt        item_in_cnt
+      , i.out_cnt       item_out_cnt
+      , i.risk_cnt      item_risk_cnt
+from    sla_data3 h
+        join sla_data3 i
+          on h.group_manager = i.group_manager
+where   h.type = 'DIRECTOR'
+and     i.type = 'PROJECT_MANAGER'
+union all
+select  h.type
+      , h.group_pm      header_text
+      , h.status        header_status
+      , h.in_cnt        header_in_cnt
+      , h.out_cnt       header_out_cnt
+      , h.risk_cnt      header_risk_cnt  
+      , i.assign_group  item_text
+      , i.status        item_status
+      , i.in_cnt        item_in_cnt
+      , i.out_cnt       item_out_cnt
+      , i.risk_cnt      item_risk_cnt 
+from    sla_data3 h
+        join sla_data3 i
+          on h.group_pm = i.group_pm
+where   h.type = 'PROJECT_MANAGER'
+and     i.type = 'ASSIGN_GROUP'
+order by 1, 2, 7
+	]]></statement>
+
+	<statement code="Sensis_SLA_Helpdesk_Gauges"><![CDATA[
+with sla_data as
+(select     mv.assign_group,mv.group_manager,mv.group_pm,sm.sla_metric_name,sum(nvl(mv.in_cnt,0)) in_cnt, sum(nvl(mv.out_cnt,0)) out_cnt,
+        sum(nvl(mv.risk_cnt,0)) risk_cnt,sm.min_target,sm.exp_target,sm.prem_target
+from    sla_incidents_chart_mv mv, sla_metric_incidents sm, (select to_date({slaMonth},'YYYYMM') sla_month from dual) params
+where   params.sla_month = mv.sla_month and sm.sla_metric = mv.priority_in
+and     params.sla_month between sm.effective_from_date and sm.effective_to_date
+group by mv.assign_group,mv.group_manager,mv.group_pm,sm.sla_metric_name,sm.min_target,sm.exp_target,sm.prem_target)
+select   type
+       , assign_group
+       --, support_category
+       , group_manager
+       , group_pm
+       , sla_metric_name
+       , in_cnt
+       , out_cnt
+       , risk_cnt
+       , (case when in_cnt+out_cnt = 0 then 100 else round(in_cnt/(in_cnt+out_cnt) * 100,2) end) value
+       , (case when in_cnt+out_cnt = 0 then 'Blue'
+               when in_cnt/(in_cnt+out_cnt) * 100 < min_target then 'Red'
+               when in_cnt/(in_cnt+out_cnt) * 100 < exp_target then 'Yellow'
+               when in_cnt/(in_cnt+out_cnt) * 100 < prem_target then 'Green'
+               when in_cnt/(in_cnt+out_cnt) * 100 >= prem_target then 'Blue'
+          end) status
+       , min_target
+       , exp_target
+       , prem_target
+from     (select   'ASSIGN_GROUP' type
+                  , s.* 
+          from     sla_data s
+          /*union all
+          select   'SUPPORT_CATEGORY' type
+                 , null assign_group
+                 , support_category
+                 , null group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data s
+          group by support_category
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target*/
+          union all
+          select   'PROJECT_MANAGER' type
+                 , null assign_group
+                 --, null support_category
+                 , group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data s
+          group by group_manager
+                 , group_pm
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'DIRECTOR' type
+                 , null assign_group
+                 --, null support_category
+                 , group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data s
+          group by group_manager
+                 , sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+          union all
+          select   'ALL' type
+                 , null assign_group
+                 --, null support_category
+                 , null group_manager
+                 , null group_pm
+                 , sla_metric_name
+                 , sum(in_cnt) in_cnt
+                 , sum(out_cnt) out_cnt
+                 , sum(risk_cnt) risk_cnt
+                 , min_target
+                 , exp_target
+                 , prem_target
+          from     sla_data s
+          group by sla_metric_name
+                 , min_target
+                 , exp_target
+                 , prem_target
+         )
+order by 1, 2, 3, 4, 5, 6
+	]]></statement>
+
+
+<!-- 
+Returns help desk detail data for dashboard.
+
+Parameters
+  - slaMonth      : ALL if all months
+  - itemType      : ALL, GROUP_MANAGER, GROUP_PM, SUPPORT_CATEGORY, ASSIGN_GROUP
+  - itemName      : Value to filter group_manger, group_pm, or support_category on. 
+  - priority      : ALL, STANDARD, HIGH, or CRITICAL
+  - slaType       : ALL, RESPONSE, REPAIR, or RESOLUTION
+  - slaStatus     : IN, OUT, RISK
+  - status        : ALL or OPEN  (not CLOSED)
+  
+To select all risks, you'd pass { slaMonth: "ALL"
+                                , itemType: "ALL"
+                                , itemName: "ALL"
+                                , priority: "ALL"
+                                , slaType: "ALL"
+                                , slaStatus: "RISK"
+                                , state: "ALL" }
+
+ -->
+	<statement code="Sensis_SLA_Helpdesk_Detail_Data"><![CDATA[	
+select /*+ parallel(a,6) */
+	active   ,
+	age    ,
+	to_char(agreed_date, 'mm/dd/yyyy hh:mi:ss am') agreed_date   ,
+	agreed_sla_violations    ,
+	assigned_group    ,
+	assigned_group_organisation    ,
+	assigned_to    ,
+	assigned_to_organisation    ,
+	category    ,
+	cause_summary ,
+	caused_by_change    ,
+	ci_name    ,
+	ci_status    ,
+	ci_vendor    ,
+	classification    ,
+	close_by    ,
+	to_char(close_date, 'mm/dd/yyyy hh:mi:ss am') close_date   ,
+	close_date_hour ,
+	close_group    ,
+	consequence_summary,
+	create_group    ,
+	created_by    ,
+	created_by_organisation    ,
+	customer    ,
+	customer_location    ,
+	customer_organisation    ,
+	days_open    ,
+	days_since_modify    ,
+	days_to_close    ,
+	days_to_resolve    ,
+	description      ,
+	environment    ,
+	to_char(ext_ack_date_time, 'mm/dd/yyyy hh:mi:ss am') ext_ack_date_time,
+	to_char(ext_sla_start_date_time, 'mm/dd/yyyy hh:mi:ss am') ext_sla_start_date_time ,
+	fix_description    ,
+	fixed_on_first_contact ,
+	has_change    ,
+	has_parent    ,
+	has_problem    ,
+	hours_open    ,
+	hours_since_modify    ,
+	hours_to_close    ,
+	hours_to_resolve    ,
+	impact    ,
+	last_modified  ,
+	location    ,
+	mim_cause    ,
+	mim_error    ,
+	mim_service   ,
+	ticket_id    ,
+	to_char(open_date, 'mm/dd/yyyy hh:mi:ss am') open_date   ,
+	outage_duration    ,
+	outage_duration_hour ,
+	outage_duration_mins ,
+	outage_end    ,
+	outage_start    ,
+	owner    ,
+	priority    ,
+	rel_change    ,
+	rel_children    ,
+	rel_parent    ,
+	rel_problem    ,
+	release    ,
+	reporting_method    ,
+	resolution_code    ,
+	resolution_summary  ,
+	resolve_by    ,
+	to_char(resolve_date, 'mm/dd/yyyy hh:mi:ss am') resolve_date,
+	resolve_date_hour ,
+	resolve_group    ,
+	resolved_status    ,
+	review_date ,
+	root_cause    ,
+	service    ,
+	service_summary     ,
+	service_type    ,
+	sla_violation    ,
+	sla_violation_yn    ,
+	status    ,
+	summary     ,
+	time_open    ,
+	time_to_close    ,
+	time_to_resolve    ,
+	urgency    ,
+	user_code ,
+	group_manager,
+	group_pm,
+	response_target_ind,
+	resolution_target_ind,
+	to_char(resolution_due, 'mm/dd/yyyy hh:mi:ss am') resolution_due,
+	to_char(response_due, 'mm/dd/yyyy hh:mi:ss am') response_due,
+	TO_CHAR(TO_DATE(OPEN_MONTH,'YYYYMM'),'mm/yyyy') OPEN_MONTH,
+	NVL(TRUNC(RESOLVE_DATE), TRUNC(SYSDATE)) - TRUNC(OPEN_DATE) TICKET_AGE,
+	REGEXP_REPLACE(RESOLUTION_SUMMARY, '[[:cntrl:]]', ' ') SOLUTION_SUMMARY,
+	case when response_target_ind   = 'RISK' then 'RESPONSE'
+	 when resolution_target_ind = 'RISK' then 'RESOLUTION'
+	 else 'NONE' END SLA_AT_RISK,
+	case when response_target_ind   = 'RISK' then to_char(response_due, 'mm/dd/yyyy hh:mi:ss am')
+	 when resolution_target_ind = 'RISK' then to_char(resolution_due, 'mm/dd/yyyy hh:mi:ss am')
+	 else NULL END SLA_DUE_BY
+from helpdesk_incidents a
+where  ( 'ALL' = {slaMonth} or to_char(to_date(open_month,'YYYYMM'),'Mon-RR') = {slaMonth} )
+and    (    {itemType} = 'ALL'
+        or ({itemType} = 'DIRECTOR'         and group_manager = {itemName} )
+        or ({itemType} = 'PROJECT_MANAGER'  and group_pm = {itemName} )        
+        or ({itemType} = 'ASSIGN_GROUP'     and assigned_group = {itemName} )
+       )
+and    ( 'ALL' = {priority} or priority = {priority} )
+and    (   ('ALL' = {slaType}        and 'ALL' = {slaStatus} )
+        or ('ALL' = {slaType}        and (RESPONSE_TARGET_IND = {slaStatus} or RESOLUTION_TARGET_IND = {slaStatus} ) )
+        or ('RESPONSE' = {slaType}   and RESPONSE_TARGET_IND = {slaStatus} )
+        or ('RESOLUTION' = {slaType} and RESOLUTION_TARGET_IND = {slaStatus} )
+       )
+and    ( 'ALL' = {status} or ( {status} = 'OPEN' and STATUS not in ('9. Closed','9. Closed Unresolved') ) )
+    ]]></statement>
+    
+	<!-- Returns 6 months of chart data that will be filtered and aggregated on the dashboard -->
+	<statement code="Sensis_SLA_Helpdesk_Chart_Data"><![CDATA[	
+select   shc.sla_month
+	   , to_char(shc.sla_month,'Mon-YY') sla_month_1
+       , shc.sla_type
+       , shc.priority
+       , shc.assign_group
+       --, hg.support_category
+       , shc.group_manager
+       , shc.group_pm
+       , shc.in_cnt
+       , shc.out_cnt
+       , shc.risk_cnt
+       , shc.all_in_cnt
+       , shc.all_out_cnt
+       , shc.all_risk_cnt
+       , shc.all_cnt
+from     SLA_INCIDENTS_CHART_MV shc        
+where      sla_month > trunc(add_months(sysdate,-6),'MM')
+order by 1, 2, 3, 4
+    ]]></statement>
+    
+	<!-- Returns last load date for Helpdesk data -->
+	<statement code="Sensis_SLA_Helpdesk_Load_Date"><![CDATA[	
+select helpdesk_load_date from SENSIS_DASH_PROCESS_CONTROL
+    ]]></statement>
+  
+</sql>

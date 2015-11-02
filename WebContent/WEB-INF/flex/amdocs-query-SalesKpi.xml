@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql SYSTEM "amdocs-query-config.dtd">
+<sql type="CdwSQL">
+
+    <statement code="SalesKPI_selectReportProperties">
+select 'Last Data Refresh' label
+     , to_char(load_date,'MM/DD/YYYY') description
+from   sales_kpi_control
+    </statement>
+
+	<statement code="SalesKPI_selectInitialReportLevel" paramsRequired="false">
+select nvl(b.cat_type, a.cat_type) cat_type
+     , nvl(b.cat_id, a.cat_id) cat_id
+     , nvl(b.cat_name, a.cat_name) cat_name
+from   (select yc.prd_year
+             , yc.cat_type
+             , yc.cat_id
+             , c.cat_name||(case when yc.cat_type='all' then ' '||yc.prd_year end) cat_name
+        from   sales_kpi_yr_categories yc 
+               join sales_kpi_category c
+                 on yc.cat_type = c.cat_type
+                and yc.cat_id = c.cat_id
+        where  yc.prd_year = nvl({prd_year},'2013')
+        and    yc.cat_type = 'all') a
+       full outer join
+       (select   yc.prd_year
+               , (case when count(case when yc.cat_type = 'gm_id' then 1 end) > 0 then 'gm_id'
+                       when count(case when yc.cat_type = 'sales_mgr_id' then 1 end) > 0 then 'sales_mgr_id'
+                       when count(case when yc.cat_type = 'rep_id' then 1 end) > 0 then 'rep_id'
+                  end) cat_type
+               , yc.cat_id
+               , c.cat_name
+        from     sales_kpi_yr_categories yc 
+                 join sales_kpi_category c
+                   on yc.cat_type = c.cat_type
+                  and yc.cat_id = c.cat_id
+        where    yc.cat_id = lpad({employee_id},6,'0')
+        and      yc.cat_type in ('rep_id','gm_id','sales_mgr_id')
+        and      yc.prd_year = nvl({prd_year},'2013')
+        group by yc.prd_year
+               , yc.cat_id
+               , c.cat_name) b on 1=1
+	</statement>
+	
+	<statement code="SalesKPI_selectInitialHistoryTrail" paramsRequired="false"><![CDATA[
+select   c.cat_type
+       , c.cat_id
+       , c.cat_name||(case when c.cat_type='all' then ' '||a.prd_year end) cat_name
+from     (select id
+               , c.prd_year
+               , (case when id = 1 then 'all'
+                       when id = 2 then 'channel_code'
+                       when id = 3 then 'region_code'
+                       when id = 4 then 'canvass_code'
+                       when id = 5 then 'gm_id'
+                       when id = 6 then 'sales_mgr_id'
+                       when id = 7 then 'rep_id' end) cat_type
+               , (case when id = 1 then 'ALL'
+                       when id = 2 then c.channel_code
+                       when id = 3 then c.region_code
+                       when id = 4 then c.canvass_code
+                       when id = 5 then c.gm_id
+                       when id = 6 then c.sales_mgr_id
+                       when id = 7 then c.rep_id  end) cat_id
+          from   (select level id from dual connect by level <= 7) gen
+               , sales_kpi_yr_categories c
+          where   c.prd_year = nvl({prd_year},'2013')
+          and     c.cat_type = {cat_type}
+          and     c.cat_id = {cat_id}
+          and    (  (c.cat_type = 'gm_id' and id in (1,2,3))
+                 or (c.cat_type = 'sales_mgr_id' and id in (1,2,3,5))
+                 or (c.cat_type = 'rep_id' and id in (1,2,3,5))
+                 or (c.cat_type = 'canvass_code' and id in (1,2,3))
+                 or (c.cat_type = 'channel_code' and id in (1,3))
+                 or (c.cat_type = 'region_code') )
+         ) a
+         join sales_kpi_yr_categories b
+           on a.prd_year = b.prd_year
+          and a.cat_type = b.cat_type
+          and a.cat_id = b.cat_id
+         join sales_kpi_category c
+           on b.cat_type = c.cat_type
+          and b.cat_id = c.cat_id
+order by a.id
+	]]></statement>
+
+
+	<statement code="SalesKPI_searchCategories" paramsRequired="false"><![CDATA[
+select   cat_type
+       , cat_id
+       , cat_name
+       , cat_desc
+from     (select   yc.cat_type, yc.cat_id
+                 , c.cat_name||(case when yc.cat_type='all' then ' '||yc.prd_year end) cat_name
+                 , (case yc.cat_type
+                         when 'channel_code' then 'Channel'
+                         when 'region_code' then 'Region'
+                         when 'canvass_code' then 'Campaign'
+                         when 'gm_id' then 'GM'
+                         when 'sales_mgr_id' then 'Sales Manager'
+                         when 'rep_id' then 'Rep'
+                    end) cat_desc
+                 , row_number() 
+                       over(partition by 1
+                            order by     instr(lower(c.cat_name), lower({search}))
+                                       , cat_name) rnum 
+          from     sales_kpi_yr_categories yc
+                   join sales_kpi_category c
+                     on yc.cat_type = c.cat_type
+                    and yc.cat_id = c.cat_id
+          where    lower(c.cat_name) like '%'||lower({search})||'%'
+          and      yc.prd_year = nvl({prd_year},'2013')
+          and      yc.cat_type not in ('office_code')
+         )
+where    rnum <= 30
+order by rnum
+	]]></statement>
+
+
+	<statement code="SalesKPI_selectReportData" paramsRequired="false"><![CDATA[
+select   t.*
+       , (yp_pct_to_obj - prev_yp_pct_to_obj)/100   yp_chg_pct
+       , (iyp_pct_to_obj - prev_iyp_pct_to_obj)/100 iyp_chg_pct
+       , (pct_to_obj - prev_pct_to_obj)/100         chg_pct
+from     (select   t.*
+                 , (case when yp_hndl_amt = 0
+                         then (case when yp_obj = 0 then 0 else 1 end)
+                         else round(yp_obj/yp_hndl_amt,4) - 1
+                    end) * 100 yp_obj_pct
+                 , (case when prev_yp_hndl_amt = 0
+                         then (case when prev_yp_obj = 0 then 0 else 1 end)
+                         else round(prev_yp_obj/prev_yp_hndl_amt,4) - 1
+                    end) * 100 prev_yp_obj_pct
+                 , (case when yp_obj = 0 
+                         then (case when yp_sold_amt = 0 then 0 else 1 end)
+                         else greatest(round(yp_sold_amt/yp_obj,4),0)
+                    end) * 100 yp_pct_to_obj
+                 , (case when prev_yp_obj = 0 
+                         then (case when prev_yp_sold_amt = 0 then 0 else 1 end)
+                         else greatest(round(prev_yp_sold_amt/prev_yp_obj,4),0)
+                    end) * 100 prev_yp_pct_to_obj
+                 , yp_sold_amt - prev_yp_sold_amt yp_chg_amt
+                 , (case when iyp_hndl_amt = 0
+                         then (case when iyp_obj = 0 then 0 else 1 end)
+                         else round(iyp_obj/iyp_hndl_amt,4) - 1
+                    end) * 100 iyp_obj_pct
+                 , (case when prev_iyp_hndl_amt = 0
+                         then (case when prev_iyp_obj = 0 then 0 else 1 end)
+                         else round(prev_iyp_obj/prev_iyp_hndl_amt,4) - 1
+                    end) * 100 prev_iyp_obj_pct
+                 , (case when iyp_obj = 0 
+                         then (case when iyp_sold_amt = 0 then 0 else 1 end)
+                         else greatest(round(iyp_sold_amt/iyp_obj,4),0)
+                    end) * 100 iyp_pct_to_obj
+                 , (case when prev_iyp_obj = 0 
+                         then (case when prev_iyp_sold_amt = 0 then 0 else 1 end)
+                         else greatest(round(prev_iyp_sold_amt/prev_iyp_obj,4),0)
+                    end) * 100 prev_iyp_pct_to_obj
+                 , iyp_sold_amt - prev_iyp_sold_amt iyp_chg_amt
+                 , (case when hndl_amt = 0
+                         then (case when obj = 0 then 0 else 1 end)
+                         else round(obj/hndl_amt,4) - 1
+                    end) * 100 obj_pct
+                 , (case when prev_hndl_amt = 0
+                         then (case when prev_obj = 0 then 0 else 1 end)
+                         else round(prev_obj/prev_hndl_amt,4) - 1
+                    end) * 100 prev_obj_pct
+                 , (case when obj = 0 
+                         then (case when sold_amt = 0 then 0 else 1 end)
+                         else greatest(round(sold_amt/obj,4),0)
+                    end) * 100 pct_to_obj
+                 , (case when prev_obj = 0 
+                         then (case when prev_sold_amt = 0 then 0 else 1 end)
+                         else greatest(round(prev_sold_amt/prev_obj,4),0)
+                    end) * 100 prev_pct_to_obj
+                 , sold_amt - prev_sold_amt chg_amt
+                 , (case when prev_renewal_amt = 0 then  (case when renewal_amt > 0 then 1 else 0 end)  else round((renewal_amt-prev_renewal_amt)/prev_renewal_amt,4) end) renewal_pct
+                 , (case when prev_increase_amt = 0 then (case when increase_amt > 0 then 1 else 0 end) else round((increase_amt-prev_increase_amt)/prev_increase_amt,4) end) increase_pct
+                 , (case when prev_decrease_amt = 0 then (case when decrease_amt > 0 then 1 else 0 end) else round((decrease_amt-prev_decrease_amt)/prev_decrease_amt,4) end) decrease_pct
+                 , (case when prev_cancel_amt = 0 then   (case when cancel_amt > 0 then 1 else 0 end)   else round((cancel_amt-prev_cancel_amt)/prev_cancel_amt,4) end) cancel_pct
+                 , (case when prev_obl_amt = 0 then      (case when obl_amt > 0 then 1 else 0 end)      else round((obl_amt-prev_obl_amt)/prev_obl_amt,4) end) obl_pct
+                 , (case when prev_new_amt = 0 then      (case when new_amt > 0 then 1 else 0 end)      else round((new_amt-prev_new_amt)/prev_new_amt,4) end) new_pct
+          from     (select   d.prd_year
+                           , d.cat_type
+                           , d.cat_id
+                           , c.cat_name||(case when d.cat_type='all' then ' '||d.prd_year end) cat_name
+                           , sum(yp_asgn_amt)       yp_asgn_amt
+                           , sum(yp_hndl_amt)       yp_hndl_amt
+                           , sum(yp_sold_amt)       yp_sold_amt
+                           , sum(case when {cat_type} = 'rep_id' or {rep_id} is not null then yp_rep_obj else yp_mgr_obj end) yp_obj
+                           , sum(nvl(prev_yp_hndl_amt,0))  prev_yp_hndl_amt
+                           , sum(nvl(prev_yp_sold_amt,0))  prev_yp_sold_amt
+                           , sum(nvl(case when {cat_type} = 'rep_id' or {rep_id} is not null then prev_yp_rep_obj else prev_yp_mgr_obj end,0)) prev_yp_obj
+                           , sum(iyp_asgn_amt)      iyp_asgn_amt
+                           , sum(iyp_hndl_amt)      iyp_hndl_amt
+                           , sum(iyp_sold_amt)      iyp_sold_amt
+                           , sum(case when {cat_type} = 'rep_id' or {rep_id} is not null then iyp_rep_obj else iyp_mgr_obj end) iyp_obj
+                           , sum(nvl(prev_yp_hndl_amt,0))  prev_iyp_hndl_amt
+                           , sum(nvl(prev_iyp_sold_amt,0)) prev_iyp_sold_amt
+                           , sum(nvl(case when {cat_type} = 'rep_id' or {rep_id} is not null then prev_iyp_rep_obj else prev_iyp_mgr_obj end,0)) prev_iyp_obj
+                           , sum(tot_cnt)           cnt
+                           , sum(tot_asgn_cnt)      asgn_cnt
+                           , sum(tot_hndl_cnt)      hndl_cnt
+                           , sum(tot_sold_cnt)      sold_cnt
+                           , sum(tot_renewal_cnt)   renewal_cnt
+                           , sum(tot_increase_cnt)  increase_cnt
+                           , sum(tot_decrease_cnt)  decrease_cnt
+                           , sum(tot_cancel_cnt)    cancel_cnt
+                           , sum(tot_obl_cnt)       obl_cnt
+                           , sum(tot_new_cnt)       new_cnt
+                           , sum(tot_asgn_cst)      asgn_cst
+                           , sum(tot_hndl_cst)      hndl_cst
+                           , sum(tot_asgn_amt)      asgn_amt
+                           , sum(tot_hndl_amt)      hndl_amt
+                           , sum(tot_sold_amt)      sold_amt
+                           , sum(tot_renewal_amt)   renewal_amt
+                           , sum(tot_increase_amt)  increase_amt
+                           , sum(tot_decrease_amt)  decrease_amt
+                           , sum(tot_cancel_amt)    cancel_amt
+                           , sum(tot_obl_amt)       obl_amt
+                           , sum(tot_new_amt)       new_amt
+                           , sum(case when {cat_type} = 'rep_id' or {rep_id} is not null then tot_rep_obj else tot_mgr_obj end) obj
+                           , sum(nvl(prev_tot_hndl_amt,0))     prev_hndl_amt
+                           , sum(nvl(prev_tot_sold_amt,0))     prev_sold_amt
+                           , sum(nvl(prev_tot_renewal_amt,0))  prev_renewal_amt
+                           , sum(nvl(prev_tot_increase_amt,0)) prev_increase_amt
+                           , sum(nvl(prev_tot_decrease_amt,0)) prev_decrease_amt
+                           , sum(nvl(prev_tot_cancel_amt,0))   prev_cancel_amt
+                           , sum(nvl(prev_tot_obl_amt,0))      prev_obl_amt
+                           , sum(nvl(prev_tot_new_amt,0))      prev_new_amt
+                           , sum(nvl(case when {cat_type} = 'rep_id' or {rep_id} is not null then prev_tot_rep_obj else prev_tot_mgr_obj end,0)) prev_obj
+                    from     (select  nvl({cat_type},'all') cat_type
+                                    , (case {cat_type}
+                                            when 'rep_id' then lpad(nvl(rep_id,0),6,'0')
+                                            when 'sales_mgr_id' then lpad(nvl(sales_mgr_id,0),6,'0')
+                                            when 'gm_id' then lpad(nvl(gm_id,0),6,'0')
+                                            when 'region_code' then to_char(region_code)
+                                            when 'office_code' then office_code
+                                            when 'canvass_code' then canvass_code
+                                            when 'channel_code' then channel_code
+                                            else 'ALL' end) cat_id
+                                    , s.*
+                              from    sales_kpi_smy s
+                              where   (nvl({rep_id}, 0) = 0 or rep_id = to_number({rep_id}))
+                              and     (nvl({sales_mgr_id}, 0) = 0 or sales_mgr_id = to_number({sales_mgr_id}))
+                              and     (nvl({gm_id}, 0) = 0 or gm_id = to_number({gm_id}))
+                              and     (nvl({region_code}, 0) = 0 or region_code = to_number({region_code}))
+                              and     ({office_code} is null or office_code = {office_code})
+                              and     ({canvass_code} is null or canvass_code = {canvass_code})
+                              and     ({channel_code} is null or channel_code = {channel_code})
+                              and     prd_year = nvl({prd_year},'2013')
+                             ) d
+                            left outer join sales_kpi_category c
+                              on d.cat_type = c.cat_type
+                             and d.cat_id = c.cat_id
+                   group by d.prd_year
+                          , d.cat_id
+                          , c.cat_name||(case when d.cat_type='all' then ' '||d.prd_year end)
+                          , d.cat_type
+                  ) t
+         ) t
+order by prd_year
+       , cat_name
+       , obj desc
+	]]></statement>
+
+	<statement code="SalesKPI_selectCustomerDetailData" paramsRequired="false"><![CDATA[
+select /*+ parallel(d,4) parallel(dci,4) */ 
+        d.customer_id
+      , dci.customer_name
+      , d.region_code
+      , c1.cat_name region_name
+      , d.product_code
+      , d.prd_year
+      , d.prd_month
+      , d.canvass_code
+      , d.cvs_year
+      , d.cvs_month
+      , d.rep_id
+      , e2.cat_name rep_name
+      , d.sales_mgr_id
+      , e3.cat_name sales_mgr_name
+      , d.gm_id
+      , e4.cat_name gm_name
+      , d.channel_code
+      , d.office_code
+      , d.prospect_code
+      , d.pool_ind
+      , d.handled_ind
+      , d.product_type
+      , d.asgn_amt
+      , d.hndl_amt
+      , d.sold_amt
+      , (case when hndl_amt > 0 and asgn_amt > 0 and sold_amt > hndl_amt then sold_amt - hndl_amt else 0 end) increase_amt
+      , (case when hndl_amt > 0 and asgn_amt > 0 and sold_amt > 0 and sold_amt < hndl_amt then hndl_amt - sold_amt else 0 end) decrease_amt
+      , (case when hndl_amt > 0 and asgn_amt > 0 and sold_amt > 0 then hndl_amt else 0 end) renewal_amt
+      , (case when hndl_amt > 0 and asgn_amt > 0 and sold_amt = 0 then hndl_amt else 0 end) cancel_amt
+      , (case when hndl_amt > 0 and asgn_amt > 0
+              then (case when sold_amt > 0 and sold_amt < hndl_amt then hndl_amt - sold_amt else 0 end) +
+                   (case when sold_amt = 0 then hndl_amt else 0 end)
+              else 0
+         end) obl_amt
+      , (case when asgn_amt = 0 and sold_amt > 0 then sold_amt else 0 end) new_amt
+      , d.bst_hndl_amt
+      , d.bst_sold_amt
+      , d.discon_amt
+      , d.delinq_amt
+from    sales_kpi_detail d
+        join sales_kpi_category c1
+          on 'region_code' = c1.cat_type
+         and d.region_code = c1.cat_id
+        join sales_kpi_customer dci
+          on d.customer_id = dci.customer_id
+        left outer join sales_kpi_employee e2
+          on d.rep_id = e2.employee_id
+        left outer join sales_kpi_employee e3
+          on d.sales_mgr_id = e3.employee_id
+        left outer join sales_kpi_employee e4
+          on d.gm_id = e4.employee_id
+where   prd_year = nvl({prd_year},'2013')
+and     (
+         (({data_field} in ('asgn_amt') or
+          ({data_field} in ('iyp_asgn_amt') and product_type = 'O') or
+          ({data_field} in ('yp_asgn_amt') and product_type != 'O')) and asgn_amt != 0)
+      or (({data_field} in ('asgn_cnt','cat_name','obj') or
+          ({data_field} in ('iyp_asgn_cnt','iyp_obj') and product_type = 'O') or
+          ({data_field} in ('yp_asgn_cnt','yp_obj') and product_type != 'O')))
+      or (({data_field} in ('hndl_amt') or
+          ({data_field} in ('iyp_hndl_amt') and product_type = 'O') or
+          ({data_field} in ('yp_hndl_amt') and product_type != 'O')) and hndl_amt != 0)
+      or (({data_field} in ('hndl_cnt') or
+          ({data_field} in ('iyp_hndl_cnt') and product_type = 'O') or
+          ({data_field} in ('yp_hndl_cnt') and product_type != 'O')) and handled_ind ='Y')
+      or (({data_field} in ('sold_amt','sold_cnt') or
+          ({data_field} in ('iyp_sold_amt','iyp_sold_cnt') and product_type = 'O') or
+          ({data_field} in ('yp_sold_amt','yp_sold_cnt') and product_type != 'O')) and sold_amt != 0)
+      or ({data_field} in ('increase_amt','increase_cnt') and (case when hndl_amt > 0 and asgn_amt > 0 and sold_amt > hndl_amt then sold_amt - hndl_amt else 0 end) != 0)
+      or ({data_field} in ('decrease_amt','decrease_cnt') and (case when hndl_amt > 0 and asgn_amt > 0 and sold_amt > 0 and sold_amt < hndl_amt then hndl_amt - sold_amt else 0 end) != 0)
+      or ({data_field} in ('renewal_amt','renewal_cnt') and (case when hndl_amt > 0 and asgn_amt > 0 and sold_amt > 0 then hndl_amt else 0 end) != 0)
+      or ({data_field} in ('cancel_amt','cancel_cnt') and (case when hndl_amt > 0 and asgn_amt > 0 and sold_amt = 0 then hndl_amt else 0 end) != 0)
+      or ({data_field} in ('obl_amt','obl_cnt') and (case when hndl_amt > 0 and asgn_amt > 0 then (case when sold_amt > 0 and sold_amt < hndl_amt then hndl_amt - sold_amt else 0 end) + (case when sold_amt = 0 then hndl_amt else 0 end) else 0 end) != 0)
+      or ({data_field} in ('new_amt','new_cnt') and (case when asgn_amt = 0 and sold_amt > 0 then sold_amt else 0 end) != 0)
+        )
+	]]></statement>
+	
+<statement code="SalesKPI_selectTrendChartData" paramsRequired="false"><![CDATA[
+with report_periods as
+(select    prd_year report_year
+         , (case when report_type='M' then add_months(start_report_period,(level-1))
+                 --when report_type='W' then start_report_period + ((level-1)*7)
+                 --when report_type='D' then start_report_period + (level-1)
+            end) report_date
+         , prd_year
+         , data_field
+         , report_type
+         , (case when report_type='M' then add_months(start_report_period,(level-1))
+                 --when report_type='W' then start_report_period + ((level-1)*7)
+                 --when report_type='D' then start_report_period + (level-1)
+            end) report_period
+ from      (select /*+ parallel(t,4) */
+                     prd_year
+                   , {data_field} data_field
+                   , report_type
+                   , min(report_period) start_report_period
+                   , max(report_period) end_report_period
+            from     sales_kpi_smy_hist t
+            where    prd_year = nvl({prd_year}, '2013')
+            and      report_type = {report_type}
+            and      report_period >= to_date('0101'||(nvl({prd_year}, '2013')-1),'MMDDYYYY')
+            group by prd_year
+                   , report_type
+           )
+            connect by level <= (case when report_type='M' then (months_between(end_report_period, start_report_period) + 1)
+                                      --when report_type='W' then ((end_report_period-start_report_period)/7)+1
+                                      --when report_type='D' then end_report_period-start_report_period
+                                 end)
+)
+select   to_char(report_period,'MM/DD/YYYY') kpi_date
+       , (case when report_type='M' then to_char(report_period,'Mon YYYY') 
+               --when report_type='W' then to_char(report_period,'Mon D') 
+               --when report_type='D' then to_char(report_period,'Mon D') 
+          end)  kpi_date_lbl
+       , sum(kpi_val) kpi_val
+from     (select   p.report_date report_period
+                 , p.prd_year
+                 , p.report_type
+                 , nvl(case p.data_field
+                         when 'hndl_cnt' then tot_hndl_cnt
+                         when 'asgn_cnt' then tot_asgn_cnt
+                         when 'yp_sold_amt' then yp_sold_amt
+                         when 'iyp_sold_amt' then iyp_sold_amt
+                         when 'sold_amt' then tot_sold_amt
+                         when 'increase_amt' then tot_increase_amt
+                         when 'decrease_amt' then tot_decrease_amt
+                         when 'renewal_amt' then tot_renewal_amt
+                         when 'cancel_amt' then tot_cancel_amt
+                         when 'obl_amt' then tot_obl_amt
+                         when 'new_amt' then tot_new_amt
+                       end, 0) kpi_val
+          from     report_periods p
+                   left outer join 
+                      (select /*+ parallel(t,4) */ t.*
+                       from   sales_kpi_smy_hist t
+                       where  prd_year = nvl({prd_year}, '2013')
+                       and    report_type = {report_type}
+                       and    rep_id = nvl(nullif(to_number({rep_id}),0),rep_id)
+                       and    sales_mgr_id = nvl(nullif(to_number({sales_mgr_id}),0),sales_mgr_id)
+                       and    gm_id = nvl(nullif(to_number({gm_id}),0),gm_id)
+                       and    region_code = nvl(nullif(to_number({region_code}),0),region_code)
+                       and    office_code = nvl({office_code},office_code)
+                       and    canvass_code = nvl({canvass_code},canvass_code)
+                       and    channel_code = nvl({channel_code},channel_code)) h
+                     on p.prd_year = h.prd_year
+                    and p.report_type = h.report_type
+                    and p.report_period = h.report_period
+         )
+group by report_period
+       , (case when report_type='M' then to_char(report_period,'Mon YYYY') 
+               --when report_type='W' then to_char(report_date,'Mon D') 
+               --when report_type='D' then to_char(report_date,'Mon D') 
+          end)
+order by report_period desc
+	]]></statement>
+	
+	<statement code="SalesKPI_selectYOYChartData" paramsRequired="false"><![CDATA[
+with report_periods as
+(select    prd_year report_year
+         , (case when report_type='M' then add_months(start_report_period,(level-1))
+                 --when report_type='W' then start_report_period + ((level-1)*7)
+                 --when report_type='D' then start_report_period + (level-1)
+            end) report_date
+         , prd_year
+         , data_field
+         , report_type
+         , (case when report_type='M' then add_months(start_report_period,(level-1))
+                 --when report_type='W' then start_report_period + ((level-1)*7)
+                 --when report_type='D' then start_report_period + (level-1)
+            end) report_period
+ from      (select /*+ parallel(t,4) */ 
+                     prd_year
+                   , {data_field} data_field
+                   , report_type
+                   , min(report_period) start_report_period
+                   , max(report_period) end_report_period
+            from     sales_kpi_smy_hist t
+            where    prd_year = nvl({prd_year}, '2013')
+            and      report_type = {report_type}
+            and      report_period >= to_date('0101'||(nvl({prd_year}, '2013')-1),'MMDDYYYY')
+            group by prd_year
+                   , report_type
+           )
+            connect by level <= (case when report_type='M' then (months_between(end_report_period, start_report_period) + 1)
+                                      --when report_type='W' then ((end_report_period-start_report_period)/7)+1
+                                      --when report_type='D' then end_report_period-start_report_period
+                                 end)
+)
+select   to_char(report_period,'MM/DD/YYYY') kpi_date
+       , (case when report_type='M' then to_char(report_period,'Mon') 
+               --when report_type='W' then to_char(report_period,'Mon D') 
+               --when report_type='D' then to_char(report_period,'Mon D') 
+          end)  kpi_date_lbl
+       , sum(case when is_current = 'N' then kpi_val else 0 end) prev_kpi_val
+       , sum(case when is_current = 'Y' then kpi_val else 0 end) kpi_val
+from     (select   p.report_date report_period
+                 , p.prd_year
+                 , p.is_current
+                 , p.report_type
+                 , nvl(case p.data_field
+                         when 'hndl_cnt' then tot_hndl_cnt
+                         when 'asgn_cnt' then tot_asgn_cnt
+                         when 'yp_sold_amt' then yp_sold_amt
+                         when 'iyp_sold_amt' then iyp_sold_amt
+                         when 'sold_amt' then tot_sold_amt
+                         when 'increase_amt' then tot_increase_amt
+                         when 'decrease_amt' then tot_decrease_amt
+                         when 'renewal_amt' then tot_renewal_amt
+                         when 'cancel_amt' then tot_cancel_amt
+                         when 'obl_amt' then tot_obl_amt
+                         when 'new_amt' then tot_new_amt
+                       end, 0) kpi_val
+          from     (select    report_year
+                            , report_date
+                            , 'Y' is_current
+                            , prd_year
+                            , data_field
+                            , report_type
+                            , report_period
+                    from      report_periods
+                    union all
+                    select    report_year
+                            , report_date
+                            , 'N' is_current
+                            , (case when report_type='M' then to_char(prd_year-1)
+                                    --when report_type='W' then prd_year
+                                    --when report_type='D' then prd_year
+                               end) prd_year
+                            , data_field
+                            , report_type
+                            , (case when report_type='M' then add_months(report_period,-12)
+                                    --when report_type='W' then report_period-7
+                                    --when report_type='D' then report_period-7
+                               end) report_period
+                    from      report_periods
+                   ) p
+                   left outer join 
+                      (select /*+ parallel(t,4) */ t.*
+                       from   sales_kpi_smy_hist t
+                       where  report_type = {report_type}
+                       and    rep_id = nvl(nullif(to_number({rep_id}),0),rep_id)
+                       and    sales_mgr_id = nvl(nullif(to_number({sales_mgr_id}),0),sales_mgr_id)
+                       and    gm_id = nvl(nullif(to_number({gm_id}),0),gm_id)
+                       and    region_code = nvl(nullif(to_number({region_code}),0),region_code)
+                       and    office_code = nvl({office_code},office_code)
+                       and    canvass_code = nvl({canvass_code},canvass_code)
+                       and    channel_code = nvl({channel_code},channel_code)) h
+                     on p.prd_year = h.prd_year
+                    and p.report_type = h.report_type
+                    and p.report_period = h.report_period
+         )
+group by report_period
+       , (case when report_type='M' then to_char(report_period,'Mon') 
+               --when report_type='W' then to_char(report_date,'Mon D') 
+               --when report_type='D' then to_char(report_date,'Mon D') 
+          end)
+order by report_period desc
+	]]></statement>
+
+
+	<statement code="SalesKPI_selectContactData"><![CDATA[
+select   e.work_email
+       , (case when length(e.mobile_phone) = 10 then substr(e.mobile_phone,1,3)||'.'||substr(e.mobile_phone,4,3)||'.'||substr(e.mobile_phone,7,4) end) mobile_phone
+       , (case when length(e.work_phone) = 10 then substr(e.work_phone,1,3)||'.'||substr(e.work_phone,4,3)||'.'||substr(e.work_phone,7,4) end) work_phone
+       , work_phone_ext
+       , e.home_email
+       , (case when length(e.home_phone) = 10 then substr(e.home_phone,1,3)||'.'||substr(e.home_phone,4,3)||'.'||substr(e.home_phone,7,4) end) home_phone
+       , (case when length(e.office_phone) = 10 then substr(e.office_phone,1,3)||'.'||substr(e.office_phone,4,3)||'.'||substr(e.office_phone,7,4) end) office_phone
+       , office_address1 office_address
+       , office_address2
+       , office_city
+       , office_state
+       , office_zip
+from     sales_kpi_employee e
+where    e.employee_id = to_number({employee_id})
+	]]></statement>
+
+</sql>

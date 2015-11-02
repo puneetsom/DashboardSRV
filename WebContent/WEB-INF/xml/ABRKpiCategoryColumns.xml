@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomDataGrid xmlns="http://amdocs.com/flex/dashboard/customDataGrid/CustomDataGrid" 
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                xsi:schemaLocation="http://amdocs.com/flex/dashboard/customDataGrid/CustomDataGrid ../xsd/CustomDataGrid.xsd"
+                lockedColumnCount="1"
+                version="1">
+  
+  <Column id="catName" dataField="cat_name" headerLabel="Category" visible="true" />
+  
+  <Column id="iypHndlAmt" dataField="iyp_hndl_amt" headerLabel="SVC" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypHndlObj" dataField="iyp_hndl_obj" headerLabel="Prev SRV" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypHndlChgAmt" dataField="iyp_hndl_chg_amt" headerLabel="SVC Change" visible="false" type="currency" fractionalDigits="0" />
+  <Column id="iypHndlChgPct" dataField="iyp_hndl_chg_pct" headerLabel="SVC Change %" visible="true" type="percent" fractionalDigits="1" />
+  
+  <Column id="iypIncreaseAmt" dataField="iyp_increase_amt" headerLabel="ITA" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypIncreaseObj" dataField="iyp_increase_obj" headerLabel="Prev ITA" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypIncreaseChgAmt" dataField="iyp_increase_chg_amt" headerLabel="ITA Change" visible="false" type="currency" fractionalDigits="0" />
+  <Column id="iypIncreaseChgPct" dataField="iyp_increase_chg_pct" headerLabel="ITA Change %" visible="true" type="percent" fractionalDigits="1" />
+  
+  <Column id="iypOblAmt" dataField="iyp_obl_amt" headerLabel="OBL" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypOblObj" dataField="iyp_obl_obj" headerLabel="Prev OBL" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypOblChgAmt" dataField="iyp_obl_chg_amt" headerLabel="OBL Change" visible="false" type="currency" fractionalDigits="0" />
+  <Column id="iypOblChgPct" dataField="iyp_obl_chg_pct" headerLabel="OBL Change %" visible="true" type="percent" fractionalDigits="1" />
+  
+  <Column id="iypNewAmt" dataField="iyp_new_amt" headerLabel="New" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypNewObj" dataField="iyp_new_obj" headerLabel="Prev New" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypNewChgAmt" dataField="iyp_new_chg_amt" headerLabel="New Change" visible="false" type="currency" fractionalDigits="0" />
+  <Column id="iypNewChgPct" dataField="iyp_new_chg_pct" headerLabel="New Change %" visible="true" type="percent" fractionalDigits="1" />
+  
+  <Column id="iypSoldAmt" dataField="iyp_sold_amt" headerLabel="Sold" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypSoldObj" dataField="iyp_sold_obj" headerLabel="Prev Sold" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypSoldChgAmt" dataField="iyp_sold_chg_amt" headerLabel="Sold Change" visible="false" type="currency" fractionalDigits="0" />
+  <Column id="iypSoldChgPct" dataField="iyp_sold_chg_pct" headerLabel="Sold Change %" visible="true" type="percent" fractionalDigits="1" />
+  
+  <Column id="iypNetAmt" dataField="iyp_net_amt" headerLabel="Net" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypNetObj" dataField="iyp_net_obj" headerLabel="Prev Net" visible="true" type="currency" fractionalDigits="0" />
+  <Column id="iypNetChgAmt" dataField="iyp_net_chg_amt" headerLabel="Net Change" visible="false" type="currency" fractionalDigits="0" />
+  <Column id="iypNetChgPct" dataField="iyp_net_chg_pct" headerLabel="Net Change %" visible="true" type="percent" fractionalDigits="1" />
+  
+  <Column id="prevIypNetSrvPct" dataField="prev_iyp_net_srv_pct" headerLabel="Prev Net %" visible="true" type="percent" fractionalDigits="1" />
+  <Column id="iypNetSrvPct" dataField="iyp_net_srv_pct" headerLabel="Net %" visible="true" type="percent" fractionalDigits="1" />
+  <Column id="iypNetPctGrowth" dataField="iyp_net_pct_growth" headerLabel="Net % Growth" visible="true" type="percent" fractionalDigits="1" />
+  
+</CustomDataGrid>

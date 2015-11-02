@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://www.amdocs.com/dashboard/mobile/report" 
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.amdocs.com/dashboard/mobile/report ../xsd/Report.xsd "
+           locale="en_US"
+           title="Production Defects">
+           
+    <Grid name="gridColumns" configurationId="ProdDefectsColumns" xmlCode="ProdDefectsColumns" cacheLife="21600" />
+
+	<Service name="selectGridData" serviceCode="DEFECTS_DETAIL2" cacheLife="21600" maxRows="100" />
+	
+</Report>
