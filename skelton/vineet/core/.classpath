@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+  <classpathentry kind="src" path="src/test/java" output="target/test-classes" including="**/*.java"/>
+  <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
+  <classpathentry kind="output" path="target/classes"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-kernel/2.3.1/neo4j-kernel-2.3.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-primitive-collections/2.3.1/neo4j-primitive-collections-2.3.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-unsafe/2.3.1/neo4j-unsafe-2.3.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-function/2.3.1/neo4j-function-2.3.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-io/2.3.1/neo4j-io-2.3.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/apache/commons/commons-lang3/3.3.2/commons-lang3-3.3.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-csv/2.3.1/neo4j-csv-2.3.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-logging/2.3.1/neo4j-logging-2.3.1.jar"/>
+</classpath>
